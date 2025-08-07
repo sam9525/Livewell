@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'shared/shared.dart';
 import 'views/signin.dart';
+import 'views/signup.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,7 +63,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUpPage()),
+                );
+              },
               style: Shared.buttonStyle(
                 MyHomePage.buttonWidth,
                 MyHomePage.buttonHeight,

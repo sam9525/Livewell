@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'signin.dart';
 import '../shared/shared.dart';
-import 'signup.dart';
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,11 +32,13 @@ class _SignInPageState extends State<SignInPage> {
               ],
             ),
             Text(
-              'Sign In',
+              'Sign Up',
               style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
             ),
+            Shared.inputContainer(260, 'Username'),
             Shared.inputContainer(260, 'Email'),
             Shared.inputContainer(260, 'Password'),
+            Shared.inputContainer(260, 'Confirm Password'),
             TextButton(
               onPressed: () {},
               style: ButtonStyle(
@@ -54,21 +56,21 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {},
               style: Shared.buttonStyle(160, 52, Shared.orange, Colors.white),
               child: Text(
-                'Sign In',
+                'Sign Up',
                 style: Shared.fontStyle(24, FontWeight.bold, Colors.white),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Don\'t have an account?',
+                  'Already test have an account?',
                   style: Shared.fontStyle(16, FontWeight.w500, Shared.gray),
                 ),
                 TextButton(
@@ -76,7 +78,7 @@ class _SignInPageState extends State<SignInPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SignUpPage(),
+                        builder: (context) => const SignInPage(),
                       ),
                     );
                   },
@@ -86,7 +88,7 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                   ),
                   child: Text(
-                    'Sign Up',
+                    'Sign In',
                     style: TextStyle(
                       color: Shared.black,
                       fontSize: 16,
