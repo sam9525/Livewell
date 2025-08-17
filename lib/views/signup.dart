@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'survey.dart';
 import 'signin.dart';
 import '../shared/shared.dart';
 
@@ -58,7 +59,12 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SurveyPage()),
+                );
+              },
               style: Shared.buttonStyle(160, 52, Shared.orange, Colors.white),
               child: Text(
                 'Sign Up',
@@ -70,7 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Already test have an account?',
+                  'Already have an account?',
                   style: Shared.fontStyle(16, FontWeight.w500, Shared.gray),
                 ),
                 TextButton(
