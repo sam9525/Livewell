@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Shared {
   // Colors
-  static const Color orange = Color(0xFFEB5E28);
+  static const Color orange = Color(0xFFCD4813);
   static const Color black = Color(0xFF1E1E1E);
   static const Color gray = Color(0xFF4F4F4F);
   static const Color lightGray = Color(0xFFC0C0C0);
