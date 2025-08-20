@@ -13,10 +13,15 @@ class Shared {
       TextStyle(fontSize: size, fontWeight: weight, color: color);
 
   // Input Container
-  static Container inputContainer(double width, String hintText) => Container(
+  static Container inputContainer(
+    double width,
+    String hintText,
+    TextEditingController controller,
+  ) => Container(
     margin: const EdgeInsets.symmetric(vertical: 6),
     width: width,
     child: TextField(
+      controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
@@ -63,4 +68,38 @@ class Shared {
           side: BorderSide(color: const Color(0xFF1E1E1E), width: 1),
         ),
       );
+
+  static void showCredentialsDialog(
+    BuildContext context,
+    String message,
+    bool mounted,
+  ) {
+    ScaffoldMessenger.of(context).showMaterialBanner(
+      MaterialBanner(
+        backgroundColor: Shared.orange.withOpacity(0.1),
+        content: Text(
+          message,
+          style: Shared.fontStyle(20, FontWeight.w500, Shared.orange),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+            child: Text(
+              'OK',
+              style: Shared.fontStyle(20, FontWeight.bold, Shared.orange),
+            ),
+          ),
+        ],
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      ),
+    );
+
+    // Hide the MaterialBanner after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+      }
+    });
+  }
 }

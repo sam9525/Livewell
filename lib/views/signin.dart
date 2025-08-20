@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'home.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../shared/shared.dart';
 import 'signup.dart';
 
@@ -11,6 +13,28 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  // Sign in user
+  Future<void> signIn() async {
+    try {
+      await Supabase.instance.client.auth.signInWithPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } on AuthException catch (e) {
+      Shared.showCredentialsDialog(context, e.message, mounted);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,8 +59,8 @@ class _SignInPageState extends State<SignInPage> {
               'Sign In',
               style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
             ),
-            Shared.inputContainer(260, 'Email'),
-            Shared.inputContainer(260, 'Password'),
+            Shared.inputContainer(260, 'Email', emailController),
+            Shared.inputContainer(260, 'Password', passwordController),
             TextButton(
               onPressed: () {},
               style: ButtonStyle(
@@ -56,7 +80,9 @@ class _SignInPageState extends State<SignInPage> {
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                signIn();
+              },
               style: Shared.buttonStyle(160, 52, Shared.orange, Colors.white),
               child: Text(
                 'Sign In',

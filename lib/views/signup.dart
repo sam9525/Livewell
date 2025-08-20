@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'survey.dart';
 import 'signin.dart';
 import '../shared/shared.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -12,6 +13,48 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
+  // Sign up user
+  Future<void> signUp() async {
+    try {
+      if (passwordController.text.trim() !=
+          confirmPasswordController.text.trim()) {
+        Shared.showCredentialsDialog(
+          context,
+          'Passwords do not match',
+          mounted,
+        );
+        return;
+      }
+
+      await Supabase.instance.client.auth.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      // Check if the user is signed up
+      if (!mounted) return;
+
+      // Create a new user profile in the database
+      await Supabase.instance.client.from('profile').insert({
+        'uuid': Supabase.instance.client.auth.currentUser?.id,
+        'username': usernameController.text.trim(),
+      });
+
+      // Navigate to the survey page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SurveyPage()),
+      );
+    } on AuthException catch (e) {
+      Shared.showCredentialsDialog(context, e.message, mounted);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +79,14 @@ class _SignUpPageState extends State<SignUpPage> {
               'Sign Up',
               style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
             ),
-            Shared.inputContainer(260, 'Username'),
-            Shared.inputContainer(260, 'Email'),
-            Shared.inputContainer(260, 'Password'),
-            Shared.inputContainer(260, 'Confirm Password'),
+            Shared.inputContainer(260, 'Username', usernameController),
+            Shared.inputContainer(260, 'Email', emailController),
+            Shared.inputContainer(260, 'Password', passwordController),
+            Shared.inputContainer(
+              260,
+              'Confirm Password',
+              confirmPasswordController,
+            ),
             TextButton(
               onPressed: () {},
               style: ButtonStyle(
@@ -60,10 +107,7 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SurveyPage()),
-                );
+                signUp();
               },
               style: Shared.buttonStyle(160, 52, Shared.orange, Colors.white),
               child: Text(
