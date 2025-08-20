@@ -61,6 +61,8 @@ flutter:
   assets:
     - assets/icons/google.svg
     - assets/icons/facebook.svg
+    - assets/icons/open_eye.svg
+    - assets/icons/closed_eye.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

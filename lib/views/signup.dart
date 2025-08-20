@@ -17,6 +17,13 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  bool obscureText = true;
+
+  void toggle() {
+    setState(() {
+      obscureText = !obscureText;
+    });
+  }
 
   // Sign up user
   Future<void> signUp() async {
@@ -81,11 +88,19 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             Shared.inputContainer(260, 'Username', usernameController),
             Shared.inputContainer(260, 'Email', emailController),
-            Shared.inputContainer(260, 'Password', passwordController),
+            Shared.inputContainer(
+              260,
+              'Password',
+              passwordController,
+              obscureText: obscureText,
+              toggle: toggle,
+            ),
             Shared.inputContainer(
               260,
               'Confirm Password',
               confirmPasswordController,
+              obscureText: obscureText,
+              toggle: toggle,
             ),
             TextButton(
               onPressed: () {},

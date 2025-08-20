@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Shared {
   // Colors
@@ -16,12 +17,15 @@ class Shared {
   static Container inputContainer(
     double width,
     String hintText,
-    TextEditingController controller,
-  ) => Container(
+    TextEditingController controller, {
+    bool obscureText = false,
+    Function()? toggle,
+  }) => Container(
     margin: const EdgeInsets.symmetric(vertical: 6),
     width: width,
     child: TextField(
       controller: controller,
+      obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
@@ -39,6 +43,20 @@ class Shared {
         ),
         filled: true,
         fillColor: Colors.white,
+        suffixIcon: hintText == 'Password' || hintText == 'Confirm Password'
+            ? IconButton(
+                onPressed: toggle,
+                color: orange,
+                icon: SvgPicture.asset(
+                  obscureText
+                      ? 'assets/icons/closed_eye.svg'
+                      : 'assets/icons/open_eye.svg',
+                  height: 24,
+                  width: 24,
+                  colorFilter: ColorFilter.mode(orange, BlendMode.srcIn),
+                ),
+              )
+            : null,
       ),
     ),
   );

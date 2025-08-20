@@ -15,6 +15,13 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool obscureText = true;
+
+  void toggle() {
+    setState(() {
+      obscureText = !obscureText;
+    });
+  }
 
   // Sign in user
   Future<void> signIn() async {
@@ -60,7 +67,13 @@ class _SignInPageState extends State<SignInPage> {
               style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
             ),
             Shared.inputContainer(260, 'Email', emailController),
-            Shared.inputContainer(260, 'Password', passwordController),
+            Shared.inputContainer(
+              260,
+              'Password',
+              passwordController,
+              obscureText: obscureText,
+              toggle: toggle,
+            ),
             TextButton(
               onPressed: () {},
               style: ButtonStyle(
