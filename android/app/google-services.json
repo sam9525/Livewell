@@ -12,7 +12,20 @@
           "package_name": "com.example.livewell_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "575568014301-epgk57hhlmvf43ns4jt2s0jitpd5v2s7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.livewell_app",
+            "certificate_hash": "6ed8fdae45e6f20d38e25dbd02bda2f98c0987fb"
+          }
+        },
+        {
+          "client_id": "575568014301-5j4iebpih4i9m1h8mjs2qmgo7cr0hf5c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCVfJmycsqf3DrH09hyTb18nkKi1ChOYhY"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "575568014301-5j4iebpih4i9m1h8mjs2qmgo7cr0hf5c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "575568014301-re0i1v3v0krlgnf5sk8mmk3pnvnpo3d1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.livewellApp"
+              }
+            }
+          ]
         }
       }
     }

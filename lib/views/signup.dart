@@ -3,7 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'survey.dart';
 import 'signin.dart';
 import '../shared/shared.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import '../auth/signin_with_google.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -18,6 +20,9 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   bool obscureText = true;
+
+  // Google Auth Service
+  final GoogleAuthService _authService = GoogleAuthService();
 
   void toggle() {
     setState(() {
@@ -38,7 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      await Supabase.instance.client.auth.signUp(
+      await supabase.Supabase.instance.client.auth.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -47,8 +52,8 @@ class _SignUpPageState extends State<SignUpPage> {
       if (!mounted) return;
 
       // Create a new user profile in the database
-      await Supabase.instance.client.from('profile').insert({
-        'uuid': Supabase.instance.client.auth.currentUser?.id,
+      await supabase.Supabase.instance.client.from('profile').insert({
+        'uuid': supabase.Supabase.instance.client.auth.currentUser?.id,
         'username': usernameController.text.trim(),
       });
 
@@ -57,7 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
         context,
         MaterialPageRoute(builder: (context) => const SurveyPage()),
       );
-    } on AuthException catch (e) {
+    } on supabase.AuthException catch (e) {
       Shared.showCredentialsDialog(context, e.message, mounted);
     }
   }
@@ -174,7 +179,16 @@ class _SignUpPageState extends State<SignUpPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    User? user = await _authService.signInWithGoogle();
+                    if (user != null) {
+                      // Navigate to the survey page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SurveyPage()),
+                      );
+                    }
+                  },
                   style: Shared.thridPartyButtonStyle(160, 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
