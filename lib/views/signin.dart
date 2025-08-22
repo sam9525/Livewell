@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'home.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../shared/shared.dart';
 import 'signup.dart';
+import '../auth/signin_with_google.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -17,6 +19,9 @@ class _SignInPageState extends State<SignInPage> {
   TextEditingController passwordController = TextEditingController();
   bool obscureText = true;
 
+  // Google Auth Service
+  final GoogleAuthService _authService = GoogleAuthService();
+
   void toggle() {
     setState(() {
       obscureText = !obscureText;
@@ -26,7 +31,7 @@ class _SignInPageState extends State<SignInPage> {
   // Sign in user
   Future<void> signIn() async {
     try {
-      await Supabase.instance.client.auth.signInWithPassword(
+      await supabase.Supabase.instance.client.auth.signInWithPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -37,7 +42,7 @@ class _SignInPageState extends State<SignInPage> {
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    } on AuthException catch (e) {
+    } on supabase.AuthException catch (e) {
       Shared.showCredentialsDialog(context, e.message, mounted);
     }
   }
@@ -146,7 +151,16 @@ class _SignInPageState extends State<SignInPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    User? user = await _authService.signInWithGoogle();
+                    if (user != null) {
+                      // Navigate to the home page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => HomePage()),
+                      );
+                    }
+                  },
                   style: Shared.thridPartyButtonStyle(160, 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
