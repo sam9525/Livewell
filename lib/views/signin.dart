@@ -6,6 +6,7 @@ import '../shared/shared.dart';
 import 'signup.dart';
 import '../auth/signin_with_google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/signin_with_facebook.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -21,6 +22,9 @@ class _SignInPageState extends State<SignInPage> {
 
   // Google Auth Service
   final GoogleAuthService _authService = GoogleAuthService();
+
+  // Facebook Auth Service
+  final SignInWithFacebook _facebookAuthService = SignInWithFacebook();
 
   void toggle() {
     setState(() {
@@ -184,7 +188,17 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    User? user = await _facebookAuthService
+                        .signInWithFacebook();
+                    if (user != null) {
+                      // Navigate to the home page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => HomePage()),
+                      );
+                    }
+                  },
                   style: Shared.thridPartyButtonStyle(160, 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

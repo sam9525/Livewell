@@ -5,6 +5,7 @@ class AppConfig {
 
   // Authentication endpoints
   static const String googleAuthEndpoint = '/auth/google';
+  static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
 
   // Authorization Bearer Token
@@ -16,5 +17,6 @@ class AppConfig {
 
   // Get authentication endpoints
   static String get googleAuthUrl => '$apiBaseUrl$googleAuthEndpoint';
+  static String get facebookAuthUrl => '$apiBaseUrl$facebookAuthEndpoint';
   static String get logoutUrl => '$apiBaseUrl$logoutEndpoint';
 }

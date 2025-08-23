@@ -1,7 +1,7 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'backend_auth.dart';
+import 'sign_out.dart';
 import '../config/app_config.dart';
 
 class GoogleAuthService {
@@ -40,7 +40,10 @@ class GoogleAuthService {
       final userCredential = await _auth.signInWithCredential(credential);
 
       // Authenticate with your backend server
-      final backendAuthResult = await _authenticateWithBackend(idToken);
+      final backendAuthResult = await BackendAuth().authenticateWithBackend(
+        idToken,
+        AppConfig.googleAuthUrl,
+      );
 
       if (backendAuthResult) {
         print("Backend authentication successful");
@@ -49,7 +52,7 @@ class GoogleAuthService {
       } else {
         print("Backend authentication failed");
 
-        await signOut();
+        await SignOut().signOut();
 
         return null;
       }
@@ -57,62 +60,6 @@ class GoogleAuthService {
       // Print the error and return null if an exception occurs
       print("Sign-in error: $e");
       return null;
-    }
-  }
-
-  // Authenticates with the backend server using the Google ID token
-  Future<bool> _authenticateWithBackend(String idToken) async {
-    bool checkBackend = false;
-
-    // Check if the ID token is null or empty
-    if (idToken.isEmpty) {
-      print("ID token is null or empty, cannot authenticate with backend");
-      return false;
-    }
-
-    // Check the health of the backend server
-    final healthResponse = await http.get(Uri.parse(AppConfig.healthUrl));
-    if (healthResponse.statusCode == 200) checkBackend = true;
-
-    // Authenticate with the backend server
-    try {
-      final response = await http.post(
-        Uri.parse(AppConfig.googleAuthUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authorizationBearerToken}',
-        },
-        body: jsonEncode({'token': idToken}),
-      );
-
-      if (response.statusCode == 200) {
-        return checkBackend;
-      } else {
-        print(
-          "Backend authentication failed with status: ${response.statusCode}",
-        );
-        print("Response body: ${response.body}");
-
-        checkBackend = false;
-      }
-    } catch (e) {
-      print("Error authenticating with backend: $e");
-      checkBackend = false;
-    }
-
-    return checkBackend;
-  }
-
-  // Signs out the user from both Google and Firebase
-  Future<void> signOut() async {
-    try {
-      // Sign out from Google
-      await _googleSignIn.signOut();
-
-      // Sign out from Firebase
-      await _auth.signOut();
-    } catch (e) {
-      print("Sign out error: $e");
     }
   }
 }

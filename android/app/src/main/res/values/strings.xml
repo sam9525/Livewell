@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Livewell-g</string>
+    <string name="facebook_app_id">1674443456582829</string>
+    <string name="fb_login_protocol_scheme">fb1674443456582829</string>
+    <string name="facebook_client_token">8466c784dd4582cb0bee4a8919879d2b</string>
+</resources>

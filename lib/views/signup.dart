@@ -6,6 +6,7 @@ import '../shared/shared.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../auth/signin_with_google.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/signin_with_facebook.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -23,6 +24,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // Google Auth Service
   final GoogleAuthService _authService = GoogleAuthService();
+
+  // Facebook Auth Service
+  final SignInWithFacebook _facebookAuthService = SignInWithFacebook();
 
   void toggle() {
     setState(() {
@@ -212,7 +216,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    User? user = await _facebookAuthService
+                        .signInWithFacebook();
+                    if (user != null) {
+                      // Navigate to the survey page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SurveyPage()),
+                      );
+                    }
+                  },
                   style: Shared.thridPartyButtonStyle(160, 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
