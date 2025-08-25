@@ -67,6 +67,11 @@ flutter:
     - assets/icons/facebook.svg
     - assets/icons/open_eye.svg
     - assets/icons/closed_eye.svg
+    - assets/icons/home.svg
+    - assets/icons/book.svg
+    - assets/icons/bell.svg
+    - assets/icons/user.svg
+    - assets/icons/chatbot.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

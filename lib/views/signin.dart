@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'home.dart';
+import 'navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../shared/shared.dart';
 import 'signup.dart';
