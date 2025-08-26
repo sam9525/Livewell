@@ -41,6 +41,7 @@ dependencies:
   firebase_auth: ^6.0.1
   google_sign_in: ^6.3.0
   flutter_facebook_auth: ^7.1.2
+  provider: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
     - assets/icons/bell.svg
     - assets/icons/user.svg
     - assets/icons/chatbot.svg
+    - assets/icons/logout.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

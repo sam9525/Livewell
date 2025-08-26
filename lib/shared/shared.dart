@@ -6,7 +6,9 @@ class Shared {
   static const Color orange = Color(0xFFCD4813);
   static const Color black = Color(0xFF1E1E1E);
   static const Color gray = Color(0xFF4F4F4F);
+  static const Color lightGray2 = Color(0xFFEDEDED);
   static const Color lightGray = Color(0xFFC0C0C0);
+  static const Color darkGray = Color(0xFF626262);
   static const Color bgColor = Color(0xFFFFFCF2);
 
   // Text Styles
@@ -17,23 +19,33 @@ class Shared {
   static Container inputContainer(
     double width,
     String hintText,
-    TextEditingController controller, {
+    TextEditingController? controller, {
     bool obscureText = false,
     Function()? toggle,
+    Color fontColor = lightGray,
+    bool enabled = true,
   }) => Container(
     margin: const EdgeInsets.symmetric(vertical: 6),
     width: width,
+    height: 52,
     child: TextField(
       controller: controller,
+      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
       obscureText: obscureText,
+      enabled: enabled,
+      textAlignVertical: TextAlignVertical.bottom,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
-          color: lightGray,
+          color: fontColor,
           fontWeight: FontWeight.w500,
-          fontSize: 16,
+          fontSize: 24,
         ),
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: black, width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: black, width: 2),
         ),

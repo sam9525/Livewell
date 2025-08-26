@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:livewell_app/shared/shared.dart';
+import '../views/signin.dart';
 
 class SignOut {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -20,5 +23,55 @@ class SignOut {
     } catch (e) {
       print("Sign out error: $e");
     }
+  }
+
+  static Future<void> showSignOutDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Shared.bgColor,
+        title: Text(
+          'Sign Out',
+          style: Shared.fontStyle(28, FontWeight.bold, Shared.black),
+        ),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: Shared.fontStyle(24, FontWeight.bold, Shared.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              overlayColor: WidgetStateProperty.all(
+                Shared.orange.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Text(
+              'Cancel',
+              style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await SignOut().signOut();
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SignInPage()),
+              );
+            },
+            style: ButtonStyle(
+              overlayColor: WidgetStateProperty.all(
+                Shared.orange.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Text(
+              'Sign Out',
+              style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

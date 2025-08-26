@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'shared/shared.dart';
+import 'shared/user_provider.dart';
 import 'views/signin.dart';
 import 'views/signup.dart';
 import 'firebase_options.dart';
@@ -24,10 +26,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LiveWell',
-      theme: ThemeData(scaffoldBackgroundColor: Shared.bgColor),
-      home: const MyHomePage(),
+    return ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: MaterialApp(
+        title: 'LiveWell',
+        theme: ThemeData(scaffoldBackgroundColor: Shared.bgColor),
+        home: const MyHomePage(),
+      ),
     );
   }
 }
