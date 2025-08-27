@@ -6,6 +6,12 @@
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
     </queries>
 
+    <queries>
+    <intent>
+        <action android:name="android.intent.action.TTS_SERVICE" />
+    </intent>
+    </queries>
+
     <application
         android:label="livewell_app"
         android:name="${applicationName}"
