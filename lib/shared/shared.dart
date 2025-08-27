@@ -28,13 +28,12 @@ class Shared {
   }) => Container(
     margin: const EdgeInsets.symmetric(vertical: 6),
     width: width,
-    height: 52,
     child: TextField(
       controller: controller,
       style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
       obscureText: obscureText,
       enabled: enabled,
-      textAlignVertical: TextAlignVertical.bottom,
+      textAlignVertical: TextAlignVertical.center,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
         hintText: hintText,

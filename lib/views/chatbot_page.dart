@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../shared/user_provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatMessage {
   final String text;
@@ -25,11 +26,19 @@ class Chatbot {
   static final ValueNotifier<List<ChatMessage>> chatHistoryNotifier =
       ValueNotifier<List<ChatMessage>>([]);
 
+  // A notifier for if speech is listening
+  static final ValueNotifier<bool> _isListeningNotifier = ValueNotifier<bool>(
+    false,
+  );
+
   static final FlutterTts flutterTts = FlutterTts();
+  static final stt.SpeechToText _speechToText = stt.SpeechToText();
+  static bool _speechEnabled = false;
 
   // Prevent multiple initializations
   static bool _isChatInitialized = false;
   static bool _isTTSInitialized = false;
+  static bool _isSpeechInitialized = false;
 
   // Initialize chat message
   static void initializeChat() {
@@ -49,6 +58,31 @@ class Chatbot {
       await flutterTts.setVolume(1.0);
       await flutterTts.setPitch(1.0);
       _isTTSInitialized = true;
+    }
+  }
+
+  static Future<void> initializeSpeech() async {
+    if (!_isSpeechInitialized) {
+      try {
+        _speechEnabled = await _speechToText.initialize(
+          onError: (error) {
+            print("Speech recognition error: ${error.errorMsg}");
+            _isListeningNotifier.value = false;
+          },
+          onStatus: (status) {
+            print("Speech recognition status: $status");
+            if (status == 'done' || status == 'notListening') {
+              _isListeningNotifier.value = false;
+            }
+          },
+        );
+        print("Speech recognition initialized: $_speechEnabled");
+        _isSpeechInitialized = true;
+      } catch (e) {
+        print("Error initializing speech recognition: $e");
+        _speechEnabled = false;
+        _isSpeechInitialized = true;
+      }
     }
   }
 
@@ -113,6 +147,52 @@ class Chatbot {
     }
   }
 
+  // Speech listening
+  static Future<void> startListening() async {
+    if (!_speechEnabled) return;
+
+    try {
+      _isListeningNotifier.value = true;
+
+      await _speechToText.listen(
+        onResult: (result) {
+          if (result.finalResult) {
+            final recognizedText = result.recognizedWords.trim();
+            if (recognizedText.isNotEmpty) {
+              inputController.text = recognizedText;
+              inputController.selection = TextSelection.fromPosition(
+                TextPosition(offset: inputController.text.length),
+              );
+              stopListening();
+            }
+          } else {
+            inputController.text = result.recognizedWords;
+            inputController.selection = TextSelection.fromPosition(
+              TextPosition(offset: inputController.text.length),
+            );
+          }
+        },
+        listenFor: Duration(seconds: 30),
+        pauseFor: Duration(seconds: 10),
+        localeId: "en_AU",
+      );
+    } catch (e) {
+      print("Error starting speech recognition: $e");
+      _isListeningNotifier.value = false;
+    }
+  }
+
+  static Future<void> stopListening() async {
+    try {
+      await _speechToText.stop();
+      _isListeningNotifier.value = false;
+      print("Stopped speech recognition");
+    } catch (e) {
+      print("Error stopping speech recognition: $e");
+      _isListeningNotifier.value = false;
+    }
+  }
+
   // Function to build the chatbot page
   static Container chatbotPage(BuildContext context) {
     // Initialize chat when page is built
@@ -120,6 +200,9 @@ class Chatbot {
 
     // Initialize TTS
     initializeTTS();
+
+    // Initialize speech
+    initializeSpeech();
 
     // Create a ScrollController for the ListView
     final ScrollController scrollController = ScrollController();
@@ -157,15 +240,46 @@ class Chatbot {
           Expanded(child: _buildChatMessages(context, scrollController)),
 
           // Input area
-          Container(
-            margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: Shared.inputContainer(
-              double.maxFinite,
-              'Ask me anything',
-              inputController,
-              onSubmitted: (value) async {
-                await sendMessage(value);
-              },
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Shared.inputContainer(
+                        double.infinity,
+                        'Ask me anything',
+                        inputController,
+                        onSubmitted: (value) async {
+                          await sendMessage(value);
+                        },
+                      ),
+                    ),
+                    _buildMicButton(),
+                  ],
+                ),
+                // Speech listening indicator
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isListeningNotifier,
+                  builder: (context, isListening, child) {
+                    if (isListening) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Listening...',
+                          style: Shared.fontStyle(
+                            16,
+                            FontWeight.w400,
+                            Colors.red,
+                          ),
+                        ),
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -235,6 +349,49 @@ class Chatbot {
           colorFilter: ColorFilter.mode(Shared.orange, BlendMode.srcIn),
         ),
         onPressed: () => _speak(text),
+      ),
+    );
+  }
+
+  static Widget _buildMicButton() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _isListeningNotifier,
+        builder: (context, isListening, child) {
+          return Container(
+            decoration: isListening
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.withOpacity(0.2),
+                  )
+                : null,
+            child: IconButton(
+              icon: SvgPicture.asset(
+                'assets/icons/mic.svg',
+                width: 32,
+                height: 32,
+                colorFilter: ColorFilter.mode(
+                  isListening
+                      ? Colors.red
+                      : _speechEnabled
+                      ? Shared.orange
+                      : Colors.grey,
+                  BlendMode.srcIn,
+                ),
+              ),
+              onPressed: _speechEnabled
+                  ? () {
+                      if (isListening) {
+                        stopListening();
+                      } else {
+                        startListening();
+                      }
+                    }
+                  : null,
+            ),
+          );
+        },
       ),
     );
   }
