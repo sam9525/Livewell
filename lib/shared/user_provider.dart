@@ -27,4 +27,7 @@ class UserProvider extends ChangeNotifier {
 
   // Get user photo URL
   String? get userPhotoURL => _user?.photoURL;
+
+  // Store user jwt token
+  static String? userJwtToken;
 }

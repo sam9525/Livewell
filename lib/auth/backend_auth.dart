@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config/app_config.dart';
+import '../shared/user_provider.dart';
 
 class BackendAuth {
   // Authenticates with the backend server using the Google ID token
@@ -29,6 +30,11 @@ class BackendAuth {
       );
 
       if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+
+        // Store the JWT token UserProvider
+        UserProvider.userJwtToken = responseBody['token'];
+
         return checkBackend;
       } else {
         print(

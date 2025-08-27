@@ -24,6 +24,7 @@ class Shared {
     Function()? toggle,
     Color fontColor = lightGray,
     bool enabled = true,
+    Function(String)? onSubmitted,
   }) => Container(
     margin: const EdgeInsets.symmetric(vertical: 6),
     width: width,
@@ -34,6 +35,7 @@ class Shared {
       obscureText: obscureText,
       enabled: enabled,
       textAlignVertical: TextAlignVertical.bottom,
+      onSubmitted: onSubmitted,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
