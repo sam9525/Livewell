@@ -62,50 +62,46 @@ class Profile {
                   ],
                 ),
               ),
-              if (userProvider.isSignedIn)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: () => SignOut.showSignOutDialog(context),
-                      style: Shared.buttonStyle(
-                        MediaQuery.of(context).size.width,
-                        52,
-                        Shared.orange,
-                        Colors.white,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logout.svg',
-                            height: 30,
-                            width: 30,
-                            colorFilter: ColorFilter.mode(
-                              Shared.bgColor,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Sign Out',
-                            style: Shared.fontStyle(
-                              24,
-                              FontWeight.bold,
-                              Shared.bgColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              if (userProvider.isSignedIn) _buildSignOutButton(context),
             ],
           ),
         );
       },
+    );
+  }
+
+  static Widget _buildSignOutButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton(
+          onPressed: () => SignOut.showSignOutDialog(context),
+          style: Shared.buttonStyle(
+            MediaQuery.of(context).size.width,
+            52,
+            Shared.orange,
+            Colors.white,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/logout.svg',
+                height: 30,
+                width: 30,
+                colorFilter: ColorFilter.mode(Shared.bgColor, BlendMode.srcIn),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Sign Out',
+                style: Shared.fontStyle(24, FontWeight.bold, Shared.bgColor),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

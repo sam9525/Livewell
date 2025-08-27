@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../shared/shared.dart';
-import 'signup.dart';
 import '../auth/signin_with_google.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/signin_with_facebook.dart';
+import '../shared/sign_in_out_shared.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -58,19 +56,7 @@ class _SignInPageState extends State<SignInPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Welcome to ',
-                  style: Shared.fontStyle(32, FontWeight.bold, Shared.black),
-                ),
-                Text(
-                  'LiveWell',
-                  style: Shared.fontStyle(32, FontWeight.bold, Shared.orange),
-                ),
-              ],
-            ),
+            SignInOutShared.header(),
             Text(
               'Sign In',
               style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
@@ -83,23 +69,7 @@ class _SignInPageState extends State<SignInPage> {
               obscureText: obscureText,
               toggle: toggle,
             ),
-            TextButton(
-              onPressed: () {},
-              style: ButtonStyle(
-                overlayColor: WidgetStateProperty.all(
-                  Shared.orange.withOpacity(0.1),
-                ),
-              ),
-              child: Text(
-                'Forgot Password?',
-                style: TextStyle(
-                  color: const Color(0xFF1E1E1E),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
+            SignInOutShared.forgotPassword(context),
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
@@ -119,30 +89,7 @@ class _SignInPageState extends State<SignInPage> {
                   'Don\'t have an account?',
                   style: Shared.fontStyle(16, FontWeight.w500, Shared.gray),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpPage(),
-                      ),
-                    );
-                  },
-                  style: ButtonStyle(
-                    overlayColor: WidgetStateProperty.all(
-                      Shared.orange.withOpacity(0.1),
-                    ),
-                  ),
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: Shared.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
+                SignInOutShared.signUpOrSignIn(context, 'Sign Up'),
               ],
             ),
             Container(
@@ -154,71 +101,29 @@ class _SignInPageState extends State<SignInPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    User? user = await _authService.signInWithGoogle();
-                    if (user != null) {
-                      // Navigate to the home page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => HomePage()),
-                      );
-                    }
-                  },
-                  style: Shared.thridPartyButtonStyle(160, 50),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/google.svg',
-                        height: 32,
-                        width: 32,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Google',
-                        style: Shared.fontStyle(
-                          16,
-                          FontWeight.w500,
-                          Shared.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                SignInOutShared.thirdPartyButtons('google', 'Google', () async {
+                  final user = await _authService.signInWithGoogle();
+                  if (context.mounted && user != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => HomePage()),
+                    );
+                  }
+                }),
                 SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    User? user = await _facebookAuthService
+                SignInOutShared.thirdPartyButtons(
+                  'facebook',
+                  'Facebook',
+                  () async {
+                    final user = await _facebookAuthService
                         .signInWithFacebook();
-                    if (user != null) {
-                      // Navigate to the home page
+                    if (context.mounted && user != null) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => HomePage()),
                       );
                     }
                   },
-                  style: Shared.thridPartyButtonStyle(160, 50),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/facebook.svg',
-                        height: 32,
-                        width: 32,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Facebook',
-                        style: Shared.fontStyle(
-                          16,
-                          FontWeight.w500,
-                          Shared.black,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),

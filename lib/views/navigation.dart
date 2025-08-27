@@ -17,6 +17,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int currentPageIndex = 0;
 
+  Widget buildNavigationDestination(String icon, String label, int index) {
+    return NavigationDestination(
+      icon: SvgPicture.asset(
+        'assets/icons/$icon.svg',
+        height: 52,
+        width: 52,
+        colorFilter: currentPageIndex == index
+            ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
+            : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
+      ),
+      label: label,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,61 +77,11 @@ class _HomePageState extends State<HomePage> {
               });
             },
             destinations: [
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/icons/home.svg',
-                  height: 52,
-                  width: 52,
-                  colorFilter: currentPageIndex == 0
-                      ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
-                      : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
-                ),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/icons/book.svg',
-                  height: 52,
-                  width: 52,
-                  colorFilter: currentPageIndex == 1
-                      ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
-                      : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
-                ),
-                label: 'Goal',
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/icons/bell.svg',
-                  height: 52,
-                  width: 52,
-                  colorFilter: currentPageIndex == 2
-                      ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
-                      : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
-                ),
-                label: 'Notice',
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/icons/user.svg',
-                  height: 52,
-                  width: 52,
-                  colorFilter: currentPageIndex == 3
-                      ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
-                      : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
-                ),
-                label: 'Profile',
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/icons/chatbot.svg',
-                  height: 52,
-                  width: 52,
-                  colorFilter: currentPageIndex == 4
-                      ? ColorFilter.mode(Shared.orange, BlendMode.srcIn)
-                      : ColorFilter.mode(Shared.lightGray, BlendMode.srcIn),
-                ),
-                label: 'Chatbot',
-              ),
+              buildNavigationDestination('home', 'Home', 0),
+              buildNavigationDestination('book', 'Goal', 1),
+              buildNavigationDestination('bell', 'Notice', 2),
+              buildNavigationDestination('user', 'Profile', 3),
+              buildNavigationDestination('chatbot', 'Chatbot', 4),
             ],
           ),
         ),

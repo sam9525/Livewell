@@ -42,7 +42,7 @@ class Chatbot {
     _isChatInitialized = true;
   }
 
-  static void initializeTTS() async {
+  static Future<void> initializeTTS() async {
     if (!_isTTSInitialized) {
       await flutterTts.setLanguage("en-AU");
       await flutterTts.setSpeechRate(0.5);
@@ -121,6 +121,9 @@ class Chatbot {
     // Initialize TTS
     initializeTTS();
 
+    // Create a ScrollController for the ListView
+    final ScrollController scrollController = ScrollController();
+
     return Container(
       color: Shared.bgColor,
       child: Column(
@@ -151,68 +154,7 @@ class Chatbot {
           ),
 
           // Chat messages area
-          Expanded(
-            child: ValueListenableBuilder<List<ChatMessage>>(
-              valueListenable: chatHistoryNotifier,
-              builder: (context, chatHistory, child) {
-                return ListView.builder(
-                  padding: EdgeInsets.all(20),
-                  itemCount: chatHistory.length,
-                  itemBuilder: (context, index) {
-                    final message = chatHistory[index];
-                    return Align(
-                      alignment: message.isUser
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: message.isUser
-                              ? Shared.orange
-                              : Shared.lightGray2,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              message.text,
-                              style: Shared.fontStyle(
-                                24,
-                                FontWeight.w400,
-                                message.isUser ? Shared.bgColor : Shared.black,
-                              ),
-                            ),
-                            if (!message.isUser)
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: IconButton(
-                                  icon: SvgPicture.asset(
-                                    'assets/icons/speaker.svg',
-                                    width: 32,
-                                    height: 32,
-                                    colorFilter: ColorFilter.mode(
-                                      Shared.orange,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    await Chatbot._speak(message.text);
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+          Expanded(child: _buildChatMessages(context, scrollController)),
 
           // Input area
           Container(
@@ -229,5 +171,88 @@ class Chatbot {
         ],
       ),
     );
+  }
+
+  static Widget _buildChatMessages(
+    BuildContext context,
+    ScrollController scrollController,
+  ) {
+    return ValueListenableBuilder<List<ChatMessage>>(
+      valueListenable: chatHistoryNotifier,
+      builder: (context, chatHistory, child) {
+        _buildScrollToBottom(context, scrollController, chatHistory);
+        return ListView.builder(
+          controller: scrollController,
+          padding: const EdgeInsets.all(20),
+          itemCount: chatHistory.length,
+          itemBuilder: (context, index) {
+            return _buildMessageItem(context, chatHistory[index]);
+          },
+        );
+      },
+    );
+  }
+
+  static Widget _buildMessageItem(BuildContext context, ChatMessage message) {
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: message.isUser ? Shared.orange : Shared.lightGray2,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.7,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.text,
+              style: Shared.fontStyle(
+                24,
+                FontWeight.w400,
+                message.isUser ? Shared.bgColor : Shared.black,
+              ),
+            ),
+            if (!message.isUser) _buildSpeakerButton(message.text),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildSpeakerButton(String text) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: IconButton(
+        icon: SvgPicture.asset(
+          'assets/icons/speaker.svg',
+          width: 32,
+          height: 32,
+          colorFilter: ColorFilter.mode(Shared.orange, BlendMode.srcIn),
+        ),
+        onPressed: () => _speak(text),
+      ),
+    );
+  }
+
+  static Widget _buildScrollToBottom(
+    BuildContext context,
+    ScrollController scrollController,
+    List<ChatMessage> chatHistory,
+  ) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients && chatHistory.isNotEmpty) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+    return const SizedBox.shrink();
   }
 }
