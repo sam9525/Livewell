@@ -60,10 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       // Navigate to the survey page
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SurveyPage()),
-      );
+      SignInOutShared.changePage(context, const SurveyPage());
     } on supabase.AuthException catch (e) {
       Shared.showCredentialsDialog(context, e.message, mounted);
     }
@@ -132,10 +129,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
                   final user = await _authService.signInWithGoogle();
                   if (context.mounted && user != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => SurveyPage()),
-                    );
+                    SignInOutShared.changePage(context, const SurveyPage());
                   }
                 }),
                 SizedBox(width: 16),
@@ -146,10 +140,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     final user = await _facebookAuthService
                         .signInWithFacebook();
                     if (context.mounted && user != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => SurveyPage()),
-                      );
+                      SignInOutShared.changePage(context, const SurveyPage());
                     }
                   },
                 ),

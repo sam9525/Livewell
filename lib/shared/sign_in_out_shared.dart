@@ -90,4 +90,12 @@ class SignInOutShared {
       ),
     );
   }
+
+  // Change page
+  static Future<void> changePage(BuildContext context, Widget page) async {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => page),
+      (_) => false,
+    );
+  }
 }

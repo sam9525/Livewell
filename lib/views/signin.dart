@@ -40,10 +40,7 @@ class _SignInPageState extends State<SignInPage> {
 
       if (!mounted) return;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      SignInOutShared.changePage(context, const HomePage());
     } on supabase.AuthException catch (e) {
       Shared.showCredentialsDialog(context, e.message, mounted);
     }
@@ -104,10 +101,7 @@ class _SignInPageState extends State<SignInPage> {
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
                   final user = await _authService.signInWithGoogle();
                   if (context.mounted && user != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => HomePage()),
-                    );
+                    SignInOutShared.changePage(context, const HomePage());
                   }
                 }),
                 SizedBox(width: 16),
@@ -118,10 +112,7 @@ class _SignInPageState extends State<SignInPage> {
                     final user = await _facebookAuthService
                         .signInWithFacebook();
                     if (context.mounted && user != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => HomePage()),
-                      );
+                      SignInOutShared.changePage(context, const HomePage());
                     }
                   },
                 ),
