@@ -47,7 +47,8 @@ class _SurveyPageState extends State<SurveyPage>
 
   void _goToNextPage() {
     if (currentQuestion < questions.length - 1 &&
-        questions[currentQuestion].isAnswered) {
+        (questions[currentQuestion].isAnswered ||
+            !questions[currentQuestion].isRequired)) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
@@ -111,9 +112,22 @@ class _SurveyPageState extends State<SurveyPage>
     return ListView(
       physics: const BouncingScrollPhysics(),
       children: [
-        Text(
-          question.question,
-          style: Shared.fontStyle(32, FontWeight.bold, Shared.black),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (question.isRequired)
+              Text(
+                "*",
+                style: Shared.fontStyle(32, FontWeight.bold, Colors.red),
+              ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                question.question,
+                style: Shared.fontStyle(32, FontWeight.bold, Shared.black),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 30),
         ...question.options.map(

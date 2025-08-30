@@ -249,7 +249,8 @@ class SurveyNavigationButtons extends StatelessWidget {
     final showPreviousButton =
         currentQuestion > 0 || currentQuestion == totalQuestions - 1;
     final isLastQuestion = currentQuestion == totalQuestions - 1;
-    final canProceed = currentQuestionModel.isAnswered;
+    final canProceed =
+        currentQuestionModel.isAnswered || !currentQuestionModel.isRequired;
 
     return Align(
       alignment: Alignment.bottomCenter,
