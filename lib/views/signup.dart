@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:livewell_app/views/navigation.dart';
 import 'survey.dart';
 import '../shared/shared.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -127,9 +128,14 @@ class _SignUpPageState extends State<SignUpPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
-                  final user = await _authService.signInWithGoogle();
-                  if (context.mounted && user != null) {
-                    SignInOutShared.changePage(context, const SurveyPage());
+                  final result = await _authService.signInWithGoogle();
+                  if (context.mounted && result?['user'] != null) {
+                    SignInOutShared.changePage(
+                      context,
+                      result?['isNewUser']
+                          ? const SurveyPage()
+                          : const HomePage(),
+                    );
                   }
                 }),
                 SizedBox(width: 16),
@@ -137,10 +143,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   'facebook',
                   'Facebook',
                   () async {
-                    final user = await _facebookAuthService
+                    final result = await _facebookAuthService
                         .signInWithFacebook();
-                    if (context.mounted && user != null) {
-                      SignInOutShared.changePage(context, const SurveyPage());
+                    if (context.mounted && result?['user'] != null) {
+                      SignInOutShared.changePage(
+                        context,
+                        result?['isNewUser']
+                            ? const SurveyPage()
+                            : const HomePage(),
+                      );
                     }
                   },
                 ),

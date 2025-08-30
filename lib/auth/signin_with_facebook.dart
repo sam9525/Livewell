@@ -8,7 +8,7 @@ class SignInWithFacebook {
   // FacebookAuth instance to handle Facebook Sign-In
   final FacebookAuth _fbAuth = FacebookAuth.instance;
 
-  Future<User?> signInWithFacebook() async {
+  Future<Map<String, dynamic>?> signInWithFacebook() async {
     try {
       // Trigger the Facebook Sign-In flow
       final fbUser = await _fbAuth.login(
@@ -25,6 +25,9 @@ class SignInWithFacebook {
         credential,
       );
 
+      // Return the if the user is new or not
+      bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+
       // Authenticate with the backend server
       final backendAuthResult = await BackendAuth().authenticateWithBackend(
         accessToken,
@@ -34,7 +37,7 @@ class SignInWithFacebook {
       if (backendAuthResult) {
         print("Backend authentication successful");
         // Return the authenticated user
-        return userCredential.user;
+        return {'user': userCredential.user, 'isNewUser': isNewUser};
       } else {
         print("Backend authentication failed");
 

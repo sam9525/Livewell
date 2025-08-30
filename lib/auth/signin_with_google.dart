@@ -12,7 +12,7 @@ class GoogleAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Signs in the user with Google and authenticates with the backend server
-  Future<User?> signInWithGoogle() async {
+  Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
       // Trigger the Google Sign-In flow
       final googleUser = await _googleSignIn.signIn();
@@ -39,6 +39,9 @@ class GoogleAuthService {
       // Sign in to Firebase with the Google credential
       final userCredential = await _auth.signInWithCredential(credential);
 
+      // Return the if the user is new or not
+      bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+
       // Authenticate with your backend server
       final backendAuthResult = await BackendAuth().authenticateWithBackend(
         idToken,
@@ -48,7 +51,7 @@ class GoogleAuthService {
       if (backendAuthResult) {
         print("Backend authentication successful");
         // Return the authenticated user
-        return userCredential.user;
+        return {'user': userCredential.user, 'isNewUser': isNewUser};
       } else {
         print("Backend authentication failed");
 
