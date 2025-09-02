@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   List<String> navigationHistory = ['/home'];
 
   static final Map<String, _RouteData> routes = {
-    '/home': _RouteData('Home', 'home', Home.homePageText),
+    '/home': _RouteData('Home', 'home', (context) => const Home()),
     '/goal': _RouteData('Goal', 'book', Goal.goalPage),
     '/notice': _RouteData('Notice', 'bell', Notice.noticePage),
     '/profile': _RouteData('Profile', 'user', Profile.profilePage),
