@@ -8,6 +8,7 @@ class AppConfig {
   static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
   static const String chatbotEndpoint = '/chat/';
+  static const String profileEndpoint = '/profile/';
 
   // Authorization Bearer Token
   static const String authorizationBearerToken =
@@ -21,4 +22,5 @@ class AppConfig {
   static String get facebookAuthUrl => '$apiBaseUrl$facebookAuthEndpoint';
   static String get logoutUrl => '$apiBaseUrl$logoutEndpoint';
   static String get chatbotUrl => '$apiBaseUrl$chatbotEndpoint';
+  static String get profileUrl => '$apiBaseUrl$profileEndpoint';
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../shared/shared.dart';
 import '../../model/surveyModel.dart';
+import '../../auth/login_survey.dart';
+import '../../views/navigation.dart';
+import '../../shared/sign_in_out_shared.dart';
 
 class SurveyProgressIndicator extends StatelessWidget {
   final int currentQuestion;
@@ -357,7 +360,13 @@ class SurveyNavigationButtons extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () async {
+            // POST answers to the database
+            bool res = await LoginSurvey().postSurvey();
+            if (res) {
+              SignInOutShared.changePage(context, HomePage());
+            }
+          },
           child: Text(
             'OK',
             style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'backend_auth.dart';
 import 'sign_out.dart';
 import '../config/app_config.dart';
+import '../shared/user_provider.dart';
 
 class GoogleAuthService {
   // FirebaseAuth instance to handle authentication
@@ -25,6 +26,11 @@ class GoogleAuthService {
 
       // Check if the Google ID token is null
       final idToken = googleAuth.idToken;
+
+      // Store the user id token in the user provider
+      UserProvider.userIdToken = idToken;
+
+      // Check if the Google ID token is null
       if (idToken == null) {
         print("Google ID token is null");
         return null;
