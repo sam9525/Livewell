@@ -8,6 +8,7 @@ import 'views/signup.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'shared/goal_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => DateProvider()),
+        ChangeNotifierProvider(create: (context) => WaterIntakeNotifier()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              CurrentWaterIntakeNotifier(context.read<WaterIntakeNotifier>()),
+        ),
+        ChangeNotifierProvider(create: (context) => StepsNotifier()),
       ],
       child: MaterialApp(
         title: 'LiveWell',

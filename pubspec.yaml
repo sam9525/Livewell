@@ -45,6 +45,7 @@ dependencies:
   flutter_tts: ^4.2.3
   speech_to_text: ^7.3.0
   fl_chart: ^1.0.0
+  flutter_picker_plus: ^1.5.4
 
 dev_dependencies:
   flutter_test:

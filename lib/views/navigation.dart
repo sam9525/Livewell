@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   static final Map<String, _RouteData> routes = {
     '/home': _RouteData('Home', 'home', (context) => const Home()),
-    '/goal': _RouteData('Goal', 'book', Goal.goalPage),
+    '/goal': _RouteData('Goal', 'book', (context) => const Goal()),
     '/notice': _RouteData('Notice', 'bell', Notice.noticePage),
     '/profile': _RouteData('Profile', 'user', Profile.profilePage),
     '/chatbot': _RouteData('Chatbot', 'chatbot', Chatbot.chatbotPage),
