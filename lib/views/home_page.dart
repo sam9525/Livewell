@@ -38,6 +38,7 @@ class _HomeState extends State<Home> {
                       weekDays: AppConstants.weekDays,
                     )
                   : Center(child: Text("No data available")),
+              WaterIntakeSliders(),
             ],
           ),
         );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../shared/goal_provider.dart';
+import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -186,6 +188,114 @@ class BuildLineChart extends StatelessWidget {
       child: Text(
         value.toInt().toString(),
         style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
+      ),
+    );
+  }
+}
+
+class WaterIntakeSliders extends StatelessWidget {
+  const WaterIntakeSliders({super.key});
+
+  static double buttonWidth(BuildContext context) =>
+      ((MediaQuery.of(context).size.width - 40) / 2) - 30;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<WaterIntakeNotifier, CurrentWaterIntakeNotifier>(
+      builder: (context, waterIntakeNotifier, currentWaterIntakeNotifier, child) {
+        return Column(
+          children: [
+            Text(
+              "Water Intake: ${currentWaterIntakeNotifier.currentWaterIntake} ml",
+              style: Shared.fontStyle(28, FontWeight.w500, Shared.black),
+            ),
+            _sliderTheme(
+              context,
+              currentWaterIntakeNotifier,
+              waterIntakeNotifier,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "0",
+                  style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
+                ),
+                Text(
+                  waterIntakeNotifier.waterIntake.toString(),
+                  style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _addWaterButton(context, currentWaterIntakeNotifier, "+250 ml"),
+                SizedBox(width: 30),
+                _addWaterButton(context, currentWaterIntakeNotifier, "+500 ml"),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _sliderTheme(
+    BuildContext context,
+    CurrentWaterIntakeNotifier currentWaterIntakeNotifier,
+    WaterIntakeNotifier waterIntakeNotifier,
+  ) {
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        activeTrackColor: Shared.orange,
+        inactiveTrackColor: Shared.lightGray,
+        trackHeight: 12.0,
+        thumbColor: Shared.orange,
+        overlayColor: Shared.orange.withValues(alpha: 0.2),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14.0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
+        valueIndicatorColor: Shared.orange,
+        valueIndicatorTextStyle: Shared.fontStyle(
+          18,
+          FontWeight.bold,
+          Colors.white,
+        ),
+      ),
+      child: Slider(
+        value: currentWaterIntakeNotifier.currentWaterIntake.toDouble(),
+        max: waterIntakeNotifier.waterIntake.toDouble(),
+        divisions: (waterIntakeNotifier.waterIntake / 50).toInt(),
+        label: "${currentWaterIntakeNotifier.currentWaterIntake}",
+        onChanged: (double value) {
+          currentWaterIntakeNotifier.setWaterIntake(value.toInt());
+        },
+      ),
+    );
+  }
+
+  Widget _addWaterButton(
+    BuildContext context,
+    CurrentWaterIntakeNotifier currentWaterIntakeNotifier,
+    String text,
+  ) {
+    return ElevatedButton(
+      onPressed: () {
+        if (text == "+250 ml") {
+          currentWaterIntakeNotifier.add250ml();
+        } else if (text == "+500 ml") {
+          currentWaterIntakeNotifier.add500ml();
+        }
+      },
+      style: Shared.buttonStyle(
+        buttonWidth(context),
+        52,
+        Colors.white,
+        Shared.orange,
+      ),
+      child: Text(
+        text,
+        style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
       ),
     );
   }
