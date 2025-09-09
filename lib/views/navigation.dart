@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
     '/home': _RouteData('Home', 'home', (context) => const Home()),
     '/goal': _RouteData('Goal', 'book', (context) => const Goal()),
     '/notice': _RouteData('Notice', 'bell', Notice.noticePage),
-    '/profile': _RouteData('Profile', 'user', Profile.profilePage),
+    '/profile': _RouteData('Profile', 'user', (context) => const Profile()),
     '/chatbot': _RouteData('Chatbot', 'chatbot', Chatbot.chatbotPage),
   };
 

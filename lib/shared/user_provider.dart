@@ -33,4 +33,10 @@ class UserProvider extends ChangeNotifier {
 
   // Store user jwt token
   static String? userJwtToken;
+
+  // Store user gender
+  static String? userGender;
+
+  // Store user age range
+  static String? userAgeRange;
 }

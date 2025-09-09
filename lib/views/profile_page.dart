@@ -4,9 +4,32 @@ import 'package:livewell_app/auth/sign_out.dart';
 import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import '../shared/user_provider.dart';
+import '../auth/profile_auth.dart';
 
-class Profile {
-  static Widget profilePage(BuildContext context) {
+class Profile extends StatefulWidget {
+  const Profile({super.key});
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  @override
+  void initState() {
+    super.initState();
+    _initProfile();
+  }
+
+  void _initProfile() async {
+    await ProfileAuth.getProfile();
+    // Trigger a rebuild after profile data is loaded
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         final user = userProvider.user;
@@ -56,9 +79,15 @@ class Profile {
                       'Email',
                       user?.email ?? 'No email available',
                     ),
-                    buildProfileField('Gender', 'No gender available'),
-                    buildProfileField('Age Range', 'No age range available'),
-                    buildProfileField('Postcode', 'No gender available'),
+                    buildProfileField(
+                      'Gender',
+                      UserProvider.userGender ?? 'No gender available',
+                    ),
+                    buildProfileField(
+                      'Age Range',
+                      UserProvider.userAgeRange ?? 'No age range available',
+                    ),
+                    buildProfileField('Postcode', 'No postcode available'),
                   ],
                 ),
               ),
