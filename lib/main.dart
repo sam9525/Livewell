@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'shared/goal_provider.dart';
+import 'shared/location_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
               CurrentWaterIntakeNotifier(context.read<WaterIntakeNotifier>()),
         ),
         ChangeNotifierProvider(create: (context) => StepsNotifier()),
+        ChangeNotifierProvider(create: (context) => LocationProvider()),
       ],
       child: MaterialApp(
         title: 'LiveWell',

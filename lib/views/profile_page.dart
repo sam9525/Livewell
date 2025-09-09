@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import '../shared/user_provider.dart';
 import '../auth/profile_auth.dart';
+import '../shared/location_provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -30,8 +31,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
+    return Consumer2<UserProvider, LocationProvider>(
+      builder: (context, userProvider, locationProvider, child) {
         final user = userProvider.user;
 
         Widget buildProfileField(String label, String value) {
@@ -87,7 +88,7 @@ class _ProfileState extends State<Profile> {
                       'Age Range',
                       UserProvider.userAgeRange ?? 'No age range available',
                     ),
-                    buildProfileField('Postcode', 'No postcode available'),
+                    buildProfileField('Postcode', locationProvider.postcode),
                   ],
                 ),
               ),

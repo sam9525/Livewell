@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import 'home_page.dart';
 import 'goal_page.dart';
 import 'notice_page.dart';
 import 'profile_page.dart';
 import 'chatbot_page.dart';
+import '../shared/location_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -75,6 +77,18 @@ class _HomePageState extends State<HomePage> {
         navigationHistory.removeLast();
         currentRoute = navigationHistory.last;
       }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Get the Postcode
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LocationProvider>(
+        context,
+        listen: false,
+      ).startLocationUpdates();
     });
   }
 
