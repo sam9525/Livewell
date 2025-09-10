@@ -3,6 +3,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'backend_auth.dart';
 import 'sign_out.dart';
 import '../config/app_config.dart';
+import 'package:flutter/foundation.dart';
 
 class SignInWithFacebook {
   // FacebookAuth instance to handle Facebook Sign-In
@@ -35,19 +36,18 @@ class SignInWithFacebook {
       );
 
       if (backendAuthResult) {
-        print("Backend authentication successful");
+        debugPrint("Backend authentication successful");
         // Return the authenticated user
         return {'user': userCredential.user, 'isNewUser': isNewUser};
       } else {
-        print("Backend authentication failed");
+        debugPrint("Backend authentication failed");
 
         await SignOut().signOut();
 
         return null;
       }
     } catch (e) {
-      print("Sign-in error: $e");
-      return null;
+      throw Exception("Sign-in error: $e");
     }
   }
 }

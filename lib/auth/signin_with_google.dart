@@ -4,6 +4,7 @@ import 'backend_auth.dart';
 import 'sign_out.dart';
 import '../config/app_config.dart';
 import '../shared/user_provider.dart';
+import 'package:flutter/foundation.dart';
 
 class GoogleAuthService {
   // FirebaseAuth instance to handle authentication
@@ -32,7 +33,7 @@ class GoogleAuthService {
 
       // Check if the Google ID token is null
       if (idToken == null) {
-        print("Google ID token is null");
+        debugPrint("Google ID token is null");
         return null;
       }
 
@@ -55,11 +56,11 @@ class GoogleAuthService {
       );
 
       if (backendAuthResult) {
-        print("Backend authentication successful");
+        debugPrint("Backend authentication successful");
         // Return the authenticated user
         return {'user': userCredential.user, 'isNewUser': isNewUser};
       } else {
-        print("Backend authentication failed");
+        debugPrint("Backend authentication failed");
 
         await SignOut().signOut();
 
@@ -67,8 +68,7 @@ class GoogleAuthService {
       }
     } catch (e) {
       // Print the error and return null if an exception occurs
-      print("Sign-in error: $e");
-      return null;
+      throw Exception("Sign-in error: $e");
     }
   }
 }

@@ -4,6 +4,7 @@ import '../shared/user_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../model/surveyModel.dart';
+import 'package:flutter/foundation.dart';
 
 class LoginSurvey {
   Map<String, dynamic> questionsJSON = {
@@ -26,38 +27,30 @@ class LoginSurvey {
   };
 
   Future<bool> postSurvey() async {
-    try {
-      // Authenticate with your backend server
-      final backendAuthResult = await BackendAuth().authenticateWithBackend(
-        UserProvider.userIdToken ?? '',
-        AppConfig.googleAuthUrl,
+    // Authenticate with your backend server
+    final backendAuthResult = await BackendAuth().authenticateWithBackend(
+      UserProvider.userIdToken ?? '',
+      AppConfig.googleAuthUrl,
+    );
+
+    if (backendAuthResult) {
+      // POST to the database
+      final response = await http.post(
+        Uri.parse(AppConfig.profileUrl),
+        headers: BackendAuth().getAuthHeaders(),
+        body: jsonEncode(questionsJSON),
       );
 
-      if (backendAuthResult) {
-        // POST to the database
-        final response = await http.post(
-          Uri.parse(AppConfig.profileUrl),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${UserProvider.userJwtToken}',
-          },
-          body: jsonEncode(questionsJSON),
-        );
-
-        if (response.statusCode == 200) {
-          print("Survey posted successfully");
-          return true;
-        } else {
-          print("Survey posting failed: Status code ${response.statusCode}");
-          print("Error: ${response.body}");
-          return false;
-        }
+      if (response.statusCode == 200) {
+        debugPrint("Survey posted successfully");
+        return true;
       } else {
-        print("Backend authentication failed");
+        debugPrint("Survey posting failed: Status code ${response.statusCode}");
+        debugPrint("Error: ${response.body}");
         return false;
       }
-    } catch (e) {
-      print("Error posting survey: $e");
+    } else {
+      debugPrint("Backend authentication failed");
       return false;
     }
   }

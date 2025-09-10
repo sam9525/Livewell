@@ -3,7 +3,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:livewell_app/shared/shared.dart';
+import 'package:livewell_app/shared/user_provider.dart';
 import '../views/signin.dart';
+import 'backend_auth.dart';
 
 class SignOut {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -20,8 +22,17 @@ class SignOut {
 
       // Sign out from Firebase
       await _auth.signOut();
+
+      // Set the backend authentication to false
+      BackendAuth().isAuthenticated = false;
+
+      // Clear the user provider
+      UserProvider.userJwtToken = null;
+      UserProvider.userIdToken = null;
+      UserProvider.userGender = null;
+      UserProvider.userAgeRange = null;
     } catch (e) {
-      print("Sign out error: $e");
+      throw Exception("Sign out error: $e");
     }
   }
 

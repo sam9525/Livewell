@@ -17,10 +17,7 @@ class ProfileAuth {
         // GET the profile from the database
         final response = await http.get(
           Uri.parse(AppConfig.profileUrl),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${UserProvider.userJwtToken}',
-          },
+          headers: BackendAuth().getAuthHeaders(),
         );
 
         if (response.statusCode == 200) {
@@ -30,7 +27,7 @@ class ProfileAuth {
         }
       }
     } catch (e) {
-      print("Error getting profile: $e");
+      throw Exception("Error getting profile: $e");
     }
   }
 }

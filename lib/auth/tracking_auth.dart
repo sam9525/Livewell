@@ -3,27 +3,31 @@ import '../config/app_config.dart';
 import 'dart:convert';
 import 'backend_auth.dart';
 import '../shared/user_provider.dart';
+import 'package:flutter/foundation.dart';
 
 class TrackingAuth {
-  static Future<Map<String, dynamic>?> getTracking() async {
-    // Authenticate with the backend server
-    final backendAuthResult = await BackendAuth().authenticateWithBackend(
-      UserProvider.userIdToken ?? '',
-      AppConfig.googleAuthUrl,
-    );
-
-    if (!backendAuthResult) {
-      throw Exception(
-        'Failed to authenticate with backend: $backendAuthResult',
+  static Future<void> checkAuthentication() async {
+    if (!BackendAuth().isAuthenticated) {
+      // Authenticate with the backend server
+      final backendAuthResult = await BackendAuth().authenticateWithBackend(
+        UserProvider.userIdToken ?? '',
+        AppConfig.googleAuthUrl,
       );
+
+      if (!backendAuthResult) {
+        throw Exception(
+          'Failed to authenticate with backend: $backendAuthResult',
+        );
+      }
     }
+  }
+
+  static Future<Map<String, dynamic>?> getTrackingToday() async {
+    await checkAuthentication();
 
     final response = await http.get(
       Uri.parse(AppConfig.trackingTodayUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${UserProvider.userJwtToken}',
-      },
+      headers: BackendAuth().getAuthHeaders(),
     );
 
     if (response.statusCode == 200) {
@@ -35,29 +39,16 @@ class TrackingAuth {
   }
 
   static Future<void> putTodayTracking(int steps, int waterIntakeMl) async {
-    // Authenticate with the backend server
-    final backendAuthResult = await BackendAuth().authenticateWithBackend(
-      UserProvider.userIdToken ?? '',
-      AppConfig.googleAuthUrl,
-    );
-
-    if (!backendAuthResult) {
-      throw Exception(
-        'Failed to authenticate with backend: $backendAuthResult',
-      );
-    }
+    await checkAuthentication();
 
     final response = await http.put(
       Uri.parse(AppConfig.trackingTodayUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${UserProvider.userJwtToken}',
-      },
+      headers: BackendAuth().getAuthHeaders(),
       body: jsonEncode({'steps': steps, 'waterIntakeMl': waterIntakeMl}),
     );
 
     if (response.statusCode == 200) {
-      print('Tracking updated successfully');
+      debugPrint('Tracking updated successfully');
     } else {
       throw Exception('Failed to update tracking: ${response.statusCode}');
     }

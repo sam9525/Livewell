@@ -9,7 +9,7 @@ class WaterIntakeNotifier extends ChangeNotifier {
   int get selected => _selected;
 
   void setWaterIntake(int value) async {
-    final trackingData = await TrackingAuth.getTracking();
+    final trackingData = await TrackingAuth.getTrackingToday();
     if (trackingData != null) {
       _waterIntake = trackingData['targetWaterIntakeMl'];
       _selected = ((_waterIntake - 500) / 50).round();
