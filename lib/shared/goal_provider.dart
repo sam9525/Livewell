@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:livewell_app/auth/tracking_auth.dart';
 
 class WaterIntakeNotifier extends ChangeNotifier {
   int _waterIntake = 2000;
@@ -7,9 +8,12 @@ class WaterIntakeNotifier extends ChangeNotifier {
   int get waterIntake => _waterIntake;
   int get selected => _selected;
 
-  void setWaterIntake(int value) {
-    _waterIntake = value;
-    _selected = ((value - 500) / 50).round();
+  void setWaterIntake(int value) async {
+    final trackingData = await TrackingAuth.getTracking();
+    if (trackingData != null) {
+      _waterIntake = trackingData['targetWaterIntakeMl'];
+      _selected = ((_waterIntake - 500) / 50).round();
+    }
     notifyListeners();
   }
 }
@@ -24,6 +28,16 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
 
   void setWaterIntake(int value) {
     _currentWaterIntake = value;
+    TrackingAuth.putTodayTracking(0, value);
+
+    notifyListeners();
+  }
+
+  // Add this new method
+  void updateFromTrackingData(Map<String, dynamic> trackingData) {
+    _waterIntakeNotifier.setWaterIntake(trackingData['targetWaterIntakeMl']);
+    _currentWaterIntake = trackingData['currentWaterIntakeMl'];
+
     notifyListeners();
   }
 
@@ -34,6 +48,9 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
     } else {
       _currentWaterIntake += 250;
     }
+
+    setWaterIntake(_currentWaterIntake);
+
     notifyListeners();
   }
 
@@ -44,6 +61,9 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
     } else {
       _currentWaterIntake += 500;
     }
+
+    setWaterIntake(_currentWaterIntake);
+
     notifyListeners();
   }
 }

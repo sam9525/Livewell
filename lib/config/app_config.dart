@@ -9,6 +9,8 @@ class AppConfig {
   static const String logoutEndpoint = '/auth/logout';
   static const String chatbotEndpoint = '/chat/';
   static const String profileEndpoint = '/profile/';
+  static const String trackingEndpoint = '/tracking/';
+  static const String trackingTodayEndpoint = '/tracking/today';
 
   // Authorization Bearer Token
   static const String authorizationBearerToken =
@@ -23,4 +25,6 @@ class AppConfig {
   static String get logoutUrl => '$apiBaseUrl$logoutEndpoint';
   static String get chatbotUrl => '$apiBaseUrl$chatbotEndpoint';
   static String get profileUrl => '$apiBaseUrl$profileEndpoint';
+  static String get trackingUrl => '$apiBaseUrl$trackingEndpoint';
+  static String get trackingTodayUrl => '$apiBaseUrl$trackingTodayEndpoint';
 }

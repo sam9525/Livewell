@@ -8,6 +8,8 @@ import 'notice_page.dart';
 import 'profile_page.dart';
 import 'chatbot_page.dart';
 import '../shared/location_provider.dart';
+import '../auth/tracking_auth.dart';
+import '../shared/goal_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -80,6 +82,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _loadTrackingData() async {
+    try {
+      final trackingData = await TrackingAuth.getTracking();
+      if (trackingData != null) {
+        // Update the CurrentWaterIntakeNotifier with the fetched data
+        context.read<CurrentWaterIntakeNotifier>().updateFromTrackingData(
+          trackingData,
+        );
+      }
+    } catch (e) {
+      print('Error loading tracking data: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +106,9 @@ class _HomePageState extends State<HomePage> {
         listen: false,
       ).startLocationUpdates();
     });
+
+    // Get the Tracking Data
+    _loadTrackingData();
   }
 
   @override
