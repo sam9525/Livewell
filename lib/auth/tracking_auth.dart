@@ -22,6 +22,30 @@ class TrackingAuth {
     }
   }
 
+  // Fetch the tracking data for a given week
+  static Future<Map<String, dynamic>?> getTracking(
+    String today,
+    String startOfWeek,
+  ) async {
+    await checkAuthentication();
+
+    String url =
+        '${AppConfig.trackingUrl}?start_date=$startOfWeek&end_date=$today';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: BackendAuth().getAuthHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      final tracking = jsonDecode(response.body);
+      return tracking;
+    } else {
+      throw Exception('Failed to get tracking: ${response.statusCode}');
+    }
+  }
+
+  // Fetch the tracking data for today
   static Future<Map<String, dynamic>?> getTrackingToday() async {
     await checkAuthentication();
 
@@ -38,6 +62,7 @@ class TrackingAuth {
     }
   }
 
+  // Update the tracking data for today
   static Future<void> putTodayTracking(int steps, int waterIntakeMl) async {
     await checkAuthentication();
 

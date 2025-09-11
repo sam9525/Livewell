@@ -10,7 +10,6 @@ import 'chatbot_page.dart';
 import '../shared/location_provider.dart';
 import '../auth/tracking_auth.dart';
 import '../shared/goal_provider.dart';
-import 'package:flutter/foundation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

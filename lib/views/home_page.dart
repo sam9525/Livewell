@@ -16,6 +16,13 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Consumer<DateProvider>(
       builder: (context, dateProvider, child) {
+        // Check if the tracking data is available
+        bool hasData =
+            !dateProvider.isLoading &&
+            dateProvider.weeklySteps.isNotEmpty &&
+            dateProvider.currentWeekIndex < dateProvider.weeklySteps.length &&
+            dateProvider.weeklySteps[dateProvider.currentWeekIndex].isNotEmpty;
+
         return Container(
           color: Shared.bgColor,
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -29,11 +36,13 @@ class _HomeState extends State<Home> {
                 previousWeek: dateProvider.previousWeek,
                 nextWeek: dateProvider.nextWeek,
               ),
-              dateProvider
-                      .weeklyDataTimes[dateProvider.currentWeekIndex]
-                      .isNotEmpty
+              dateProvider.isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(color: Shared.orange),
+                    )
+                  : hasData
                   ? BuildLineChart(
-                      weeklyDataTimes: dateProvider.weeklyDataTimes,
+                      weeklySteps: dateProvider.weeklySteps,
                       weekIndex: dateProvider.currentWeekIndex,
                       weekDays: AppConstants.weekDays,
                     )

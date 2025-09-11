@@ -28,7 +28,7 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
 
   void setWaterIntake(int value) {
     _currentWaterIntake = value;
-    TrackingAuth.putTodayTracking(0, value);
+    TrackingAuth.putTodayTracking(1000, value);
 
     notifyListeners();
   }

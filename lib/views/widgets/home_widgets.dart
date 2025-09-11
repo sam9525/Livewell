@@ -37,7 +37,9 @@ class WeeklyName extends StatelessWidget {
         ),
         SizedBox(
           child: Text(
-            weeklyNames[currentWeekIndex],
+            weeklyNames.isNotEmpty && currentWeekIndex < weeklyNames.length
+                ? weeklyNames[currentWeekIndex]
+                : "No data",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Shared.orange,
@@ -61,13 +63,13 @@ class WeeklyName extends StatelessWidget {
 }
 
 class BuildLineChart extends StatelessWidget {
-  final List<List<int>> weeklyDataTimes;
+  final List<List<double>> weeklySteps;
   final int weekIndex;
   final List<String> weekDays;
 
   const BuildLineChart({
     super.key,
-    required this.weeklyDataTimes,
+    required this.weeklySteps,
     required this.weekIndex,
     required this.weekDays,
   });
@@ -79,16 +81,16 @@ class BuildLineChart extends StatelessWidget {
       child: LineChart(
         LineChartData(
           minY: 0,
-          maxY: 120,
+          maxY: 8,
           lineBarsData: [
             LineChartBarData(
               color: Shared.orange,
-              spots: weeklyDataTimes[weekIndex].isNotEmpty
+              spots: weeklySteps[weekIndex].isNotEmpty
                   ? List.generate(
-                      weeklyDataTimes[weekIndex].length,
+                      weeklySteps[weekIndex].length,
                       (i) => FlSpot(
                         i.toDouble(),
-                        weeklyDataTimes[weekIndex][i].toDouble(),
+                        weeklySteps[weekIndex][i].toDouble(),
                       ),
                     )
                   : [],
@@ -128,7 +130,7 @@ class BuildLineChart extends StatelessWidget {
               getTooltipItems: (touchedSpots) {
                 return [
                   LineTooltipItem(
-                    "${touchedSpots.first.y.toInt()}",
+                    "${(touchedSpots.first.y * 1000).toInt()}",
                     Shared.fontStyle(20, FontWeight.w500, Colors.white),
                   ),
                 ];
@@ -140,9 +142,9 @@ class BuildLineChart extends StatelessWidget {
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
-                interval: 20,
+                interval: 2,
                 showTitles: true,
-                reservedSize: 50,
+                reservedSize: 40,
                 maxIncluded: true,
                 getTitlesWidget: leftTitleWidgets,
               ),
@@ -150,7 +152,7 @@ class BuildLineChart extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 60,
+                reservedSize: 50,
                 getTitlesWidget: bottomTitleWidgets,
               ),
             ),
@@ -165,12 +167,17 @@ class BuildLineChart extends StatelessWidget {
       return Container();
     }
 
+    int index = value.toInt();
+    if (index < 0 || index >= weekDays.length) {
+      return Container();
+    }
+
     return SideTitleWidget(
       space: 6,
       meta: meta,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
-        weekDays[value.toInt()],
+        weekDays[index],
         style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
       ),
     );
@@ -186,7 +193,20 @@ class BuildLineChart extends StatelessWidget {
       meta: meta,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
-        value.toInt().toString(),
+        (() {
+          switch (value.toInt()) {
+            case 2:
+              return '2K';
+            case 4:
+              return '4k';
+            case 6:
+              return '6K';
+            case 8:
+              return '8K';
+            default:
+              return '';
+          }
+        })(),
         style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
       ),
     );
