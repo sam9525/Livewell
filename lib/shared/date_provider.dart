@@ -51,17 +51,20 @@ class DateProvider extends ChangeNotifier {
     final weekStart = DateTime.parse(
       date,
     ).subtract(Duration(days: daysFromSunday));
+    final weekEnd = daysFromSunday == 0
+        ? weekStart.add(Duration(days: 6))
+        : DateTime.parse(date);
 
     return (
       start: weekStart.toIso8601String().split('T').first,
-      end: DateTime.parse(date).toIso8601String().split('T').first,
+      end: weekEnd.toIso8601String().split('T').first,
     );
   }
 
   // Load the week data from the tracking data
   Future<void> _loadWeekData(String startDate, String endDate) async {
     try {
-      final trackingData = await TrackingAuth.getTracking(endDate, startDate);
+      final trackingData = await TrackingAuth.getTracking(startDate, endDate);
       final currentWeeklySteps = _extractWeeklySteps(
         trackingData,
         startDate,
@@ -161,7 +164,7 @@ class DateProvider extends ChangeNotifier {
     }
 
     // Set the current week index to the current week (index 0)
-    currentWeekIndex = 0;
+    // currentWeekIndex = 0;
     notifyListeners();
   }
 
@@ -183,6 +186,6 @@ class DateProvider extends ChangeNotifier {
   }
 
   bool get canGoPrevious =>
-      currentWeekIndex < weeklySteps.length - 1 && hasPreviousWeek;
+      currentWeekIndex < weeklySteps.length - 1 || hasPreviousWeek;
   bool get canGoNext => currentWeekIndex > 0;
 }

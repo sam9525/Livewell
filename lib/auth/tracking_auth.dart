@@ -24,13 +24,13 @@ class TrackingAuth {
 
   // Fetch the tracking data for a given week
   static Future<Map<String, dynamic>?> getTracking(
-    String today,
     String startOfWeek,
+    String endOfWeek,
   ) async {
     await checkAuthentication();
 
     String url =
-        '${AppConfig.trackingUrl}?start_date=$startOfWeek&end_date=$today';
+        '${AppConfig.trackingUrl}?start_date=$startOfWeek&end_date=$endOfWeek';
 
     final response = await http.get(
       Uri.parse(url),
