@@ -90,6 +90,10 @@ class _HomePageState extends State<HomePage> {
         context.read<CurrentWaterIntakeNotifier>().updateFromTrackingData(
           trackingData,
         );
+        // Update the StepsNotifier with the fetched data
+        context.read<CurrentStepsNotifier>().updateFromTrackingData(
+          trackingData,
+        );
       }
     } catch (e) {
       debugPrint('Error loading tracking data: $e');

@@ -26,9 +26,9 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
 
   int get currentWaterIntake => _currentWaterIntake;
 
-  void setWaterIntake(int value) {
+  void setWaterIntake(int steps, int value) {
     _currentWaterIntake = value;
-    TrackingAuth.putTodayTracking(1000, value);
+    TrackingAuth.putTodayTracking(steps, value);
 
     notifyListeners();
   }
@@ -41,7 +41,7 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void add250ml() {
+  void add250ml(int steps) {
     // Avoid exceeding the water intake
     if (_currentWaterIntake + 250 > _waterIntakeNotifier.waterIntake) {
       _currentWaterIntake = _waterIntakeNotifier.waterIntake;
@@ -49,12 +49,12 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
       _currentWaterIntake += 250;
     }
 
-    setWaterIntake(_currentWaterIntake);
+    setWaterIntake(steps, _currentWaterIntake);
 
     notifyListeners();
   }
 
-  void add500ml() {
+  void add500ml(int steps) {
     // Avoid exceeding the water intake
     if (_currentWaterIntake + 500 > _waterIntakeNotifier.waterIntake) {
       _currentWaterIntake = _waterIntakeNotifier.waterIntake;
@@ -62,7 +62,7 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
       _currentWaterIntake += 500;
     }
 
-    setWaterIntake(_currentWaterIntake);
+    setWaterIntake(steps, _currentWaterIntake);
 
     notifyListeners();
   }
@@ -78,6 +78,29 @@ class StepsNotifier extends ChangeNotifier {
   void setSteps(int value) {
     _steps = value;
     _selected = ((value - 2000) / 100).round();
+    notifyListeners();
+  }
+}
+
+class CurrentStepsNotifier extends ChangeNotifier {
+  int _currentSteps = 0;
+  final StepsNotifier _stepsNotifier;
+
+  CurrentStepsNotifier(this._stepsNotifier);
+
+  int get currentSteps => _currentSteps;
+
+  void setCurrentSteps(int steps, int waterIntake) {
+    _currentSteps = steps;
+    TrackingAuth.putTodayTracking(steps, waterIntake);
+
+    notifyListeners();
+  }
+
+  void updateFromTrackingData(Map<String, dynamic> trackingData) {
+    _stepsNotifier.setSteps(trackingData['targetSteps']);
+    _currentSteps = trackingData['currentSteps'];
+
     notifyListeners();
   }
 }

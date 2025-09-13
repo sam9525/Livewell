@@ -40,6 +40,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (context) => StepsNotifier()),
         ChangeNotifierProvider(create: (context) => LocationProvider()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              CurrentStepsNotifier(context.read<StepsNotifier>()),
+        ),
       ],
       child: MaterialApp(
         title: 'LiveWell',

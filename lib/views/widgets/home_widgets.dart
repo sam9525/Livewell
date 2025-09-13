@@ -3,6 +3,9 @@ import '../../shared/goal_provider.dart';
 import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
 
 class WeeklyName extends StatelessWidget {
   final List<String> weeklyNames;
@@ -43,7 +46,7 @@ class WeeklyName extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Shared.orange,
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -178,7 +181,7 @@ class BuildLineChart extends StatelessWidget {
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
         weekDays[index],
-        style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
+        style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
       ),
     );
   }
@@ -207,7 +210,7 @@ class BuildLineChart extends StatelessWidget {
               return '';
           }
         })(),
-        style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
+        style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
       ),
     );
   }
@@ -221,43 +224,73 @@ class WaterIntakeSliders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<WaterIntakeNotifier, CurrentWaterIntakeNotifier>(
-      builder: (context, waterIntakeNotifier, currentWaterIntakeNotifier, child) {
-        return Column(
-          children: [
-            Text(
-              "Water Intake: ${currentWaterIntakeNotifier.currentWaterIntake} ml",
-              style: Shared.fontStyle(28, FontWeight.w500, Shared.black),
-            ),
-            _sliderTheme(
-              context,
-              currentWaterIntakeNotifier,
-              waterIntakeNotifier,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer3<
+      WaterIntakeNotifier,
+      CurrentWaterIntakeNotifier,
+      CurrentStepsNotifier
+    >(
+      builder:
+          (
+            context,
+            waterIntakeNotifier,
+            currentWaterIntakeNotifier,
+            currentStepsNotifier,
+            child,
+          ) {
+            return Column(
               children: [
                 Text(
-                  "0",
-                  style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
+                  "Water Intake: ${currentWaterIntakeNotifier.currentWaterIntake} ml",
+                  style: Shared.fontStyle(28, FontWeight.w500, Shared.black),
                 ),
-                Text(
-                  waterIntakeNotifier.waterIntake.toString(),
-                  style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
+                _sliderTheme(
+                  context,
+                  currentWaterIntakeNotifier,
+                  waterIntakeNotifier,
+                  currentStepsNotifier,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "0",
+                      style: Shared.fontStyle(
+                        24,
+                        FontWeight.w500,
+                        Shared.black,
+                      ),
+                    ),
+                    Text(
+                      waterIntakeNotifier.waterIntake.toString(),
+                      style: Shared.fontStyle(
+                        24,
+                        FontWeight.w500,
+                        Shared.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _addWaterButton(
+                      context,
+                      currentWaterIntakeNotifier,
+                      currentStepsNotifier,
+                      "+250 ml",
+                    ),
+                    SizedBox(width: 30),
+                    _addWaterButton(
+                      context,
+                      currentWaterIntakeNotifier,
+                      currentStepsNotifier,
+                      "+500 ml",
+                    ),
+                  ],
                 ),
               ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _addWaterButton(context, currentWaterIntakeNotifier, "+250 ml"),
-                SizedBox(width: 30),
-                _addWaterButton(context, currentWaterIntakeNotifier, "+500 ml"),
-              ],
-            ),
-          ],
-        );
-      },
+            );
+          },
     );
   }
 
@@ -265,6 +298,7 @@ class WaterIntakeSliders extends StatelessWidget {
     BuildContext context,
     CurrentWaterIntakeNotifier currentWaterIntakeNotifier,
     WaterIntakeNotifier waterIntakeNotifier,
+    CurrentStepsNotifier currentStepsNotifier,
   ) {
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
@@ -288,7 +322,10 @@ class WaterIntakeSliders extends StatelessWidget {
         divisions: (waterIntakeNotifier.waterIntake / 50).toInt(),
         label: "${currentWaterIntakeNotifier.currentWaterIntake}",
         onChanged: (double value) {
-          currentWaterIntakeNotifier.setWaterIntake(value.toInt());
+          currentWaterIntakeNotifier.setWaterIntake(
+            currentStepsNotifier.currentSteps,
+            value.toInt(),
+          );
         },
       ),
     );
@@ -297,14 +334,19 @@ class WaterIntakeSliders extends StatelessWidget {
   Widget _addWaterButton(
     BuildContext context,
     CurrentWaterIntakeNotifier currentWaterIntakeNotifier,
+    CurrentStepsNotifier currentStepsNotifier,
     String text,
   ) {
     return ElevatedButton(
       onPressed: () {
         if (text == "+250 ml") {
-          currentWaterIntakeNotifier.add250ml();
+          currentWaterIntakeNotifier.add250ml(
+            currentStepsNotifier.currentSteps,
+          );
         } else if (text == "+500 ml") {
-          currentWaterIntakeNotifier.add500ml();
+          currentWaterIntakeNotifier.add500ml(
+            currentStepsNotifier.currentSteps,
+          );
         }
       },
       style: Shared.buttonStyle(
@@ -317,6 +359,261 @@ class WaterIntakeSliders extends StatelessWidget {
         text,
         style: Shared.fontStyle(24, FontWeight.bold, Shared.orange),
       ),
+    );
+  }
+}
+
+class StepsWidget extends StatefulWidget {
+  const StepsWidget({super.key});
+
+  @override
+  State<StepsWidget> createState() => _StepsWidgetState();
+}
+
+class _StepsWidgetState extends State<StepsWidget> {
+  late Stream<StepCount> _stepCountStream;
+  bool _isInitialized = false;
+  String _lastResetDate = '';
+
+  int offset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastResetDate = _getCurrentDate();
+    initPlatformState();
+    _startDailyCheck();
+  }
+
+  String _getCurrentDate() {
+    return DateTime.now().toIso8601String().split('T').first;
+  }
+
+  void _startDailyCheck() {
+    // Check every minute if we need to reset
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+      _checkAndResetIfNewDay();
+    });
+  }
+
+  void _checkAndResetIfNewDay() {
+    final currentDate = _getCurrentDate();
+    if (currentDate != _lastResetDate) {
+      _resetStepsForNewDay();
+      _lastResetDate = currentDate;
+    }
+  }
+
+  void _resetStepsForNewDay() {
+    if (mounted) {
+      // Reset step count to 0
+      final currentStepsNotifier = context.read<CurrentStepsNotifier>();
+      final currentWaterIntakeNotifier = context
+          .read<CurrentWaterIntakeNotifier>();
+
+      _resetStepsForNewSession(currentStepsNotifier.currentSteps);
+
+      currentStepsNotifier.setCurrentSteps(0, 0);
+      currentWaterIntakeNotifier.setWaterIntake(0, 0);
+
+      debugPrint('Steps reset for new day: $_lastResetDate');
+    }
+  }
+
+  void _resetStepsForNewSession(int currentSensorValue) {
+    if (mounted) {
+      offset = currentSensorValue;
+    }
+  }
+
+  void onStepCount(StepCount event) {
+    if (mounted) {
+      final currentStepsNotifier = context.read<CurrentStepsNotifier>();
+      final currentWaterIntakeNotifier = context
+          .read<CurrentWaterIntakeNotifier>();
+
+      currentStepsNotifier.setCurrentSteps(
+        event.steps - offset,
+        currentWaterIntakeNotifier.currentWaterIntake,
+      );
+    }
+  }
+
+  void onStepCountError(error) {
+    debugPrint('onStepCountError: $error');
+  }
+
+  Future<void> initPlatformState() async {
+    try {
+      bool granted = await _checkActivityRecognitionPermission();
+      if (!granted) {
+        return;
+      }
+
+      _stepCountStream = Pedometer.stepCountStream;
+      _stepCountStream.listen(onStepCount).onError(onStepCountError);
+
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to initialize pedometer: $e');
+    }
+  }
+
+  Future<bool> _checkActivityRecognitionPermission() async {
+    bool granted = await Permission.activityRecognition.isGranted;
+
+    if (!granted) {
+      granted =
+          await Permission.activityRecognition.request() ==
+          PermissionStatus.granted;
+    }
+
+    return granted;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<StepsNotifier, CurrentStepsNotifier>(
+      builder: (context, stepsNotifier, currentStepsNotifier, child) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 4,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Today's Steps",
+                    style: Shared.fontStyle(32, FontWeight.w600, Shared.black),
+                  ),
+                  _progressBar(context, currentStepsNotifier),
+                ],
+              ),
+              SizedBox(height: 20),
+              _currentSteps(context, currentStepsNotifier),
+              SizedBox(height: 15),
+              _currentStepsProgress(
+                context,
+                stepsNotifier,
+                currentStepsNotifier,
+              ),
+              SizedBox(height: 10),
+              _stepsGoal(context, stepsNotifier),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _progressBar(
+    BuildContext context,
+    CurrentStepsNotifier currentStepsNotifier,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: _isInitialized
+            ? Shared.orange.withValues(alpha: 0.1)
+            : Shared.lightGray.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: _isInitialized ? Shared.orange : Shared.lightGray,
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: 6),
+          Text(
+            _isInitialized ? "Active" : "Inactive",
+            style: Shared.fontStyle(
+              20,
+              FontWeight.w500,
+              _isInitialized ? Shared.orange : Shared.lightGray,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _currentSteps(
+    BuildContext context,
+    CurrentStepsNotifier currentStepsNotifier,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "${currentStepsNotifier.currentSteps}",
+          style: Shared.fontStyle(48, FontWeight.bold, Shared.orange),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          "steps",
+          style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
+        ),
+      ],
+    );
+  }
+
+  Widget _currentStepsProgress(
+    BuildContext context,
+    StepsNotifier stepsNotifier,
+    CurrentStepsNotifier currentStepsNotifier,
+  ) {
+    return Container(
+      height: 8,
+      decoration: BoxDecoration(
+        color: Shared.lightGray2,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: (currentStepsNotifier.currentSteps / stepsNotifier.steps)
+            .clamp(0.0, 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Shared.orange,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _stepsGoal(BuildContext context, StepsNotifier stepsNotifier) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("0", style: Shared.fontStyle(24, FontWeight.w500, Shared.gray)),
+        Text(
+          "Goal: ${stepsNotifier.steps}",
+          style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
+        ),
+      ],
     );
   }
 }

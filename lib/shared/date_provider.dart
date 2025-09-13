@@ -3,7 +3,7 @@ import 'package:livewell_app/auth/tracking_auth.dart';
 import 'package:livewell_app/shared/shared.dart';
 
 class DateProvider extends ChangeNotifier {
-  DateTime now = DateTime.now().add(const Duration(hours: 9, minutes: 30));
+  DateTime now = DateTime.now();
   late String startOfWeek;
   late String endOfWeek = now.toIso8601String().split("T").first;
   int currentWeekIndex = 0;
@@ -36,7 +36,6 @@ class DateProvider extends ChangeNotifier {
   Future<void> getWeeklySteps() async {
     final currentWeekBounds = _calculateWeekBounds(endOfWeek);
     startOfWeek = currentWeekBounds.start;
-    endOfWeek = currentWeekBounds.end;
 
     await _loadWeekData(startOfWeek, endOfWeek);
 
