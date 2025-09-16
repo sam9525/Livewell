@@ -25,8 +25,8 @@ class SignOut {
       // Sign out from Firebase
       await _auth.signOut();
 
-      // Set the backend authentication to false
-      BackendAuth().isAuthenticated = false;
+      // Backend signout
+      await BackendAuth.signOut();
 
       // Clear the user provider
       SharedPreferencesProvider.getBackgroundPrefs().then((prefs) {

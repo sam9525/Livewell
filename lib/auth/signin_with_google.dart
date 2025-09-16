@@ -35,6 +35,9 @@ class GoogleAuthService {
       // Store the user id token in the user provider ONLY if it's not null
       UserProvider.userIdToken = idToken;
 
+      // Start token refresh timer
+      BackendAuth.startTokenRefreshTimer();
+
       // Create a new credential using the Google authentication details
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,

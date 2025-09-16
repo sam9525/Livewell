@@ -1,9 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import '../config/app_config.dart';
 import '../shared/user_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
+import 'signin_with_google.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class BackendAuth {
   // Make it a singleton
@@ -12,6 +15,7 @@ class BackendAuth {
   BackendAuth._internal();
 
   bool isAuthenticated = false;
+  Timer? _tokenRefreshTimer;
 
   // Store JWT token persistently
   static Future<void> storeJwtToken(String jwtToken) async {
@@ -49,10 +53,95 @@ class BackendAuth {
       final now = DateTime.now();
       final difference = now.difference(timestamp);
 
-      // Consider token valid for 24 hours
-      return difference.inHours < 24;
+      // Consider token valid for 15 minutes
+      return difference.inMinutes < 15;
     } catch (e) {
       debugPrint('Error checking token validity: $e');
+      return false;
+    }
+  }
+
+  // Check if token needs refresh (within threshold time of expiry)
+  static Future<bool> shouldRefreshToken() async {
+    try {
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+      String token = prefs?.getString('jwt_token') ?? '';
+      DateTime expiryDate = JwtDecoder.getExpirationDate(token);
+      Duration timeLeft = expiryDate.difference(DateTime.now());
+
+      return timeLeft.inMinutes < 1;
+    } catch (e) {
+      debugPrint('Error checking if token should refresh: $e');
+      return true;
+    }
+  }
+
+  // Start automatic token refresh timer
+  static void startTokenRefreshTimer() {
+    BackendAuth()._stopTokenRefreshTimer();
+
+    // Check every 5 minutes if token needs refresh
+    BackendAuth()._tokenRefreshTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (timer) async {
+        await BackendAuth()._checkAndRefreshToken();
+      },
+    );
+
+    debugPrint('Token refresh timer started');
+  }
+
+  // Stop automatic token refresh timer
+  void _stopTokenRefreshTimer() {
+    _tokenRefreshTimer?.cancel();
+    _tokenRefreshTimer = null;
+  }
+
+  // Check and refresh token if needed
+  Future<void> _checkAndRefreshToken() async {
+    try {
+      if (!isAuthenticated) return;
+
+      final shouldRefresh = await shouldRefreshToken();
+      if (shouldRefresh) {
+        debugPrint('Token needs refresh, attempting to refresh...');
+        await refreshJwtToken();
+      }
+    } catch (e) {
+      debugPrint('Error in token refresh check: $e');
+    }
+  }
+
+  // Refresh JWT token using Google ID token
+  Future<bool> refreshJwtToken() async {
+    try {
+      debugPrint('Attempting to refresh JWT token...');
+
+      // Get fresh Google ID token
+      final googleAuthService = GoogleAuthService();
+      final idToken = await googleAuthService.refreshIdToken();
+
+      if (idToken == null || idToken.isEmpty) {
+        debugPrint('Failed to get fresh Google ID token');
+        return false;
+      }
+
+      // Authenticate with backend using fresh ID token
+      final success = await authenticateWithBackend(
+        idToken,
+        AppConfig.googleAuthUrl,
+      );
+
+      if (success) {
+        debugPrint('JWT token refreshed successfully');
+        startTokenRefreshTimer();
+        return true;
+      } else {
+        debugPrint('Failed to refresh JWT token with backend');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error refreshing JWT token: $e');
       return false;
     }
   }
@@ -172,5 +261,19 @@ class BackendAuth {
     await prefs?.remove('jwt_token');
     await prefs?.remove('jwt_token_timestamp');
     debugPrint('Stored JWT token deleted');
+  }
+
+  // Sign out and cleanup
+  static Future<void> signOut() async {
+    BackendAuth()._stopTokenRefreshTimer();
+    BackendAuth().isAuthenticated = false;
+    UserProvider.userJwtToken = null;
+    await deleteStoredJwtToken();
+    debugPrint('User signed out and token refresh stopped');
+  }
+
+  // Dispose method to cleanup resources
+  static void dispose() {
+    BackendAuth()._stopTokenRefreshTimer();
   }
 }
