@@ -10,6 +10,7 @@ import 'chatbot_page.dart';
 import '../shared/location_provider.dart';
 import '../auth/tracking_auth.dart';
 import '../shared/goal_provider.dart';
+import '../auth/profile_auth.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,6 +72,12 @@ class _HomePageState extends State<HomePage> {
       currentRoute = route;
       navigationHistory.add(route);
     });
+
+    if (currentRoute == '/profile') {
+      await ProfileAuth.getProfile();
+    } else if (currentRoute == '/home') {
+      await _loadTrackingData();
+    }
   }
 
   Future<void> navigateBack() async {

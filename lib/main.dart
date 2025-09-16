@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:livewell_app/views/navigation.dart';
 import 'package:provider/provider.dart';
 import 'shared/shared.dart';
 import 'shared/user_provider.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'shared/goal_provider.dart';
 import 'shared/location_provider.dart';
+import 'auth/backend_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +67,29 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Check if the token is valid
+    isTokenValid();
+  }
+
+  // Check if the jwt token is valid
+  void isTokenValid() async {
+    final isValid = await BackendAuth.isStoredTokenValid();
+
+    // If the token is valid, navigate to the home page
+    if (isValid) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

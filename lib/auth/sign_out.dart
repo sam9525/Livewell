@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:livewell_app/shared/shared.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import 'package:livewell_app/shared/user_provider.dart';
 import '../views/signin.dart';
 import 'backend_auth.dart';
@@ -28,8 +29,13 @@ class SignOut {
       BackendAuth().isAuthenticated = false;
 
       // Clear the user provider
-      UserProvider.userJwtToken = null;
+      SharedPreferencesProvider.getBackgroundPrefs().then((prefs) {
+        prefs?.remove('jwt_token');
+        prefs?.remove('jwt_token_timestamp');
+      });
+
       UserProvider.userIdToken = null;
+      UserProvider.userJwtToken = null;
       UserProvider.userGender = null;
       UserProvider.userAgeRange = null;
 
