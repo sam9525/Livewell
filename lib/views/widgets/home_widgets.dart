@@ -3,9 +3,8 @@ import '../../shared/goal_provider.dart';
 import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:pedometer/pedometer.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
+import '../../services/background_service_manager.dart';
 
 class WeeklyName extends StatelessWidget {
   final List<String> weeklyNames;
@@ -102,7 +101,7 @@ class BuildLineChart extends StatelessWidget {
               dotData: FlDotData(
                 show: true,
                 getDotPainter: (spot, percent, barData, index) {
-                  final touchedSpots = barData.showingIndicators ?? [];
+                  final touchedSpots = barData.showingIndicators;
                   final isTouched = touchedSpots.contains(index);
                   return FlDotCirclePainter(
                     radius: isTouched ? 9 : 6,
@@ -371,87 +370,50 @@ class StepsWidget extends StatefulWidget {
 }
 
 class _StepsWidgetState extends State<StepsWidget> {
-  late Stream<StepCount> _stepCountStream;
+  int? stepCountStreamFrom;
   bool _isInitialized = false;
-  String _lastResetDate = '';
-
-  int offset = 0;
+  Timer? _periodicUpdateTimer;
 
   @override
   void initState() {
     super.initState();
-    _lastResetDate = _getCurrentDate();
-    initPlatformState();
-    _startDailyCheck();
+    _initializeStepCounting();
   }
 
-  String _getCurrentDate() {
-    return DateTime.now().toIso8601String().split('T').first;
+  @override
+  void dispose() {
+    _periodicUpdateTimer?.cancel();
+    super.dispose();
   }
 
-  void _startDailyCheck() {
-    // Check every minute if we need to reset
-    Timer.periodic(const Duration(minutes: 1), (timer) {
-      _checkAndResetIfNewDay();
-    });
-  }
-
-  void _checkAndResetIfNewDay() {
-    final currentDate = _getCurrentDate();
-    if (currentDate != _lastResetDate) {
-      _resetStepsForNewDay();
-      _lastResetDate = currentDate;
-    }
-  }
-
-  void _resetStepsForNewDay() {
-    if (mounted) {
-      // Reset step count to 0
-      final currentStepsNotifier = context.read<CurrentStepsNotifier>();
-      final currentWaterIntakeNotifier = context
-          .read<CurrentWaterIntakeNotifier>();
-
-      _resetStepsForNewSession(currentStepsNotifier.currentSteps);
-
-      currentStepsNotifier.setCurrentSteps(0, 0);
-      currentWaterIntakeNotifier.setWaterIntake(0, 0);
-
-      debugPrint('Steps reset for new day: $_lastResetDate');
-    }
-  }
-
-  void _resetStepsForNewSession(int currentSensorValue) {
-    if (mounted) {
-      offset = currentSensorValue;
-    }
-  }
-
-  void onStepCount(StepCount event) {
-    if (mounted) {
-      final currentStepsNotifier = context.read<CurrentStepsNotifier>();
-      final currentWaterIntakeNotifier = context
-          .read<CurrentWaterIntakeNotifier>();
-
-      currentStepsNotifier.setCurrentSteps(
-        event.steps - offset,
-        currentWaterIntakeNotifier.currentWaterIntake,
-      );
-    }
-  }
-
-  void onStepCountError(error) {
-    debugPrint('onStepCountError: $error');
-  }
-
-  Future<void> initPlatformState() async {
+  Future<void> _initializeStepCounting() async {
     try {
-      bool granted = await _checkActivityRecognitionPermission();
-      if (!granted) {
-        return;
-      }
+      // Initialize background service system
+      await BackgroundServiceManager.initialize();
 
-      _stepCountStream = Pedometer.stepCountStream;
-      _stepCountStream.listen(onStepCount).onError(onStepCountError);
+      // Start background step counting
+      await BackgroundServiceManager.startStepCounting();
+
+      // Start manual step increment timer for immediate testing
+      await BackgroundServiceManager.startStepIncrementTimer();
+
+      // Also force database sync for testing
+      await BackgroundServiceManager.syncToDatabase();
+
+      // Retry any failed updates from when app was closed
+      await BackgroundServiceManager.retryFailedUpdates();
+
+      // Load initial steps from background
+      await _loadStepsFromBackground();
+
+      // Set up periodic updates to sync with background service
+      _periodicUpdateTimer = Timer.periodic(const Duration(seconds: 5), (
+        _,
+      ) async {
+        await _loadStepsFromBackground();
+        // Also force database sync every 5 seconds
+        await BackgroundServiceManager.syncToDatabase();
+      });
 
       if (mounted) {
         setState(() {
@@ -459,20 +421,44 @@ class _StepsWidgetState extends State<StepsWidget> {
         });
       }
     } catch (e) {
-      debugPrint('Failed to initialize pedometer: $e');
+      debugPrint('Failed to initialize step counting: $e');
     }
   }
 
-  Future<bool> _checkActivityRecognitionPermission() async {
-    bool granted = await Permission.activityRecognition.isGranted;
+  Future<void> _loadStepsFromBackground() async {
+    try {
+      final steps = await BackgroundServiceManager.getCurrentStepCount();
 
-    if (!granted) {
-      granted =
-          await Permission.activityRecognition.request() ==
-          PermissionStatus.granted;
+      if (mounted) {
+        setState(() {
+          stepCountStreamFrom = steps;
+        });
+        _updateCurrentSteps();
+      }
+    } catch (e) {
+      debugPrint('Error loading background steps: $e');
     }
+  }
 
-    return granted;
+  void _updateCurrentSteps() {
+    if (mounted) {
+      final currentStepsNotifier = context.read<CurrentStepsNotifier>();
+      final currentWaterIntakeNotifier = context
+          .read<CurrentWaterIntakeNotifier>();
+
+      // Use today's step count
+      int todaySteps = stepCountStreamFrom ?? 0;
+
+      // Update stored water intake
+      BackgroundServiceManager.updateStoredWaterIntake(
+        currentWaterIntakeNotifier.currentWaterIntake,
+      );
+
+      currentStepsNotifier.setCurrentSteps(
+        todaySteps,
+        currentWaterIntakeNotifier.currentWaterIntake,
+      );
+    }
   }
 
   @override

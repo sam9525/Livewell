@@ -6,6 +6,7 @@ import 'package:livewell_app/shared/shared.dart';
 import 'package:livewell_app/shared/user_provider.dart';
 import '../views/signin.dart';
 import 'backend_auth.dart';
+import 'package:livewell_app/services/notifications_service.dart';
 
 class SignOut {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -31,6 +32,9 @@ class SignOut {
       UserProvider.userIdToken = null;
       UserProvider.userGender = null;
       UserProvider.userAgeRange = null;
+
+      // Cancel all notifications
+      NotificationService.cancelAllNotifications();
     } catch (e) {
       throw Exception("Sign out error: $e");
     }

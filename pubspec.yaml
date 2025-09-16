@@ -48,8 +48,12 @@ dependencies:
   flutter_picker_plus: ^1.5.4
   geolocator: ^14.0.2
   geocoding: ^4.0.0
-  pedometer: ^4.1.1
+  pedometer_2: ^5.0.4
   permission_handler: ^12.0.1
+  flutter_background_service: ^5.1.0
+  workmanager: ^0.9.0+3
+  shared_preferences: ^2.5.3
+  flutter_local_notifications: ^19.4.2
 
 dev_dependencies:
   flutter_test:
