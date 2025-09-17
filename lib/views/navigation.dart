@@ -75,6 +75,9 @@ class _HomePageState extends State<HomePage> {
 
     if (currentRoute == '/profile') {
       await ProfileAuth.getProfile();
+      if (mounted) {
+        setState(() {});
+      }
     } else if (currentRoute == '/home') {
       await _loadTrackingData();
     }

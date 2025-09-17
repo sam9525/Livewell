@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:livewell_app/auth/tracking_auth.dart';
+import 'package:livewell_app/services/background_service_manager.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 
 class WaterIntakeNotifier extends ChangeNotifier {
   int _waterIntake = 2000;
@@ -21,14 +23,36 @@ class WaterIntakeNotifier extends ChangeNotifier {
 class CurrentWaterIntakeNotifier extends ChangeNotifier {
   int _currentWaterIntake = 0;
   final WaterIntakeNotifier _waterIntakeNotifier;
+  bool _isInitialized = false;
 
-  CurrentWaterIntakeNotifier(this._waterIntakeNotifier);
+  CurrentWaterIntakeNotifier(this._waterIntakeNotifier) {
+    _initializeFromStorage();
+  }
+
+  // Add this method to initialize from SharedPreferences
+  void _initializeFromStorage() async {
+    if (_isInitialized) return;
+
+    try {
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+      final storedWaterIntake = prefs?.getInt('current_water_intake') ?? 0;
+      _currentWaterIntake = storedWaterIntake;
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading stored water intake: $e');
+      _isInitialized = true;
+    }
+  }
 
   int get currentWaterIntake => _currentWaterIntake;
 
   void setWaterIntake(int steps, int value) {
     _currentWaterIntake = value;
     TrackingAuth.putTodayTracking(steps, value);
+
+    // Update current water intake in SharedPreferences as well
+    BackgroundServiceManager.updateStoredWaterIntake(value);
 
     notifyListeners();
   }

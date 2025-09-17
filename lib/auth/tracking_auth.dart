@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import '../config/app_config.dart';
 import 'dart:convert';
 import 'backend_auth.dart';
@@ -93,6 +94,9 @@ class TrackingAuth {
     if (response.statusCode == 200) {
       final tracking = jsonDecode(response.body);
       debugPrint('Tracking: $tracking');
+
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+      prefs?.setInt('current_water_intake', tracking['currentWaterIntakeMl']);
       return tracking;
     } else {
       throw Exception('Failed to get tracking: ${response.statusCode}');

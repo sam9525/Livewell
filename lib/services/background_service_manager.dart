@@ -10,6 +10,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pedometer_2/pedometer_2.dart';
 import 'package:livewell_app/services/notifications_service.dart';
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:livewell_app/firebase_options.dart';
 
 // WorkManager callback dispatcher
 @pragma('vm:entry-point')
@@ -18,6 +20,11 @@ void callbackDispatcher() {
     debugPrint('WorkManager task executed: $task');
 
     try {
+      // Initialize Firebase for background context
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+
       // Update step count
       await _updateStepCount();
 
@@ -36,6 +43,10 @@ void callbackDispatcher() {
 @pragma('vm:entry-point')
 void _onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
+
+  // Initialize Firebase for background context
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
 
   // Show persistent notification
@@ -55,6 +66,9 @@ void _onStart(ServiceInstance service) async {
 Future<bool> _onIosBackground(ServiceInstance service) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
+
+  // Initialize Firebase for background context
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   return true;
 }
 
@@ -325,7 +339,7 @@ class BackgroundServiceManager {
       } else {
         debugPrint('Database sync failed - will retry later');
         // Queue for retry
-        await _queueFailedUpdate(currentSteps, currentWaterIntake);
+        // await _queueFailedUpdate(currentSteps, currentWaterIntake);
         return false;
       }
     } catch (e) {

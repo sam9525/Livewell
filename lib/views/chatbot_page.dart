@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import '../shared/shared.dart';
 import '../config/app_config.dart';
 import 'package:http/http.dart' as http;
@@ -89,12 +90,18 @@ class Chatbot {
   // Function to chat with the AI
   static Future<String> chatWithAI(String url, String message) async {
     try {
+      // Get the jwt token from the shared preferences
+      final jwtToken =
+          UserProvider.userJwtToken ??
+          SharedPreferencesProvider.backgroundPrefs?.getString('jwt_token') ??
+          '';
+
       var chatbotResponse = await http
           .post(
             Uri.parse(url),
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer ${UserProvider.userJwtToken}',
+              'Authorization': 'Bearer $jwtToken',
             },
             body: jsonEncode({'message': message}),
           )

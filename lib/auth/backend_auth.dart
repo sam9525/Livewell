@@ -45,16 +45,15 @@ class BackendAuth {
   // Check if stored JWT token is still valid (not expired)
   static Future<bool> isStoredTokenValid() async {
     try {
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-      final timestampStr = prefs?.getString('jwt_token_timestamp');
-      if (timestampStr == null) return false;
+      final shouldRefresh = await shouldRefreshToken();
 
-      final timestamp = DateTime.parse(timestampStr);
-      final now = DateTime.now();
-      final difference = now.difference(timestamp);
+      if (shouldRefresh) {
+        debugPrint('Token is expired, attempting to refresh...');
+        await BackendAuth().refreshJwtToken();
+        return true;
+      }
 
-      // Consider token valid for 15 minutes
-      return difference.inMinutes < 15;
+      return !shouldRefresh;
     } catch (e) {
       debugPrint('Error checking token validity: $e');
       return false;
@@ -68,6 +67,7 @@ class BackendAuth {
       String token = prefs?.getString('jwt_token') ?? '';
       DateTime expiryDate = JwtDecoder.getExpirationDate(token);
       Duration timeLeft = expiryDate.difference(DateTime.now());
+      debugPrint('Time left: ${timeLeft.inMinutes} minutes');
 
       return timeLeft.inMinutes < 1;
     } catch (e) {
@@ -195,12 +195,15 @@ class BackendAuth {
 
   // Method to get headers for API calls
   Map<String, String> getAuthHeaders() {
-    if (!isAuthenticated) {
-      throw Exception('User not authenticated');
-    }
+    // Get the jwt token from the shared preferences
+    final jwtToken =
+        UserProvider.userJwtToken ??
+        SharedPreferencesProvider.backgroundPrefs?.getString('jwt_token') ??
+        '';
+
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${UserProvider.userJwtToken}',
+      'Authorization': 'Bearer $jwtToken',
     };
   }
 

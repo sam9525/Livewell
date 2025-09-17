@@ -82,6 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // If the token is valid, navigate to the home page
     if (isValid) {
       // Authenticate with the stored jwt token to start refreshing the jwt token
+      await BackendAuth.authenticateWithStoredToken();
+
       BackendAuth.startTokenRefreshTimer();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {

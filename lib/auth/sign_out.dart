@@ -76,9 +76,10 @@ class SignOut {
             onPressed: () async {
               await SignOut().signOut();
               Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => SignInPage()),
+                (_) => false,
               );
             },
             style: ButtonStyle(

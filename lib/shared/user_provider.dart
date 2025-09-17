@@ -6,6 +6,9 @@ class UserProvider extends ChangeNotifier {
   User? get user => _user;
 
   UserProvider() {
+    // Initialize the user provider
+    _user = FirebaseAuth.instance.currentUser;
+
     // Listen to authentication state changes
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
