@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:livewell_app/auth/tracking_auth.dart';
 import 'package:livewell_app/services/background_service_manager.dart';
+import 'package:livewell_app/services/notifications_service.dart';
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
 
 class WaterIntakeNotifier extends ChangeNotifier {
@@ -50,6 +51,11 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
   void setWaterIntake(int steps, int value) {
     _currentWaterIntake = value;
     TrackingAuth.putTodayTracking(steps, value);
+
+    // Sent notification when water intake goal is reached
+    if (value == _waterIntakeNotifier.waterIntake) {
+      NotificationService.showWaterIntakeSyncNotification(value);
+    }
 
     // Update current water intake in SharedPreferences as well
     BackgroundServiceManager.updateStoredWaterIntake(value);

@@ -12,10 +12,13 @@ class NotificationService {
   static const String _updateStepsChannelId = "update_steps_channel";
   static const String _stepCounterChannelName = "Step Counter";
   static const String _updateStepsChannelName = "Update Steps";
+  static const String _waterIntakeChannelId = "water_intake_channel";
+  static const String _waterIntakeChannelName = "Water Intake";
 
   // Notification IDs
   static const int _stepCounterNotificationId = 888;
   static const int _stepsSyncNotificationId = 999;
+  static const int _waterIntakeSyncNotificationId = 1000;
 
   // Singleton instance
   static final NotificationService _instance = NotificationService._internal();
@@ -63,6 +66,14 @@ class NotificationService {
       showBadge: false,
     );
 
+    const waterIntakeChannel = AndroidNotificationChannel(
+      _waterIntakeChannelId,
+      _waterIntakeChannelName,
+      description: 'Update water intake in background',
+      importance: Importance.low,
+      showBadge: false,
+    );
+
     final androidImplementation = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -70,6 +81,7 @@ class NotificationService {
 
     await androidImplementation?.createNotificationChannel(stepCounterChannel);
     await androidImplementation?.createNotificationChannel(updateStepsChannel);
+    await androidImplementation?.createNotificationChannel(waterIntakeChannel);
   }
 
   // Show persistent notification for background step counting
@@ -138,6 +150,39 @@ class NotificationService {
     );
   }
 
+  // Show notification when steps are synced to database
+  static Future<void> showWaterIntakeSyncNotification(int waterIntake) async {
+    const androidDetails = AndroidNotificationDetails(
+      _waterIntakeChannelId,
+      _waterIntakeChannelName,
+      channelDescription: 'Water Intake Reached',
+      importance: Importance.low,
+      priority: Priority.low,
+      ongoing: false,
+      autoCancel: true,
+      showWhen: true,
+      silent: false,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: false,
+      presentSound: false,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notificationsPlugin.show(
+      _waterIntakeSyncNotificationId,
+      'Congratulations!',
+      'You have reached your today\'s water intake goal of $waterIntake ml. Keep it up!',
+      notificationDetails,
+    );
+  }
+
   // Cancel all notifications
   static Future<void> cancelAllNotifications() async {
     await _notificationsPlugin.cancelAll();
@@ -149,6 +194,7 @@ class NotificationService {
   // Get notification channel IDs (for external use if needed)
   static String get stepCounterChannelId => _stepCounterChannelId;
   static String get updateStepsChannelId => _updateStepsChannelId;
+  static String get waterIntakeChannelId => _waterIntakeChannelId;
   static int get stepCounterNotificationId => _stepCounterNotificationId;
   static int get stepsSyncNotificationId => _stepsSyncNotificationId;
 }
