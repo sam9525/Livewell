@@ -49,8 +49,8 @@ class BackendAuth {
 
       if (shouldRefresh) {
         debugPrint('Token is expired, attempting to refresh...');
-        await BackendAuth().refreshJwtToken();
-        return true;
+        final refreshSuccess = await BackendAuth().refreshJwtToken();
+        return refreshSuccess;
       }
 
       return !shouldRefresh;
