@@ -234,80 +234,6 @@ class BackgroundServiceManager {
     }
   }
 
-  // Start pedometer step counting
-  static Future<void> startStepIncrementTimer() async {
-    try {
-      // Cancel any existing timer and subscription
-      _stepIncrementTimer?.cancel();
-      await _pedometerSubscription?.cancel();
-
-      debugPrint('Starting pedometer step counting');
-
-      // Initialize pedometer
-      _pedometer = Pedometer();
-
-      // Get today's step count from pedometer
-      final todaySteps = await _getTodaySteps();
-      debugPrint('Today\'s steps from pedometer: $todaySteps');
-
-      // Store initial step count
-
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-      await prefs?.setInt('background_steps', todaySteps);
-      await prefs?.setString(
-        'last_step_update',
-        DateTime.now().toIso8601String(),
-      );
-
-      // Set up periodic updates to get fresh step count
-      _stepIncrementTimer = Timer.periodic(const Duration(seconds: 10), (
-        timer,
-      ) async {
-        try {
-          final currentSteps = await _getTodaySteps();
-          debugPrint('Pedometer step count update: $currentSteps');
-
-          // Update stored step count
-          await prefs?.setInt('background_steps', currentSteps);
-          await prefs?.setString(
-            'last_step_update',
-            DateTime.now().toIso8601String(),
-          );
-
-          // Mark that we need to sync to database
-          await prefs?.setBool('needs_database_sync', true);
-
-          // Also try immediate database sync
-          await syncToDatabase();
-        } catch (e) {
-          debugPrint('Error updating pedometer steps: $e');
-        }
-      });
-
-      debugPrint('Pedometer step counting started');
-    } catch (e) {
-      debugPrint('Error starting pedometer step counting: $e');
-    }
-  }
-
-  // Get today's step count from pedometer
-  static Future<int> _getTodaySteps() async {
-    try {
-      DateTime now = DateTime.now();
-      DateTime startOfDay = DateTime(now.year, now.month, now.day);
-      DateTime endOfDay = startOfDay.add(const Duration(days: 1));
-
-      int steps = await _pedometer!.getStepCount(
-        from: startOfDay,
-        to: endOfDay,
-      );
-      return steps;
-    } catch (e) {
-      debugPrint('Error getting today\'s steps: $e');
-      return 0;
-    }
-  }
-
   // Consolidated database sync method
   static Future<bool> syncToDatabase() async {
     try {
@@ -462,9 +388,6 @@ Future<void> _startStepCountingInService(ServiceInstance service) async {
 
           // Mark that we need to sync to database
           await prefs?.setBool('needs_database_sync', true);
-
-          // Also try immediate database sync
-          await BackgroundServiceManager.syncToDatabase();
         } catch (e) {
           debugPrint('Background service - Error updating pedometer steps: $e');
         }

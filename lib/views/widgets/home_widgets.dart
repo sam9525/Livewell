@@ -394,14 +394,11 @@ class _StepsWidgetState extends State<StepsWidget> {
       // Start background step counting
       await BackgroundServiceManager.startStepCounting();
 
-      // Start manual step increment timer for immediate testing
-      await BackgroundServiceManager.startStepIncrementTimer();
-
       // Also force database sync for testing
       await BackgroundServiceManager.syncToDatabase();
 
       // Retry any failed updates from when app was closed
-      await BackgroundServiceManager.retryFailedUpdates();
+      // await BackgroundServiceManager.retryFailedUpdates();
 
       // Load initial steps from background
       await _loadStepsFromBackground();
