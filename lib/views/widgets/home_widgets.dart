@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:easy_date_timeline/easy_date_timeline.dart';
+import 'package:livewell_app/auth/tracking_auth.dart';
+import 'package:livewell_app/shared/date_provider.dart';
 import '../../shared/goal_provider.dart';
 import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
 import '../../services/background_service_manager.dart';
+import 'package:intl/intl.dart';
 
 class WeeklyName extends StatelessWidget {
   final List<String> weeklyNames;
@@ -597,6 +601,322 @@ class _StepsWidgetState extends State<StepsWidget> {
           style: Shared.fontStyle(24, FontWeight.w500, Shared.gray),
         ),
       ],
+    );
+  }
+}
+
+class Calander extends StatefulWidget {
+  const Calander({super.key});
+  @override
+  State<Calander> createState() => _CalanderState();
+}
+
+class _CalanderState extends State<Calander> {
+  EasyDatePickerController dateController = EasyDatePickerController();
+
+  final firstDate = DateProvider().createdAt;
+
+  List<DateTime> specialDates = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getAchieveTargetDate();
+  }
+
+  Future<void> getAchieveTargetDate() async {
+    final stepsData = await TrackingAuth.getTracking(
+      firstDate,
+      DateTime.now().toIso8601String().split('T').first,
+    );
+
+    final logs = stepsData?['logs'];
+
+    for (var value in logs) {
+      if (value['currentSteps'].toInt() > value['targetSteps'].toInt()) {
+        specialDates.add(DateTime.parse(value['logDate']));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Theme(
+          data: Theme.of(context).copyWith(
+            primaryColor: Shared.orange,
+            dialogTheme: DialogThemeData(backgroundColor: Shared.black),
+          ),
+          child: Builder(builder: (context) => _easyTheme(context)),
+        ),
+        SizedBox(height: 15),
+        ElevatedButton(
+          onPressed: () {
+            dateController.animateToCurrentDate();
+          },
+          style: Shared.buttonStyle(150, 50, Shared.orange, Colors.white),
+          child: Text(
+            "Today",
+            style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _easyTheme(BuildContext context) {
+    WidgetStateProperty<Color> orangeColor = WidgetStateProperty.all(
+      Shared.orange,
+    );
+    WidgetStateProperty<Color> lightGrayColor = WidgetStateProperty.all(
+      Shared.lightGray,
+    );
+    WidgetStateProperty<BorderSide> borderSide(Color color) {
+      return WidgetStateProperty.all(BorderSide(color: color));
+    }
+
+    WidgetStateProperty<TextStyle> smallText = WidgetStateProperty.all(
+      TextStyle(fontSize: 18),
+    );
+    WidgetStateProperty<TextStyle> mediumText = WidgetStateProperty.all(
+      TextStyle(fontSize: 20),
+    );
+    WidgetStateProperty<TextStyle> largeText = WidgetStateProperty.all(
+      TextStyle(fontSize: 32),
+    );
+    WidgetStateProperty<Color> resolveColor(
+      Color color,
+      Color color2,
+      Color? color3,
+    ) {
+      return WidgetStateProperty.resolveWith((states) {
+        if (color3 != null && states.contains(WidgetState.disabled)) {
+          return color3;
+        } else if (states.contains(WidgetState.selected)) {
+          return color;
+        } else {
+          return color2;
+        }
+      });
+    }
+
+    WidgetStateProperty<BorderSide> resolveBorderSide(Color color) {
+      return WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? BorderSide(color: color)
+            : BorderSide.none,
+      );
+    }
+
+    WidgetStateProperty<OutlinedBorder?> shapeBorder = WidgetStateProperty.all(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    );
+
+    return EasyTheme(
+      data: EasyTheme.of(context).copyWith(
+        currentDayBackgroundColor: orangeColor,
+        currentDayBorder: borderSide(Shared.orange),
+        currentDayTopElementStyle: mediumText,
+        currentDayMiddleElementStyle: largeText,
+        currentDayBottomElementStyle: mediumText,
+        dayBorder: borderSide(Shared.lightGray2),
+        dayForegroundColor: lightGrayColor,
+        dayTopElementStyle: mediumText,
+        dayMiddleElementStyle: largeText,
+        dayBottomElementStyle: mediumText,
+        monthForegroundColor: resolveColor(
+          Shared.bgColor,
+          Shared.black,
+          Shared.lightGray,
+        ),
+        monthBackgroundColor: resolveColor(
+          Shared.orange,
+          Colors.transparent,
+          null,
+        ),
+        monthShape: shapeBorder,
+        monthBorder: resolveBorderSide(Shared.orange),
+        monthStyle: mediumText,
+        currentMonthForegroundColor: resolveColor(
+          Shared.bgColor,
+          Shared.black,
+          null,
+        ),
+        currentMonthBackgroundColor: resolveColor(
+          Shared.orange,
+          Shared.lightGray2,
+          null,
+        ),
+        currentMonthShape: shapeBorder,
+        currentMonthBorder: borderSide(Shared.orange),
+        currentMonthStyle: smallText,
+        yearForegroundColor: resolveColor(
+          Shared.bgColor,
+          Shared.black,
+          Shared.lightGray,
+        ),
+        yearBackgroundColor: resolveColor(
+          Shared.orange,
+          Colors.transparent,
+          null,
+        ),
+        yearShape: shapeBorder,
+        yearBorder: resolveBorderSide(Shared.orange),
+        yearStyle: smallText,
+        currentYearForegroundColor: resolveColor(
+          Shared.bgColor,
+          Shared.black,
+          null,
+        ),
+        currentYearBackgroundColor: resolveColor(
+          Shared.orange,
+          Shared.lightGray2,
+          null,
+        ),
+        currentYearShape: shapeBorder,
+        currentYearBorder: resolveBorderSide(Shared.orange),
+        currentYearStyle: smallText,
+      ),
+      child: _easyThemeChild(context),
+    );
+  }
+
+  Widget _easyThemeChild(BuildContext context) {
+    return EasyDateTimeLinePicker.itemBuilder(
+      itemExtent: 65,
+      timelineOptions: TimelineOptions(height: 120),
+      itemBuilder: (context, date, isSelected, isDisabled, isToday, onTap) {
+        bool isSpecial = specialDates.any(
+          (d) =>
+              d.year == date.year && d.month == date.month && d.day == date.day,
+        );
+
+        if (isToday) {
+          return InkWell(
+            onTap: onTap,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Shared.orange,
+                border: Border.all(color: Shared.orange, width: 2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    DateFormat('MMM').format(date).substring(0, 3),
+                    style: Shared.fontStyle(
+                      20,
+                      FontWeight.w400,
+                      Shared.bgColor,
+                    ),
+                  ),
+                  Text(
+                    '${date.day}',
+                    style: Shared.fontStyle(
+                      32,
+                      FontWeight.bold,
+                      Shared.bgColor,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('EEE').format(date),
+                    style: Shared.fontStyle(
+                      20,
+                      FontWeight.w400,
+                      Shared.bgColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return InkWell(
+          onTap: onTap,
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: isSpecial ? Shared.orange : Shared.lightGray,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat('MMM').format(date).substring(0, 3),
+                  style: Shared.fontStyle(
+                    20,
+                    FontWeight.w400,
+                    isSpecial ? Shared.orange : Shared.lightGray,
+                  ),
+                ),
+                Text(
+                  '${date.day}',
+                  style: Shared.fontStyle(
+                    32,
+                    FontWeight.bold,
+                    isSpecial ? Shared.orange : Shared.lightGray,
+                  ),
+                ),
+                Text(
+                  DateFormat('EEE').format(date),
+                  style: Shared.fontStyle(
+                    20,
+                    FontWeight.w400,
+                    isSpecial ? Shared.orange : Shared.lightGray,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      headerOptions: HeaderOptions(
+        headerBuilder: (context, date, onTap) {
+          return InkWell(
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              child: Text(
+                DateFormat('dd MMMM yyyy').format(date),
+                style: Shared.fontStyle(24, FontWeight.w500, Shared.black),
+              ),
+            ),
+          );
+        },
+      ),
+      monthYearPickerOptions: MonthYearPickerOptions(
+        cancelText: 'Cancel',
+        confirmText: 'OK',
+        cancelTextStyle: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          color: Shared.orange,
+        ),
+        confirmTextStyle: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          color: Shared.orange,
+        ),
+      ),
+      controller: dateController,
+      firstDate: DateTime.parse(firstDate),
+      lastDate: DateTime.now().add(Duration(days: 9)),
+      focusedDate: DateTime.now(),
+      onDateChange: (date) {
+        debugPrint(date.toString());
+      },
     );
   }
 }

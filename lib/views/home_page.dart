@@ -32,6 +32,7 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 StepsWidget(),
+                Calander(),
                 WeeklyName(
                   weeklyNames: dateProvider.weeklyNames,
                   currentWeekIndex: dateProvider.currentWeekIndex,

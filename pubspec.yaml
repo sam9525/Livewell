@@ -55,6 +55,7 @@ dependencies:
   shared_preferences: ^2.5.3
   flutter_local_notifications: ^19.4.2
   jwt_decoder: ^2.0.1
+  easy_date_timeline: ^2.0.9
 
 dev_dependencies:
   flutter_test:

@@ -31,6 +31,9 @@ class UserProvider extends ChangeNotifier {
   // Get user photo URL
   String? get userPhotoURL => _user?.photoURL;
 
+  // Get user created at
+  DateTime? get userCreatedAt => _user?.metadata.creationTime;
+
   // Store user id token
   static String? userIdToken;
 
