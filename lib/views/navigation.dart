@@ -35,9 +35,9 @@ class _HomePageState extends State<HomePage> {
   static final Map<String, _RouteData> routes = {
     '/home': _RouteData('Home', 'home', (context) => const Home()),
     '/goal': _RouteData('Goal', 'book', (context) => const Goal()),
+    '/chatbot': _RouteData('Chatbot', 'chatbot', Chatbot.chatbotPage),
     '/notice': _RouteData('Notice', 'bell', Notice.noticePage),
     '/profile': _RouteData('Profile', 'user', (context) => const Profile()),
-    '/chatbot': _RouteData('Chatbot', 'chatbot', Chatbot.chatbotPage),
   };
 
   Widget buildNavigationDestination(String icon, String label) {
