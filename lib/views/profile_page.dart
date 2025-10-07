@@ -66,7 +66,7 @@ class _ProfileState extends State<Profile> {
                   children: [
                     CircleAvatar(
                       radius: 75,
-                      backgroundColor: Shared.orange.withOpacity(0.1),
+                      backgroundColor: Shared.orange.withValues(alpha: 0.1),
                       backgroundImage: user?.photoURL != null
                           ? NetworkImage(user!.photoURL!)
                           : null,

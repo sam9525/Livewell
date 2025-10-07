@@ -60,6 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'username': usernameController.text.trim(),
       });
 
+      if (!mounted) return;
       // Navigate to the survey page
       SignInOutShared.changePage(context, const SurveyPage());
     } on supabase.AuthException catch (e) {

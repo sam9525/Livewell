@@ -96,6 +96,9 @@ class _HomePageState extends State<HomePage> {
     try {
       final trackingData = await TrackingAuth.getTrackingToday();
       if (trackingData != null) {
+        if (!mounted) {
+          return;
+        }
         // Update the CurrentWaterIntakeNotifier with the fetched data
         context.read<CurrentWaterIntakeNotifier>().updateFromTrackingData(
           trackingData,

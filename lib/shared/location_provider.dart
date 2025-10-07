@@ -43,7 +43,7 @@ class LocationProvider extends ChangeNotifier {
         _postcode = 'Location unavailable';
       }
     } catch (e) {
-      print('Error getting postcode: $e');
+      debugPrint('Error getting postcode: $e');
       _postcode = 'Location unavailable';
     }
     setPostcode(_postcode);
@@ -54,7 +54,7 @@ class LocationProvider extends ChangeNotifier {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('Location services are disabled');
+        debugPrint('Location services are disabled');
         return null;
       }
 
@@ -62,13 +62,13 @@ class LocationProvider extends ChangeNotifier {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('Location permissions are denied');
+          debugPrint('Location permissions are denied');
           return null;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        print('Location permissions are permanently denied');
+        debugPrint('Location permissions are permanently denied');
         return null;
       }
 
@@ -76,7 +76,7 @@ class LocationProvider extends ChangeNotifier {
         locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
       );
     } catch (e) {
-      print('Error getting current location: $e');
+      debugPrint('Error getting current location: $e');
       return null;
     }
   }

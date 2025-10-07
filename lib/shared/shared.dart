@@ -107,7 +107,7 @@ class Shared {
   ) {
     ScaffoldMessenger.of(context).showMaterialBanner(
       MaterialBanner(
-        backgroundColor: Shared.orange.withOpacity(0.1),
+        backgroundColor: Shared.orange.withValues(alpha: 0.1),
         content: Text(
           message,
           style: Shared.fontStyle(20, FontWeight.w500, Shared.orange),
@@ -128,7 +128,7 @@ class Shared {
 
     // Hide the MaterialBanner after 5 seconds
     Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
       }
     });

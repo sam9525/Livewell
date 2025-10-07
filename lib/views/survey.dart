@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../shared/shared.dart';
-import '../model/surveyModel.dart';
+import '../model/survey_model.dart';
 import 'widgets/survey_widgets.dart';
 
 class SurveyPage extends StatefulWidget {

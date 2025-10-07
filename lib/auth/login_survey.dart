@@ -3,7 +3,7 @@ import 'backend_auth.dart';
 import '../shared/user_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../model/surveyModel.dart';
+import '../model/survey_model.dart';
 import 'package:flutter/foundation.dart';
 
 class LoginSurvey {

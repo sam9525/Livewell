@@ -75,12 +75,14 @@ class SignOut {
           TextButton(
             onPressed: () async {
               await SignOut().signOut();
-              Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => SignInPage()),
-                (_) => false,
-              );
+              if (context.mounted) {
+                Navigator.of(context).pop();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => SignInPage()),
+                  (_) => false,
+                );
+              }
             },
             style: ButtonStyle(
               overlayColor: WidgetStateProperty.all(

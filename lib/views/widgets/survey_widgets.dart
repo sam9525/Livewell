@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/shared.dart';
-import '../../model/surveyModel.dart';
+import '../../model/survey_model.dart';
 import '../../auth/login_survey.dart';
 import '../../views/navigation.dart';
 import '../../shared/sign_in_out_shared.dart';
@@ -363,7 +363,7 @@ class SurveyNavigationButtons extends StatelessWidget {
           onPressed: () async {
             // POST answers to the database
             bool res = await LoginSurvey().postSurvey();
-            if (res) {
+            if (res && context.mounted) {
               SignInOutShared.changePage(context, HomePage());
             }
           },

@@ -67,20 +67,20 @@ class Chatbot {
       try {
         _speechEnabled = await _speechToText.initialize(
           onError: (error) {
-            print("Speech recognition error: ${error.errorMsg}");
+            debugPrint("Speech recognition error: ${error.errorMsg}");
             _isListeningNotifier.value = false;
           },
           onStatus: (status) {
-            print("Speech recognition status: $status");
+            debugPrint("Speech recognition status: $status");
             if (status == 'done' || status == 'notListening') {
               _isListeningNotifier.value = false;
             }
           },
         );
-        print("Speech recognition initialized: $_speechEnabled");
+        debugPrint("Speech recognition initialized: $_speechEnabled");
         _isSpeechInitialized = true;
       } catch (e) {
-        print("Error initializing speech recognition: $e");
+        debugPrint("Error initializing speech recognition: $e");
         _speechEnabled = false;
         _isSpeechInitialized = true;
       }
@@ -111,11 +111,11 @@ class Chatbot {
         final responseBody = jsonDecode(chatbotResponse.body);
         return responseBody['reply'];
       } else {
-        print("Chatbot error: ${chatbotResponse.statusCode}");
+        debugPrint("Chatbot error: ${chatbotResponse.statusCode}");
         return "Error: ${chatbotResponse.statusCode}";
       }
     } catch (e) {
-      print("Error: $e");
+      debugPrint("Error: $e");
       return "Error: $e";
     }
   }
@@ -150,7 +150,7 @@ class Chatbot {
       await flutterTts.stop();
       await flutterTts.speak(text);
     } catch (e) {
-      print("TTS error: $e");
+      debugPrint("TTS error: $e");
     }
   }
 
@@ -184,7 +184,7 @@ class Chatbot {
         localeId: "en_AU",
       );
     } catch (e) {
-      print("Error starting speech recognition: $e");
+      debugPrint("Error starting speech recognition: $e");
       _isListeningNotifier.value = false;
     }
   }
@@ -193,9 +193,9 @@ class Chatbot {
     try {
       await _speechToText.stop();
       _isListeningNotifier.value = false;
-      print("Stopped speech recognition");
+      debugPrint("Stopped speech recognition");
     } catch (e) {
-      print("Error stopping speech recognition: $e");
+      debugPrint("Error stopping speech recognition: $e");
       _isListeningNotifier.value = false;
     }
   }
@@ -370,7 +370,7 @@ class Chatbot {
             decoration: isListening
                 ? BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withOpacity(0.2),
+                    color: Colors.red.withValues(alpha: 0.2),
                   )
                 : null,
             child: IconButton(

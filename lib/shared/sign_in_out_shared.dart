@@ -27,7 +27,9 @@ class SignInOutShared {
     return TextButton(
       onPressed: () {},
       style: ButtonStyle(
-        overlayColor: WidgetStateProperty.all(Shared.orange.withOpacity(0.1)),
+        overlayColor: WidgetStateProperty.all(
+          Shared.orange.withValues(alpha: 0.1),
+        ),
       ),
       child: Text(
         'Forgot Password?',
@@ -54,7 +56,9 @@ class SignInOutShared {
         );
       },
       style: ButtonStyle(
-        overlayColor: WidgetStateProperty.all(Shared.orange.withOpacity(0.1)),
+        overlayColor: WidgetStateProperty.all(
+          Shared.orange.withValues(alpha: 0.1),
+        ),
       ),
       child: Text(
         text,
