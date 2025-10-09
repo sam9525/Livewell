@@ -11,6 +11,7 @@ class AppConfig {
   static const String profileEndpoint = '/profile/';
   static const String trackingEndpoint = '/tracking/';
   static const String trackingTodayEndpoint = '/tracking/today';
+  static const String trackingTodayTargetEndpoint = '/tracking/today/targets';
 
   // Authorization Bearer Token
   static const String authorizationBearerToken =
@@ -27,4 +28,6 @@ class AppConfig {
   static String get profileUrl => '$apiBaseUrl$profileEndpoint';
   static String get trackingUrl => '$apiBaseUrl$trackingEndpoint';
   static String get trackingTodayUrl => '$apiBaseUrl$trackingTodayEndpoint';
+  static String get trackingTodayTargetUrl =>
+      '$apiBaseUrl$trackingTodayTargetEndpoint';
 }

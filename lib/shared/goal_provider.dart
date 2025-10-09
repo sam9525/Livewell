@@ -12,11 +12,17 @@ class WaterIntakeNotifier extends ChangeNotifier {
   int get selected => _selected;
 
   void setWaterIntake(int value) async {
+    _waterIntake = value;
+    _selected = ((_waterIntake - 500) / 50).round();
+
     final trackingData = await TrackingAuth.getTrackingToday();
-    if (trackingData != null) {
-      _waterIntake = trackingData['targetWaterIntakeMl'];
-      _selected = ((_waterIntake - 500) / 50).round();
-    }
+
+    // Update the target water intake in the database
+    TrackingAuth.putTodayTrackingTargets(
+      trackingData!['targetSteps'],
+      _waterIntake,
+    );
+
     notifyListeners();
   }
 }
@@ -105,9 +111,18 @@ class StepsNotifier extends ChangeNotifier {
   int get steps => _steps;
   int get selected => _selected;
 
-  void setSteps(int value) {
+  void setSteps(int value) async {
     _steps = value;
     _selected = ((value - 2000) / 100).round();
+
+    final trackingData = await TrackingAuth.getTrackingToday();
+
+    // Update the target steps in the database
+    TrackingAuth.putTodayTrackingTargets(
+      _steps,
+      trackingData!['targetWaterIntakeMl'],
+    );
+
     notifyListeners();
   }
 }

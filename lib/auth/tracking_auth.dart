@@ -165,4 +165,36 @@ class TrackingAuth {
       return false;
     }
   }
+
+  static Future<bool> putTodayTrackingTargets(
+    int targetSteps,
+    int targetWaterIntakeMl,
+  ) async {
+    try {
+      bool authenticated = await checkAuthentication();
+      if (!authenticated) {
+        throw Exception('Failed to authenticate with backend');
+      }
+
+      final response = await http.put(
+        Uri.parse(AppConfig.trackingTodayTargetUrl),
+        headers: BackendAuth().getAuthHeaders(),
+        body: jsonEncode({
+          'targetSteps': targetSteps,
+          'targetWaterIntakeMl': targetWaterIntakeMl,
+        }),
+      );
+      getTrackingToday();
+
+      if (response.statusCode == 200) {
+        debugPrint('Tracking updated successfully');
+        return true;
+      } else {
+        throw Exception('Failed to update tracking: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error in background tracking update: $e');
+      return false;
+    }
+  }
 }
