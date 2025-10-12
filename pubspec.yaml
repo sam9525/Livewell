@@ -91,6 +91,7 @@ flutter:
     - assets/icons/logout.svg
     - assets/icons/speaker.svg
     - assets/icons/mic.svg
+    - assets/icons/health.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

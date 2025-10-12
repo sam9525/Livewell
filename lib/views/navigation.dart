@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import 'home_page.dart';
 import 'goal_page.dart';
-import 'notice_page.dart';
 import 'profile_page.dart';
 import 'chatbot_page.dart';
+import 'health_page.dart';
 import '../shared/location_provider.dart';
 import '../auth/tracking_auth.dart';
 import '../shared/goal_provider.dart';
@@ -17,6 +17,14 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
+
+  // Static method to navigate to a route from child widgets
+  static void navigateToRoute(BuildContext context, String route) {
+    final homePageState = context.findAncestorStateOfType<_HomePageState>();
+    if (homePageState != null) {
+      homePageState.navigateToRoute(route);
+    }
+  }
 }
 
 // Helper class to store route data
@@ -35,8 +43,8 @@ class _HomePageState extends State<HomePage> {
   static final Map<String, _RouteData> routes = {
     '/home': _RouteData('Home', 'home', (context) => const Home()),
     '/goal': _RouteData('Goal', 'book', (context) => const Goal()),
-    '/chatbot': _RouteData('Chatbot', 'chatbot', Chatbot.chatbotPage),
-    '/notice': _RouteData('Notice', 'bell', Notice.noticePage),
+    '/chatbot': _RouteData('Chatbot', 'chatbot', (context) => const Chatbot()),
+    '/health': _RouteData('Health', 'health', Health.healthPage),
     '/profile': _RouteData('Profile', 'user', (context) => const Profile()),
   };
 

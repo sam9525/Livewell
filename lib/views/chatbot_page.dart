@@ -18,7 +18,19 @@ class ChatMessage {
     : timestamp = timestamp ?? DateTime.now();
 }
 
-class Chatbot {
+class Chatbot extends StatefulWidget {
+  const Chatbot({super.key});
+
+  @override
+  State<Chatbot> createState() => _ChatbotState();
+
+  // Clear chat history, add medication chat history
+  static void addChatHistoryForMedication() {
+    _ChatbotState.addChatHistoryForMedication();
+  }
+}
+
+class _ChatbotState extends State<Chatbot> {
   static final TextEditingController inputController = TextEditingController();
   // Store the chat history in a list
   static final List<ChatMessage> chatHistory = [];
@@ -49,6 +61,21 @@ class Chatbot {
       );
       chatHistoryNotifier.value = List.from(chatHistory);
     }
+    _isChatInitialized = true;
+  }
+
+  // Clear chat history, add medication chat history
+  static void addChatHistoryForMedication() {
+    chatHistory.clear();
+    chatHistory.add(
+      ChatMessage(
+        text:
+            "Hi! please tell me the medication details including the name, dosage, frequency, taken times and start date that you want to create a reminder for. Or you can ask me anything.",
+        isUser: false,
+      ),
+    );
+
+    chatHistoryNotifier.value = List.from(chatHistory);
     _isChatInitialized = true;
   }
 
@@ -201,7 +228,8 @@ class Chatbot {
   }
 
   // Function to build the chatbot page
-  static Container chatbotPage(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     // Initialize chat when page is built
     initializeChat();
 

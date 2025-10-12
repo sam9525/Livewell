@@ -11,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'shared/goal_provider.dart';
 import 'shared/location_provider.dart';
+import 'shared/medication_provider.dart';
 import 'auth/backend_auth.dart';
 
 void main() async {
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
           create: (context) =>
               CurrentStepsNotifier(context.read<StepsNotifier>()),
         ),
+        ChangeNotifierProvider(create: (context) => MedicationProvider()),
       ],
       child: MaterialApp(
         title: 'LiveWell',
