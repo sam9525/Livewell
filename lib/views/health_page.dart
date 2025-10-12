@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../shared/shared.dart';
 import 'widgets/medication_list.dart';
+import 'widgets/vaccination_list.dart';
 
 class Health {
   static Widget healthPage(BuildContext context) {
@@ -15,6 +16,8 @@ class Health {
               children: const [
                 // Medications Section
                 MedicationList(),
+                SizedBox(height: 20),
+                VaccinationList(),
               ],
             ),
           ),

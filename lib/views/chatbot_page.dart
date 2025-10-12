@@ -28,6 +28,11 @@ class Chatbot extends StatefulWidget {
   static void addChatHistoryForMedication() {
     _ChatbotState.addChatHistoryForMedication();
   }
+
+  // Clear chat history, add vaccination chat history
+  static void addChatHistoryForVaccination() {
+    _ChatbotState.addChatHistoryForVaccination();
+  }
 }
 
 class _ChatbotState extends State<Chatbot> {
@@ -71,6 +76,21 @@ class _ChatbotState extends State<Chatbot> {
       ChatMessage(
         text:
             "Hi! please tell me the medication details including the name, dosage, frequency, taken times and start date that you want to create a reminder for. Or you can ask me anything.",
+        isUser: false,
+      ),
+    );
+
+    chatHistoryNotifier.value = List.from(chatHistory);
+    _isChatInitialized = true;
+  }
+
+  // Clear chat history, add vaccination chat history
+  static void addChatHistoryForVaccination() {
+    chatHistory.clear();
+    chatHistory.add(
+      ChatMessage(
+        text:
+            "Hi! please tell me the vaccination details including the name, dose date, next dose date and location that you want to create a reminder for. Or you can ask me anything.",
         isUser: false,
       ),
     );
