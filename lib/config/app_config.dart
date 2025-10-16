@@ -13,6 +13,10 @@ class AppConfig {
   static const String trackingTodayEndpoint = '/tracking/today';
   static const String trackingTodayTargetEndpoint = '/tracking/today/targets';
 
+  // Health endpoints
+  static const String medicationEndpoint = '/health/medications';
+  static const String vaccineEndpoint = '/health/vaccinations';
+
   // Authorization Bearer Token
   static const String authorizationBearerToken =
       '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SEgV3p4LGOCSPX';
@@ -30,4 +34,8 @@ class AppConfig {
   static String get trackingTodayUrl => '$apiBaseUrl$trackingTodayEndpoint';
   static String get trackingTodayTargetUrl =>
       '$apiBaseUrl$trackingTodayTargetEndpoint';
+
+  // Get health endpoints
+  static String get medicationUrl => '$apiBaseUrl$medicationEndpoint';
+  static String get vaccineUrl => '$apiBaseUrl$vaccineEndpoint';
 }

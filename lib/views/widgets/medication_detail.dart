@@ -10,6 +10,11 @@ class MedicationDetail extends StatelessWidget {
 
   const MedicationDetail({super.key, required this.medication});
 
+  // Format date to display format (DD/MM/YYYY)
+  static String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +64,7 @@ class MedicationDetail extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -100,7 +105,7 @@ class MedicationDetail extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -137,7 +142,7 @@ class MedicationDetail extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -159,7 +164,7 @@ class MedicationDetail extends StatelessWidget {
             _buildDetailRow(
               Icons.schedule,
               'Duration',
-              '${medication.durationDays} days',
+              '${medication.durationDays.toString()} days',
             ),
             const SizedBox(height: 15),
             _buildDetailRow(
@@ -188,7 +193,7 @@ class MedicationDetail extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -209,7 +214,7 @@ class MedicationDetail extends StatelessWidget {
             ),
             child: Text(
               medication.notes,
-              style: Shared.fontStyle(16, FontWeight.w400, Shared.gray),
+              style: Shared.fontStyle(20, FontWeight.w400, Shared.gray),
             ),
           ),
         ],
@@ -292,10 +297,6 @@ class MedicationDetail extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
   void _navigateToEdit(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -331,12 +332,14 @@ class MedicationDetail extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<MedicationProvider>(
-                context,
-                listen: false,
-              ).deleteMedication(medication.id);
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to list
+              if (medication.id != null) {
+                Provider.of<MedicationProvider>(
+                  context,
+                  listen: false,
+                ).deleteMedication(medication.id!);
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to list
+              }
             },
             child: Text(
               'Delete',

@@ -25,7 +25,6 @@ class _MedicationFormState extends State<MedicationForm> {
   String _selectedFrequency = Frequency.daily.value;
   TimeOfDay _selectedTime = TimeOfDay.now();
   DateTime _selectedStartDate = DateTime.now();
-  int? _durationDays;
 
   @override
   void initState() {
@@ -43,7 +42,6 @@ class _MedicationFormState extends State<MedicationForm> {
     _selectedFrequency = medication.frequency;
     _notesController.text = medication.notes;
     _selectedStartDate = medication.startDate;
-    _durationDays = medication.durationDays;
     _durationController.text = medication.durationDays?.toString() ?? '';
 
     // Parse time from string (assuming format "HH:mm")
@@ -92,19 +90,20 @@ class _MedicationFormState extends State<MedicationForm> {
   void _saveMedication() async {
     if (_formKey.currentState!.validate()) {
       final medication = Medication(
-        id:
-            widget.medication?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget
+            .medication
+            ?.id, // Preserve existing ID for updates, null for new
         name: _nameController.text.trim(),
-        dosage: double.parse(_dosageController.text),
+        dosage: int.parse(_dosageController.text),
         dosageUnit: _selectedDosageUnit,
         frequency: _selectedFrequency,
         time:
             '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
         startDate: _selectedStartDate,
-        durationDays: _durationDays,
+        durationDays: _durationController.text.trim().isNotEmpty
+            ? int.tryParse(_durationController.text.trim())
+            : null,
         notes: _notesController.text.trim(),
-        createdAt: widget.medication?.createdAt ?? DateTime.now(),
       );
 
       final medicationProvider = Provider.of<MedicationProvider>(
@@ -112,19 +111,35 @@ class _MedicationFormState extends State<MedicationForm> {
         listen: false,
       );
 
+      bool success;
       if (widget.medication != null) {
-        await medicationProvider.updateMedication(medication);
+        success = await medicationProvider.updateMedication(medication);
       } else {
-        await medicationProvider.addMedication(medication);
+        success = await medicationProvider.addMedication(medication);
       }
 
-      // Call the onSaved callback to trigger parent rebuild
-      if (widget.onSaved != null) {
-        widget.onSaved!();
-      }
+      if (success) {
+        // Call the onSaved callback to trigger parent rebuild
+        if (widget.onSaved != null) {
+          widget.onSaved!();
+        }
 
-      if (mounted) {
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        // Show error message to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                medicationProvider.error ?? 'Failed to save medication',
+                style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -342,13 +357,6 @@ class _MedicationFormState extends State<MedicationForm> {
                 double.infinity,
                 'Enter duration in days',
                 _durationController,
-                onSubmitted: (value) {
-                  setState(() {
-                    _durationDays = value.isNotEmpty
-                        ? int.tryParse(value)
-                        : null;
-                  });
-                },
               ),
               const SizedBox(height: 20),
 
