@@ -87,15 +87,12 @@ class _VaccinationFormState extends State<VaccinationForm> {
   void _saveVaccination() async {
     if (_formKey.currentState!.validate()) {
       final vaccination = Vaccination(
-        id:
-            widget.vaccination?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.vaccination?.id, // Preserve ID for updates, null for new
         name: _nameController.text.trim(),
         doseDate: _selectedDoseDate,
         nextDoseDate: _selectedNextDoseDate,
         location: _locationController.text.trim(),
         notes: _notesController.text.trim(),
-        createdAt: widget.vaccination?.createdAt ?? DateTime.now(),
       );
 
       final vaccinationProvider = Provider.of<VaccinationProvider>(
@@ -103,19 +100,35 @@ class _VaccinationFormState extends State<VaccinationForm> {
         listen: false,
       );
 
+      bool success;
       if (widget.vaccination != null) {
-        await vaccinationProvider.updateVaccination(vaccination);
+        success = await vaccinationProvider.updateVaccination(vaccination);
       } else {
-        await vaccinationProvider.addVaccination(vaccination);
+        success = await vaccinationProvider.addVaccination(vaccination);
       }
 
-      // Call the onSaved callback to trigger parent rebuild
-      if (widget.onSaved != null) {
-        widget.onSaved!();
-      }
+      if (success) {
+        // Call the onSaved callback to trigger parent rebuild
+        if (widget.onSaved != null) {
+          widget.onSaved!();
+        }
 
-      if (mounted) {
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        // Show error message to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                vaccinationProvider.error ?? 'Failed to save vaccination',
+                style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

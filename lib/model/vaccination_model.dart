@@ -1,47 +1,71 @@
 class Vaccination {
-  final String id;
+  final String? id; // Optional - provided by database for existing records
   final String name;
   final DateTime doseDate;
   final DateTime? nextDoseDate;
   final String location;
   final String notes;
-  final DateTime createdAt;
 
-  Vaccination({
-    required this.id,
+  // Backend field name constants
+  static const String _fieldId = 'id';
+  static const String _fieldName = 'name';
+  static const String _fieldDoseDate = 'doseDate';
+  static const String _fieldNextDoseDate = 'nextDoseDate';
+  static const String _fieldLocation = 'location';
+  static const String _fieldNotes = 'notes';
+
+  const Vaccination({
+    this.id, // Optional for new vaccinations, required for updates
     required this.name,
     required this.doseDate,
     this.nextDoseDate,
     required this.location,
     required this.notes,
-    required this.createdAt,
   });
 
-  // Convert to Map for storage
-  Map<String, dynamic> toMap() {
+  // Helper method to build common map fields
+  Map<String, dynamic> _buildBaseMap() {
     return {
-      'id': id,
-      'name': name,
-      'doseDate': doseDate.toIso8601String(),
-      'nextDoseDate': nextDoseDate?.toIso8601String(),
-      'location': location,
-      'notes': notes,
-      'createdAt': createdAt.toIso8601String(),
+      _fieldName: name,
+      _fieldDoseDate: _formatDate(doseDate),
+      _fieldNextDoseDate: nextDoseDate != null ? _formatDate(nextDoseDate!) : null,
+      _fieldLocation: location,
+      _fieldNotes: notes,
     };
   }
 
-  // Create from Map
+  // Format date to backend format (YYYY-MM-DD)
+  static String _formatDate(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+  }
+
+  // Convert to Map for storage (includes id for updates)
+  Map<String, dynamic> toMap() {
+    final map = _buildBaseMap();
+    if (id != null) {
+      map[_fieldId] = id;
+    }
+    return map;
+  }
+
+  // Convert to Map for creating new vaccination (explicitly excludes ID)
+  Map<String, dynamic> toCreateMap() => _buildBaseMap();
+
+  // Create from Map (receives id from database)
   factory Vaccination.fromMap(Map<String, dynamic> map) {
     return Vaccination(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      doseDate: DateTime.parse(map['doseDate']),
-      nextDoseDate: map['nextDoseDate'] != null
-          ? DateTime.parse(map['nextDoseDate'])
+      id: map[_fieldId]?.toString(),
+      name: (map[_fieldName] ?? '').toString(),
+      doseDate: DateTime.parse(
+        map[_fieldDoseDate] ?? DateTime.now().toIso8601String(),
+      ),
+      nextDoseDate: map[_fieldNextDoseDate] != null
+          ? DateTime.parse(map[_fieldNextDoseDate])
           : null,
-      location: map['location'] ?? '',
-      notes: map['notes'] ?? '',
-      createdAt: DateTime.parse(map['createdAt']),
+      location: (map[_fieldLocation] ?? '').toString(),
+      notes: (map[_fieldNotes] ?? '').toString(),
     );
   }
 
@@ -53,7 +77,6 @@ class Vaccination {
     DateTime? nextDoseDate,
     String? location,
     String? notes,
-    DateTime? createdAt,
   }) {
     return Vaccination(
       id: id ?? this.id,
@@ -62,7 +85,6 @@ class Vaccination {
       nextDoseDate: nextDoseDate ?? this.nextDoseDate,
       location: location ?? this.location,
       notes: notes ?? this.notes,
-      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

@@ -191,30 +191,30 @@ class MedicationDetail extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 4,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            'Notes',
-            style: Shared.fontStyle(22, FontWeight.bold, Shared.black),
-          ),
-          const SizedBox(height: 15),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Shared.lightGray2,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              medication.notes,
-              style: Shared.fontStyle(20, FontWeight.w400, Shared.gray),
+          Icon(Icons.notes, color: Shared.orange, size: 32),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notes',
+                  style: Shared.fontStyle(24, FontWeight.w600, Shared.gray),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  medication.notes,
+                  style: Shared.fontStyle(28, FontWeight.w500, Shared.black),
+                ),
+              ],
             ),
           ),
         ],

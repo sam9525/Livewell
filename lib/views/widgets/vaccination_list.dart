@@ -59,7 +59,7 @@ class _VaccinationListState extends State<VaccinationList>
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 4,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -118,7 +118,7 @@ class _VaccinationListState extends State<VaccinationList>
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         // Chatbot button
         SizedBox(
           width: double.infinity,
@@ -237,7 +237,7 @@ class _VaccinationListState extends State<VaccinationList>
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 4,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -407,11 +407,21 @@ class _VaccinationListState extends State<VaccinationList>
   }
 
   void _navigateToDetail(Vaccination vaccination) {
-    Navigator.of(context).push(
+    Navigator.of(context)
+        .push(
       MaterialPageRoute(
         builder: (context) => VaccinationDetail(vaccination: vaccination),
       ),
-    );
+    )
+        .then((_) {
+      // Refresh the list when returning from detail view
+      if (mounted) {
+        Provider.of<VaccinationProvider>(
+          context,
+          listen: false,
+        ).loadVaccinations();
+      }
+    });
   }
 
   void _navigateToChatbot() {
@@ -454,11 +464,13 @@ class _VaccinationListState extends State<VaccinationList>
           ),
           TextButton(
             onPressed: () {
-              Provider.of<VaccinationProvider>(
-                context,
-                listen: false,
-              ).deleteVaccination(vaccination.id);
-              Navigator.of(context).pop();
+              if (vaccination.id != null) {
+                Provider.of<VaccinationProvider>(
+                  context,
+                  listen: false,
+                ).deleteVaccination(vaccination.id!);
+                Navigator.of(context).pop();
+              }
             },
             child: Text(
               'Delete',

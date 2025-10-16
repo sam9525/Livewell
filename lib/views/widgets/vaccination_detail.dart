@@ -10,6 +10,11 @@ class VaccinationDetail extends StatelessWidget {
 
   const VaccinationDetail({super.key, required this.vaccination});
 
+  // Format date to display format (DD/MM/YYYY)
+  static String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,15 +122,7 @@ class VaccinationDetail extends StatelessWidget {
             // Notes Card (if available)
             if (vaccination.notes.isNotEmpty) ...[
               _buildInfoCard('Notes', vaccination.notes, Icons.notes),
-              const SizedBox(height: 15),
             ],
-
-            // Created Date Card
-            _buildInfoCard(
-              'Added On',
-              _formatDate(vaccination.createdAt),
-              Icons.add_circle_outline,
-            ),
             const SizedBox(height: 30),
 
             // Action Buttons
@@ -221,17 +218,12 @@ class VaccinationDetail extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  void _navigateToEdit(BuildContext context) {
-    Navigator.of(context).push(
+  void _navigateToEdit(BuildContext context) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => VaccinationForm(
           vaccination: vaccination,
           onSaved: () {
-            // Refresh the detail view
             Navigator.of(context).pop();
           },
         ),
@@ -261,12 +253,14 @@ class VaccinationDetail extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<VaccinationProvider>(
-                context,
-                listen: false,
-              ).deleteVaccination(vaccination.id);
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to list
+              if (vaccination.id != null) {
+                Provider.of<VaccinationProvider>(
+                  context,
+                  listen: false,
+                ).deleteVaccination(vaccination.id!);
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to list
+              }
             },
             child: Text(
               'Delete',
