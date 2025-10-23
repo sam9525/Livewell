@@ -17,6 +17,10 @@ class AppConfig {
   static const String medicationEndpoint = '/health/medications';
   static const String vaccineEndpoint = '/health/vaccinations';
 
+  // Recommendation endpoints
+  static const String suggestEndpoint = '/goals/suggested';
+  static const String recommendationEndpoint = '/goals/suggested';
+
   // Authorization Bearer Token
   static const String authorizationBearerToken =
       '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SEgV3p4LGOCSPX';
@@ -38,4 +42,8 @@ class AppConfig {
   // Get health endpoints
   static String get medicationUrl => '$apiBaseUrl$medicationEndpoint';
   static String get vaccineUrl => '$apiBaseUrl$vaccineEndpoint';
+
+  // Get recommendation endpoints
+  static String get suggestUrl => '$apiBaseUrl$suggestEndpoint';
+  static String get recommendationUrl => '$apiBaseUrl$recommendationEndpoint';
 }

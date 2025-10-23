@@ -14,11 +14,14 @@ class NotificationService {
   static const String _updateStepsChannelName = "Update Steps";
   static const String _waterIntakeChannelId = "water_intake_channel";
   static const String _waterIntakeChannelName = "Water Intake";
+  static const String _recommendationsChannelId = "recommendations_channel";
+  static const String _recommendationsChannelName = "Health Recommendations";
 
   // Notification IDs
   static const int _stepCounterNotificationId = 888;
   static const int _stepsSyncNotificationId = 999;
   static const int _waterIntakeSyncNotificationId = 1000;
+  static const int _recommendationsNotificationId = 1001;
 
   // Singleton instance
   static final NotificationService _instance = NotificationService._internal();
@@ -74,6 +77,14 @@ class NotificationService {
       showBadge: false,
     );
 
+    const recommendationsChannel = AndroidNotificationChannel(
+      _recommendationsChannelId,
+      _recommendationsChannelName,
+      description: 'AI health recommendations',
+      importance: Importance.high,
+      showBadge: true,
+    );
+
     final androidImplementation = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -82,6 +93,7 @@ class NotificationService {
     await androidImplementation?.createNotificationChannel(stepCounterChannel);
     await androidImplementation?.createNotificationChannel(updateStepsChannel);
     await androidImplementation?.createNotificationChannel(waterIntakeChannel);
+    await androidImplementation?.createNotificationChannel(recommendationsChannel);
   }
 
   // Show persistent notification for background step counting
@@ -179,6 +191,92 @@ class NotificationService {
       _waterIntakeSyncNotificationId,
       'Congratulations!',
       'You have reached your today\'s water intake goal of $waterIntake ml. Keep it up!',
+      notificationDetails,
+    );
+  }
+
+  // Show notification for new AI health recommendations
+  static Future<void> showRecommendationsNotification({
+    required int recommendedSteps,
+    required int recommendedWaterMl,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      _recommendationsChannelId,
+      _recommendationsChannelName,
+      channelDescription: 'AI health recommendations',
+      importance: Importance.high,
+      priority: Priority.high,
+      ongoing: false,
+      autoCancel: true,
+      showWhen: true,
+      silent: false,
+      enableVibration: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notificationsPlugin.show(
+      _recommendationsNotificationId,
+      'New Health Recommendations',
+      'AI suggests: $recommendedSteps steps and $recommendedWaterMl ml water daily',
+      notificationDetails,
+    );
+  }
+
+  // Show notification with custom title and message for recommendations
+  static Future<void> showCustomRecommendationNotification({
+    required String title,
+    required String message,
+    int? stepsTarget,
+    int? waterIntakeTarget,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      _recommendationsChannelId,
+      _recommendationsChannelName,
+      channelDescription: 'AI health recommendations',
+      importance: Importance.high,
+      priority: Priority.high,
+      ongoing: false,
+      autoCancel: true,
+      showWhen: true,
+      silent: false,
+      enableVibration: true,
+      styleInformation: BigTextStyleInformation(''),
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    // Build notification body
+    String body = message;
+    if (stepsTarget != null && stepsTarget > 0) {
+      body += '\n🚶 Steps: $stepsTarget';
+    }
+    if (waterIntakeTarget != null && waterIntakeTarget > 0) {
+      body += '\n💧 Water: $waterIntakeTarget ml';
+    }
+
+    await _notificationsPlugin.show(
+      _recommendationsNotificationId,
+      title,
+      body,
       notificationDetails,
     );
   }

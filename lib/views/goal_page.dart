@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/goal_widgets.dart';
+import 'widgets/recommendations_list.dart';
 
 class Goal extends StatelessWidget {
   const Goal({super.key});
@@ -11,6 +12,9 @@ class Goal extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
+            // AI Recommendations Section
+            RecommendationsList(),
+            SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,

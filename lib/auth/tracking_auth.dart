@@ -97,6 +97,7 @@ class TrackingAuth {
 
       final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
       prefs?.setInt('current_water_intake', tracking['currentWaterIntakeMl']);
+      prefs?.setInt('target_water_intake', tracking['targetWaterIntakeMl']);
       return tracking;
     } else {
       throw Exception('Failed to get tracking: ${response.statusCode}');
@@ -188,6 +189,10 @@ class TrackingAuth {
 
       if (response.statusCode == 200) {
         debugPrint('Tracking updated successfully');
+
+        final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+        prefs?.setInt('target_water_intake', targetWaterIntakeMl);
+
         return true;
       } else {
         throw Exception('Failed to update tracking: ${response.statusCode}');
