@@ -3,7 +3,6 @@ import 'package:flutter_picker_plus/flutter_picker_plus.dart';
 import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import '../../shared/goal_provider.dart';
-import 'dart:async';
 
 class NumberPicker extends StatelessWidget {
   final String title;
@@ -27,12 +26,14 @@ class NumberPicker extends StatelessWidget {
         ? _buildPicker<WaterIntakeNotifier>(
             context,
             (notifier) => notifier.selected,
+            (notifier, value) => notifier.setSelected(value),
             (notifier, value) => notifier.setWaterIntake(value),
             (selected) => selected * 50 + 500,
           )
         : _buildPicker<StepsNotifier>(
             context,
             (notifier) => notifier.selected,
+            (notifier, value) => notifier.setSelected(value),
             (notifier, value) => notifier.setSteps(value),
             (selected) => selected * 100 + 2000,
           );
@@ -41,10 +42,10 @@ class NumberPicker extends StatelessWidget {
   Widget _buildPicker<T extends ChangeNotifier>(
     BuildContext context,
     int Function(T) getSelected,
+    void Function(T, int) setIndex,
     void Function(T, int) setValue,
     int Function(int) valueTransform,
   ) {
-    Timer? debounceTimer;
     return Consumer<T>(
       builder: (context, notifier, child) {
         return Padding(
@@ -71,13 +72,40 @@ class NumberPicker extends StatelessWidget {
             selectionOverlay: const SizedBox.shrink(),
             itemExtent: 50.0,
             onSelect: (picker, index, selecteds) {
-              debounceTimer?.cancel();
-
-              // Set new timer, return the value after 1 second
-              debounceTimer = Timer(const Duration(milliseconds: 1000), () {
-                setValue(notifier, valueTransform(selecteds[index]));
-              });
+              setIndex(notifier, selecteds[0]);
             },
+            containerColor: Colors.white,
+            footer: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                ),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Shared.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 2,
+                  ),
+                  onPressed: () {
+                    setValue(notifier, valueTransform(getSelected(notifier)));
+                  },
+                  child: Text(
+                    'Confirm',
+                    style: Shared.fontStyle(24, FontWeight.bold, Colors.white),
+                  ),
+                ),
+              ),
+            ),
           ).makePicker(),
         );
       },

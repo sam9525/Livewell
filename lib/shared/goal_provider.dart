@@ -25,6 +25,10 @@ class WaterIntakeNotifier extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void setSelected(int value) {
+    _selected = value;
+  }
 }
 
 class CurrentWaterIntakeNotifier extends ChangeNotifier {
@@ -124,6 +128,10 @@ class StepsNotifier extends ChangeNotifier {
     );
 
     notifyListeners();
+  }
+
+  void setSelected(int value) {
+    _selected = value;
   }
 }
 
