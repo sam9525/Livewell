@@ -82,7 +82,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
           SnackBar(
             content: Text(
               'Goals updated successfully!',
-              style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+              style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
@@ -101,7 +101,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
         SnackBar(
           content: Text(
             'Failed to update goals. Please try again.',
-            style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+            style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
           ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
@@ -118,7 +118,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
           SnackBar(
             content: Text(
               'No recommendations available',
-              style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+              style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
             ),
             backgroundColor: Shared.orange,
             behavior: SnackBarBehavior.floating,
@@ -142,7 +142,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
         SnackBar(
           content: Text(
             'Notification sent!',
-            style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+            style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
           ),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
@@ -156,7 +156,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
         SnackBar(
           content: Text(
             'Failed to send notification',
-            style: Shared.fontStyle(16, FontWeight.w500, Colors.white),
+            style: Shared.fontStyle(24, FontWeight.w500, Colors.white),
           ),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
@@ -286,7 +286,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
           // Title
           Text(
             recommendation.title,
-            style: Shared.fontStyle(18, FontWeight.bold, Shared.black),
+            style: Shared.fontStyle(24, FontWeight.bold, Shared.black),
           ),
 
           const SizedBox(height: 10),
@@ -298,13 +298,9 @@ class _RecommendationsListState extends State<RecommendationsList> {
               Expanded(
                 child: Text(
                   recommendation.message,
-                  style: Shared.fontStyle(16, FontWeight.w500, Shared.black),
+                  style: Shared.fontStyle(20, FontWeight.w500, Shared.black),
                 ),
               ),
-              if (recommendation.isCompleted) ...[
-                const SizedBox(width: 10),
-                Icon(Icons.check_circle, color: Colors.green, size: 24),
-              ],
             ],
           ),
 
@@ -333,7 +329,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
                         Text(
                           'Daily Steps',
                           style: Shared.fontStyle(
-                            14,
+                            20,
                             FontWeight.w500,
                             Shared.gray,
                           ),
@@ -370,7 +366,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
                         Text(
                           'Water Intake',
                           style: Shared.fontStyle(
-                            14,
+                            20,
                             FontWeight.w500,
                             Shared.gray,
                           ),
@@ -420,10 +416,8 @@ class _RecommendationsListState extends State<RecommendationsList> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      recommendation.isCompleted
-                          ? Icons.check
-                          : Icons.rocket_launch,
-                      size: 20,
+                      recommendation.isCompleted ? null : Icons.rocket_launch,
+                      size: 24,
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -431,7 +425,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
                           ? 'Goals Applied ✓'
                           : 'Set Goals',
                       style: Shared.fontStyle(
-                        18,
+                        24,
                         FontWeight.bold,
                         recommendation.isCompleted ? Shared.gray : Colors.white,
                       ),
