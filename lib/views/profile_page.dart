@@ -6,6 +6,7 @@ import '../shared/shared.dart';
 import '../shared/user_provider.dart';
 import '../auth/profile_auth.dart';
 import '../shared/location_provider.dart';
+import 'frailty_survey_page.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -89,6 +90,7 @@ class _ProfileState extends State<Profile> {
                       UserProvider.userAgeRange ?? 'No age range available',
                     ),
                     buildProfileField('Postcode', locationProvider.postcode),
+                    _buildFrailtyButton(),
                   ],
                 ),
               ),
@@ -130,6 +132,74 @@ class _ProfileState extends State<Profile> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildFrailtyButton() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: Builder(
+          builder: (context) {
+            return ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FrailtySurveyPage(),
+                  ),
+                );
+              },
+              style: Shared.buttonStyle(
+                double.infinity,
+                52,
+                Shared.orange,
+                Colors.white,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Frailty Assessment',
+                    style: Shared.fontStyle(
+                      24,
+                      FontWeight.bold,
+                      Shared.bgColor,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  // Use Provider to get the frailty score (default to 1 if null)
+                  Builder(
+                    builder: (context) {
+                      final frailtyScore =
+                          Provider.of<UserProvider>(
+                            context,
+                            listen: true,
+                          ).userFrailtyScore ??
+                          1.0;
+                      String? iconPath;
+                      if (frailtyScore == 0) {
+                        iconPath = null;
+                      } else if (frailtyScore < 1.5) {
+                        iconPath = 'assets/icons/happy.svg';
+                      } else if (frailtyScore < 2.5) {
+                        iconPath = 'assets/icons/neutral.svg';
+                      } else {
+                        iconPath = 'assets/icons/sad.svg';
+                      }
+                      return iconPath != null
+                          ? SvgPicture.asset(iconPath, height: 30, width: 30)
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

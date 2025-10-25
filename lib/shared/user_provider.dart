@@ -34,6 +34,16 @@ class UserProvider extends ChangeNotifier {
   // Get user created at
   DateTime? get userCreatedAt => _user?.metadata.creationTime;
 
+  // Get user frailty score
+  double? _userFrailtyScore = 0.0;
+  double? get userFrailtyScore => _userFrailtyScore;
+
+  // Update user frailty score
+  void updateFrailtyScore(double score) {
+    _userFrailtyScore = score;
+    notifyListeners();
+  }
+
   // Store user id token
   static String? userIdToken;
 

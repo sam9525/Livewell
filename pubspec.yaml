@@ -92,6 +92,9 @@ flutter:
     - assets/icons/speaker.svg
     - assets/icons/mic.svg
     - assets/icons/health.svg
+    - assets/icons/happy.svg
+    - assets/icons/neutral.svg
+    - assets/icons/sad.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
