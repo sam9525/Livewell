@@ -165,16 +165,6 @@ class BackgroundServiceManager {
             PermissionStatus.granted;
       }
 
-      // Check pedometer permission
-      if (granted) {
-        bool pedometerGranted = await Permission.sensors.isGranted;
-        if (!pedometerGranted) {
-          pedometerGranted =
-              await Permission.sensors.request() == PermissionStatus.granted;
-        }
-        granted = granted && pedometerGranted;
-      }
-
       // Request battery optimization exemption
       if (granted) {
         try {
