@@ -244,17 +244,21 @@ class _RecommendationsListState extends State<RecommendationsList> {
 
                 // Recommendations list
                 if (!_isLoading)
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: _recommendations.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 15),
-                    itemBuilder: (context, index) {
-                      final recommendation = _recommendations[index];
-                      return _buildRecommendationCard(recommendation);
-                    },
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.5,
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: _recommendations.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 15),
+                      itemBuilder: (context, index) {
+                        final recommendation = _recommendations[index];
+                        return _buildRecommendationCard(recommendation);
+                      },
+                    ),
                   ),
 
                 const SizedBox(height: 20),
