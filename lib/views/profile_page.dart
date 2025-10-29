@@ -89,7 +89,7 @@ class _ProfileState extends State<Profile> {
                       'Age Range',
                       UserProvider.userAgeRange ?? 'No age range available',
                     ),
-                    buildProfileField('Postcode', locationProvider.postcode),
+                    buildProfileField('Suburb', locationProvider.suburbWithPostcode),
                     _buildFrailtyButton(),
                   ],
                 ),

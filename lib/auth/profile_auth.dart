@@ -51,4 +51,44 @@ class ProfileAuth {
       throw Exception("Error getting profile: $e");
     }
   }
+
+  static Future<bool> updateLocation(String suburb, String postcode) async {
+    try {
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+
+      // Authenticate if not already authenticated
+      if (!BackendAuth().isAuthenticated) {
+        final storedAuthSuccess =
+            await BackendAuth.authenticateWithStoredToken();
+        if (!storedAuthSuccess) {
+          final backendAuthResult = await BackendAuth().authenticateWithBackend(
+            UserProvider.userIdToken ?? prefs?.getString('jwt_token') ?? '',
+            AppConfig.googleAuthUrl,
+          );
+
+          if (!backendAuthResult) {
+            debugPrint("Failed to authenticate with backend");
+            return false;
+          }
+        }
+      }
+
+      // PUT request to update location data
+      final response = await http.put(
+        Uri.parse(AppConfig.profileUrl),
+        headers: BackendAuth().getAuthHeaders(),
+        body: jsonEncode({'suburb': suburb, 'postcode': postcode}),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        debugPrint('Failed to update location: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error updating location: $e');
+      return false;
+    }
+  }
 }
