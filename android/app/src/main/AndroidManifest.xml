@@ -20,9 +20,19 @@
     </queries>
 
     <queries>
-    <intent>
-        <action android:name="android.intent.action.TTS_SERVICE" />
-    </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
+    <queries>
+        <!-- Google Maps package -->
+        <package android:name="com.google.android.apps.maps" />
+        <!-- intent for geo scheme -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
     </queries>
 
     <application

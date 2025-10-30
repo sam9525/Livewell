@@ -46,7 +46,7 @@ class LocationProvider extends ChangeNotifier {
     getPostcode();
 
     // Set up timer to get location every 30 minutes
-    Timer.periodic(const Duration(seconds: 30), (timer) {
+    Timer.periodic(const Duration(minutes: 10), (timer) {
       getPostcode();
     });
   }

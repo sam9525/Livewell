@@ -21,6 +21,9 @@ class AppConfig {
   static const String suggestEndpoint = '/goals/suggested';
   static const String recommendationEndpoint = '/goals/suggested';
 
+  // Local resources endpoints
+  static const String localResourcesEndpoint = '/resources';
+
   // Authorization Bearer Token
   static const String authorizationBearerToken =
       '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SEgV3p4LGOCSPX';
@@ -46,4 +49,7 @@ class AppConfig {
   // Get recommendation endpoints
   static String get suggestUrl => '$apiBaseUrl$suggestEndpoint';
   static String get recommendationUrl => '$apiBaseUrl$recommendationEndpoint';
+
+  // Get local resources endpoints
+  static String get localResourcesUrl => '$apiBaseUrl$localResourcesEndpoint';
 }

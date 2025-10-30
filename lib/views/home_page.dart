@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import 'widgets/home_widgets.dart';
+import 'widgets/local_resources_widget.dart';
 import '../shared/date_provider.dart';
 
 class Home extends StatefulWidget {
@@ -31,6 +32,7 @@ class _HomeState extends State<Home> {
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
               children: [
+                const LocalResourcesWidget(),
                 StepsWidget(),
                 Calander(),
                 WeeklyName(
