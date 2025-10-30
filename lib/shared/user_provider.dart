@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProvider extends ChangeNotifier {
+  // Singleton-like reference to the active provider instance in the widget tree
+  static UserProvider? instance;
+
   User? _user;
   User? get user => _user;
 
   UserProvider() {
+    // Capture current instance for access outside widget context (e.g., services)
+    instance = this;
     // Initialize the user provider
     _user = FirebaseAuth.instance.currentUser;
 
@@ -35,12 +40,11 @@ class UserProvider extends ChangeNotifier {
   DateTime? get userCreatedAt => _user?.metadata.creationTime;
 
   // Get user frailty score
-  double? _userFrailtyScore = 0.0;
-  double? get userFrailtyScore => _userFrailtyScore;
+  static double? userFrailtyScore;
 
   // Update user frailty score
   void updateFrailtyScore(double score) {
-    _userFrailtyScore = score;
+    userFrailtyScore = score;
     notifyListeners();
   }
 

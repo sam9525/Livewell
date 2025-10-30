@@ -1,4 +1,4 @@
-enum SurveyInputType { numericInput }
+enum SurveyInputType { selection, numericInput }
 
 class FrailtySurveyModel {
   final String question;
@@ -14,7 +14,7 @@ class FrailtySurveyModel {
     this.options = const [],
     this.isRequired = true,
     this.isMultiple = false,
-    this.inputType = SurveyInputType.numericInput,
+    this.inputType = SurveyInputType.selection,
     this.unit,
     this.userAnswer = "",
   });

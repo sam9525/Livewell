@@ -41,8 +41,10 @@ class ProfileAuth {
         final profile = jsonDecode(response.body);
         UserProvider.userGender = profile['gender'];
         UserProvider.userAgeRange = profile['ageRange'];
+        UserProvider.userFrailtyScore = profile['frailtyScore'];
 
         debugPrint('Profile get successfully');
+        return profile;
       } else {
         debugPrint('Failed to get profile: ${response.statusCode}');
         throw Exception("Failed to get profile: ${response.statusCode}");
@@ -88,6 +90,47 @@ class ProfileAuth {
       }
     } catch (e) {
       debugPrint('Error updating location: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> updateFrailtyScore(double score) async {
+    try {
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+
+      // Authenticate if not already authenticated
+      if (!BackendAuth().isAuthenticated) {
+        final storedAuthSuccess =
+            await BackendAuth.authenticateWithStoredToken();
+        if (!storedAuthSuccess) {
+          final backendAuthResult = await BackendAuth().authenticateWithBackend(
+            UserProvider.userIdToken ?? prefs?.getString('jwt_token') ?? '',
+            AppConfig.googleAuthUrl,
+          );
+
+          if (!backendAuthResult) {
+            debugPrint("Failed to authenticate with backend");
+            return false;
+          }
+        }
+      }
+
+      // PUT request to update frailty score
+      final response = await http.put(
+        Uri.parse(AppConfig.profileUrl),
+        headers: BackendAuth().getAuthHeaders(),
+        body: jsonEncode({'frailtyScore': score}),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Frailty score updated successfully: $score');
+        return true;
+      } else {
+        debugPrint('Failed to update frailty score: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error updating frailty score: $e');
       return false;
     }
   }

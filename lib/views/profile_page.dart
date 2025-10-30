@@ -89,7 +89,10 @@ class _ProfileState extends State<Profile> {
                       'Age Range',
                       UserProvider.userAgeRange ?? 'No age range available',
                     ),
-                    buildProfileField('Suburb', locationProvider.suburbWithPostcode),
+                    buildProfileField(
+                      'Suburb',
+                      locationProvider.suburbWithPostcode,
+                    ),
                     _buildFrailtyButton(),
                   ],
                 ),
@@ -175,12 +178,7 @@ class _ProfileState extends State<Profile> {
                   // Use Provider to get the frailty score (default to 1 if null)
                   Builder(
                     builder: (context) {
-                      final frailtyScore =
-                          Provider.of<UserProvider>(
-                            context,
-                            listen: true,
-                          ).userFrailtyScore ??
-                          1.0;
+                      final frailtyScore = UserProvider.userFrailtyScore ?? 0.0;
                       String? iconPath;
                       if (frailtyScore == 0) {
                         iconPath = null;

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
 import '../../model/frailty_survey_model.dart';
 import '../../shared/user_provider.dart';
+import '../../auth/profile_auth.dart';
 
 class FrailtyNumericInputCard extends StatefulWidget {
   final FrailtySurveyModel question;
@@ -351,18 +352,52 @@ class FrailtyNavigationButtons extends StatelessWidget {
     return MediaQuery.of(context).size.width * 0.42;
   }
 
-  void _finishSurvey(BuildContext context) {
+  void _finishSurvey(BuildContext context) async {
     // Calculate frailty score
     final score = _calculateFrailtyScore();
 
     // Update the user provider with the new frailty score
     Provider.of<UserProvider>(context, listen: false).updateFrailtyScore(score);
 
-    // Show completion dialog
+    // Show loading indicator while updating API
     showDialog(
       context: context,
-      builder: (context) => _buildCompletionDialog(context, score),
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: Shared.orange),
+                const SizedBox(height: 16),
+                Text(
+                  'Saving your results...',
+                  style: Shared.fontStyle(18, FontWeight.normal, Shared.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+
+    // Update frailty score via API
+    final updateSuccess = await ProfileAuth.updateFrailtyScore(score);
+
+    // Close loading dialog
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    // Show completion dialog with API update status
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => _buildCompletionDialog(context, score, updateSuccess),
+      );
+    }
   }
 
   // Helper functions for BMI calculation
@@ -484,7 +519,11 @@ class FrailtyNavigationButtons extends StatelessWidget {
     return score;
   }
 
-  Widget _buildCompletionDialog(BuildContext context, double score) {
+  Widget _buildCompletionDialog(
+    BuildContext context,
+    double score,
+    bool apiUpdateSuccess,
+  ) {
     String status;
     String message;
 
@@ -529,6 +568,30 @@ class FrailtyNavigationButtons extends StatelessWidget {
             style: Shared.fontStyle(18, FontWeight.normal, Shared.black),
             textAlign: TextAlign.center,
           ),
+          if (!apiUpdateSuccess) ...[
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Your score was saved locally but could not be synced to the server.',
+                      style: Shared.fontStyle(14, FontWeight.normal, Shared.black),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
       actions: [
