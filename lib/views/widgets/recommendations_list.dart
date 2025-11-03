@@ -5,6 +5,7 @@ import '../../model/recommendation_model.dart';
 import '../../services/recommendation_service.dart';
 import '../../services/notifications_service.dart';
 import '../../auth/tracking_auth.dart';
+import '../interactive_onboarding.dart';
 
 class RecommendationsList extends StatefulWidget {
   const RecommendationsList({super.key});
@@ -416,25 +417,30 @@ class _RecommendationsListState extends State<RecommendationsList> {
                   ),
                   elevation: recommendation.isCompleted ? 0 : 2,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      recommendation.isCompleted ? null : Icons.rocket_launch,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      recommendation.isCompleted
-                          ? 'Goals Applied ✓'
-                          : 'Set Goals',
-                      style: Shared.fontStyle(
-                        24,
-                        FontWeight.bold,
-                        recommendation.isCompleted ? Shared.gray : Colors.white,
+                child: OnboardingTarget(
+                  targetKey: 'set_goals_button_by_recommendation',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        recommendation.isCompleted ? null : Icons.rocket_launch,
+                        size: 24,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 10),
+                      Text(
+                        recommendation.isCompleted
+                            ? 'Goals Applied ✓'
+                            : 'Set Goals',
+                        style: Shared.fontStyle(
+                          24,
+                          FontWeight.bold,
+                          recommendation.isCompleted
+                              ? Shared.gray
+                              : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -24,7 +24,6 @@ class RecommendationService {
 
       if (response.statusCode == 200) {
         final List<dynamic> recommendationsJson = json.decode(response.body);
-        debugPrint('Recommendations JSON: $recommendationsJson');
         final recommendations = recommendationsJson
             .map((data) => Recommendation.fromMap(data))
             .toList();

@@ -8,6 +8,7 @@ import '../shared/user_provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'interactive_onboarding.dart';
 
 class ChatMessage {
   final String text;
@@ -264,80 +265,83 @@ class _ChatbotState extends State<Chatbot> {
 
     return Container(
       color: Shared.bgColor,
-      child: Column(
-        children: [
-          // Header
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              height: 60,
-              width: double.maxFinite,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
+      child: OnboardingTarget(
+        targetKey: 'chatbot',
+        child: Column(
+          children: [
+            // Header
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                height: 60,
+                width: double.maxFinite,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Chatbot',
+                    style: Shared.fontStyle(32, FontWeight.w500, Shared.orange),
+                  ),
+                ),
+              ),
+            ),
+
+            // Chat messages area
+            Expanded(child: _buildChatMessages(context, scrollController)),
+
+            // Input area
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Shared.inputContainer(
+                          double.infinity,
+                          'Ask me anything',
+                          inputController,
+                          onSubmitted: (value) async {
+                            await sendMessage(value);
+                          },
+                        ),
+                      ),
+                      _buildMicButton(),
+                    ],
+                  ),
+                  // Speech listening indicator
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _isListeningNotifier,
+                    builder: (context, isListening, child) {
+                      if (isListening) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            'Listening...',
+                            style: Shared.fontStyle(
+                              16,
+                              FontWeight.w400,
+                              Colors.red,
+                            ),
+                          ),
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
                   ),
                 ],
               ),
-              child: Center(
-                child: Text(
-                  'Chatbot',
-                  style: Shared.fontStyle(32, FontWeight.w500, Shared.orange),
-                ),
-              ),
             ),
-          ),
-
-          // Chat messages area
-          Expanded(child: _buildChatMessages(context, scrollController)),
-
-          // Input area
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Shared.inputContainer(
-                        double.infinity,
-                        'Ask me anything',
-                        inputController,
-                        onSubmitted: (value) async {
-                          await sendMessage(value);
-                        },
-                      ),
-                    ),
-                    _buildMicButton(),
-                  ],
-                ),
-                // Speech listening indicator
-                ValueListenableBuilder<bool>(
-                  valueListenable: _isListeningNotifier,
-                  builder: (context, isListening, child) {
-                    if (isListening) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          'Listening...',
-                          style: Shared.fontStyle(
-                            16,
-                            FontWeight.w400,
-                            Colors.red,
-                          ),
-                        ),
-                      );
-                    }
-                    return SizedBox.shrink();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

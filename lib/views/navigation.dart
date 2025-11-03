@@ -11,6 +11,8 @@ import '../shared/location_provider.dart';
 import '../auth/tracking_auth.dart';
 import '../shared/goal_provider.dart';
 import '../auth/profile_auth.dart';
+import '../services/onboarding_service.dart';
+import 'interactive_onboarding.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,6 +41,8 @@ class _RouteData {
 class _HomePageState extends State<HomePage> {
   String currentRoute = '/home';
   List<String> navigationHistory = ['/home'];
+  bool _showOnboarding = false;
+  bool _isCheckingOnboarding = true;
 
   static final Map<String, _RouteData> routes = {
     '/home': _RouteData('Home', 'home', (context) => const Home()),
@@ -124,6 +128,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkOnboarding();
+
     // Get the Postcode
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<LocationProvider>(
@@ -136,40 +142,74 @@ class _HomePageState extends State<HomePage> {
     _loadTrackingData();
   }
 
+  Future<void> _checkOnboarding() async {
+    final hasCompleted = await OnboardingService.hasCompletedOnboarding();
+    setState(() {
+      _showOnboarding = !hasCompleted;
+      _isCheckingOnboarding = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
-        final bool shouldPop = await _shouldPop() ?? false;
-        if (context.mounted && shouldPop) {
-          Navigator.pop(context);
-        }
-      },
-      child: Scaffold(
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 10,
-                offset: Offset(0, -2),
+    // Show loading indicator while checking onboarding status
+    if (_isCheckingOnboarding) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Shared.orange),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) {
+              return;
+            }
+            final bool shouldPop = await _shouldPop() ?? false;
+            if (context.mounted && shouldPop) {
+              Navigator.pop(context);
+            }
+          },
+          child: Scaffold(
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: Offset(0, -2),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: NavigationBarTheme(
-            data: _buildNavigationBarTheme(),
-            child: _buildNavigationBar(),
+              child: NavigationBarTheme(
+                data: _buildNavigationBarTheme(),
+                child: _buildNavigationBar(),
+              ),
+            ),
+            body:
+                routes[currentRoute]?.builder(context) ??
+                routes['/home']!.builder(context),
           ),
         ),
-        body:
-            routes[currentRoute]?.builder(context) ??
-            routes['/home']!.builder(context),
-      ),
+
+        // Show interactive onboarding if needed
+        if (_showOnboarding)
+          InteractiveOnboarding(
+            onComplete: () {
+              setState(() {
+                _showOnboarding = false;
+              });
+            },
+            onNavigate: (route) {
+              navigateToRoute(route);
+            },
+          ),
+      ],
     );
   }
 

@@ -4,6 +4,7 @@ import '../shared/shared.dart';
 import 'widgets/home_widgets.dart';
 import 'widgets/local_resources_widget.dart';
 import '../shared/date_provider.dart';
+import 'interactive_onboarding.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -32,8 +33,14 @@ class _HomeState extends State<Home> {
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
               children: [
-                const LocalResourcesWidget(),
-                StepsWidget(),
+                OnboardingTarget(
+                  targetKey: 'local_resources',
+                  child: const LocalResourcesWidget(),
+                ),
+                OnboardingTarget(
+                  targetKey: 'steps_widget',
+                  child: StepsWidget(),
+                ),
                 Calander(),
                 WeeklyName(
                   weeklyNames: dateProvider.weeklyNames,
@@ -54,7 +61,10 @@ class _HomeState extends State<Home> {
                         weekDays: AppConstants.weekDays,
                       )
                     : Center(child: Text("No data available")),
-                WaterIntakeSliders(),
+                OnboardingTarget(
+                  targetKey: 'water_intake',
+                  child: WaterIntakeSliders(),
+                ),
               ],
             ),
           );

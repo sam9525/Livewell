@@ -7,6 +7,7 @@ import '../shared/user_provider.dart';
 import '../auth/profile_auth.dart';
 import '../shared/location_provider.dart';
 import 'frailty_survey_page.dart';
+import 'interactive_onboarding.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -93,7 +94,10 @@ class _ProfileState extends State<Profile> {
                       'Suburb',
                       locationProvider.suburbWithPostcode,
                     ),
-                    _buildFrailtyButton(),
+                    OnboardingTarget(
+                      targetKey: 'frailty_button',
+                      child: _buildFrailtyButton(),
+                    ),
                   ],
                 ),
               ),

@@ -203,11 +203,6 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
           );
         }
 
-        // Don't show widget if no resources
-        if (_resources.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
         return Column(
           children: [
             Container(
@@ -281,23 +276,61 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
                       ),
                     ),
 
-                    // Resources list
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.4,
-                      ),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: _resources.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 15),
-                        itemBuilder: (context, index) {
-                          final resource = _resources[index];
-                          return _buildResourceCard(resource);
-                        },
-                      ),
-                    ),
+                    // Resources list or empty state
+                    _resources.isEmpty
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 40,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search_off,
+                                  size: 48,
+                                  color: Shared.gray.withValues(alpha: 0.5),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No local resources found',
+                                  style: Shared.fontStyle(
+                                    20,
+                                    FontWeight.w600,
+                                    Shared.gray,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Try refreshing or check back later',
+                                  style: Shared.fontStyle(
+                                    16,
+                                    FontWeight.w400,
+                                    Shared.gray.withValues(alpha: 0.7),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        : ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.4,
+                            ),
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              itemCount: _resources.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 15),
+                              itemBuilder: (context, index) {
+                                final resource = _resources[index];
+                                return _buildResourceCard(resource);
+                              },
+                            ),
+                          ),
 
                     const SizedBox(height: 20),
                   ],
