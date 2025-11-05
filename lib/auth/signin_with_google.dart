@@ -47,8 +47,16 @@ class GoogleAuthService {
       // Sign in to Firebase with the Google credential
       final userCredential = await _auth.signInWithCredential(credential);
 
-      // Return the if the user is new or not
-      bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+      // Return the result if the user is new or not
+      final user = userCredential.user;
+
+      bool isNewUser = false;
+      final createAt = user!.metadata.creationTime;
+      final lastSignInAt = user.metadata.lastSignInTime;
+
+      if (createAt != null && lastSignInAt != null) {
+        isNewUser = createAt.isAtSameMomentAs(lastSignInAt);
+      }
 
       // Authenticate with your backend server
       final backendAuthResult = await BackendAuth().authenticateWithBackend(

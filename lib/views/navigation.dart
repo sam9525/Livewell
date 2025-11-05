@@ -155,9 +155,7 @@ class _HomePageState extends State<HomePage> {
     // Show loading indicator while checking onboarding status
     if (_isCheckingOnboarding) {
       return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(color: Shared.orange),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Shared.orange)),
       );
     }
 

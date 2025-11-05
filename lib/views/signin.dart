@@ -5,6 +5,7 @@ import '../shared/shared.dart';
 import '../auth/signin_with_google.dart';
 import '../auth/signin_with_facebook.dart';
 import '../shared/sign_in_out_shared.dart';
+import 'survey.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -99,9 +100,14 @@ class _SignInPageState extends State<SignInPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
-                  final user = await _authService.signInWithGoogle();
-                  if (context.mounted && user != null) {
-                    SignInOutShared.changePage(context, const HomePage());
+                  final result = await _authService.signInWithGoogle();
+                  if (context.mounted && result?['user'] != null) {
+                    SignInOutShared.changePage(
+                      context,
+                      result?['isNewUser']
+                          ? const SurveyPage()
+                          : const HomePage(),
+                    );
                   }
                 }),
                 SizedBox(width: 16),
@@ -109,10 +115,15 @@ class _SignInPageState extends State<SignInPage> {
                   'facebook',
                   'Facebook',
                   () async {
-                    final user = await _facebookAuthService
+                    final result = await _facebookAuthService
                         .signInWithFacebook();
-                    if (context.mounted && user != null) {
-                      SignInOutShared.changePage(context, const HomePage());
+                    if (context.mounted && result?['user'] != null) {
+                      SignInOutShared.changePage(
+                        context,
+                        result?['isNewUser']
+                            ? const SurveyPage()
+                            : const HomePage(),
+                      );
                     }
                   },
                 ),
