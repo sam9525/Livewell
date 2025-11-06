@@ -55,7 +55,7 @@ class GoogleAuthService {
       final lastSignInAt = user.metadata.lastSignInTime;
 
       if (createAt != null && lastSignInAt != null) {
-        isNewUser = createAt.isAtSameMomentAs(lastSignInAt);
+        isNewUser = createAt.difference(lastSignInAt).abs().inMinutes < 5;
       }
 
       // Authenticate with your backend server
