@@ -5,6 +5,7 @@ class Recommendation {
   final int stepsTarget;
   final int waterIntakeTarget;
   final bool isCompleted;
+  final DateTime? createdAt;
 
   // Backend field name constants
   static const String _fieldId = 'id';
@@ -13,6 +14,7 @@ class Recommendation {
   static const String _fieldStepsTarget = 'stepsTarget';
   static const String _fieldWaterIntakeTarget = 'waterIntakeTarget';
   static const String _fieldIsCompleted = 'isCompleted';
+  static const String _fieldCreatedAt = 'createdAt';
 
   const Recommendation({
     required this.id,
@@ -21,6 +23,7 @@ class Recommendation {
     required this.stepsTarget,
     required this.waterIntakeTarget,
     required this.isCompleted,
+    this.createdAt,
   });
 
   // Convert to Map for storage
@@ -32,6 +35,7 @@ class Recommendation {
       _fieldStepsTarget: stepsTarget,
       _fieldWaterIntakeTarget: waterIntakeTarget,
       _fieldIsCompleted: isCompleted.toString(),
+      _fieldCreatedAt: createdAt?.toIso8601String(),
     };
   }
 
@@ -44,6 +48,7 @@ class Recommendation {
       stepsTarget: (map[_fieldStepsTarget] ?? 0).toInt(),
       waterIntakeTarget: (map[_fieldWaterIntakeTarget] ?? 0).toInt(),
       isCompleted: _parseBool(map[_fieldIsCompleted]),
+      createdAt: _parseDateTime(map[_fieldCreatedAt]),
     );
   }
 
@@ -57,6 +62,20 @@ class Recommendation {
     return false;
   }
 
+  // Helper method to parse DateTime from various types
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   // Copy with method for updates
   Recommendation copyWith({
     String? id,
@@ -65,6 +84,7 @@ class Recommendation {
     int? stepsTarget,
     int? waterIntakeTarget,
     bool? isCompleted,
+    DateTime? createdAt,
   }) {
     return Recommendation(
       id: id ?? this.id,
@@ -73,6 +93,18 @@ class Recommendation {
       stepsTarget: stepsTarget ?? this.stepsTarget,
       waterIntakeTarget: waterIntakeTarget ?? this.waterIntakeTarget,
       isCompleted: isCompleted ?? this.isCompleted,
+      createdAt: createdAt ?? this.createdAt,
     );
+  }
+
+  // Check if recommendation is for today
+  bool isForToday() {
+    if (createdAt == null) {
+      return true; // Show if no date (backward compatibility)
+    }
+    final now = DateTime.now();
+    return createdAt!.year == now.year &&
+        createdAt!.month == now.month &&
+        createdAt!.day == now.day;
   }
 }

@@ -28,8 +28,9 @@ class _RecommendationsListState extends State<RecommendationsList> {
   Future<void> _loadRecommendations() async {
     setState(() => _isLoading = true);
     try {
+      // Fetch only today's recommendations
       final recommendations = await _recommendationService
-          .getAllRecommendations();
+          .getTodayRecommendations();
       setState(() {
         _recommendations = recommendations;
         _isLoading = false;
@@ -257,7 +258,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
                           const SizedBox(height: 15),
                       itemBuilder: (context, index) {
                         final recommendation = _recommendations[index];
-                        return _buildRecommendationCard(recommendation);
+                        return _buildRecommendationCard(recommendation, index);
                       },
                     ),
                   ),
@@ -272,7 +273,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
     );
   }
 
-  Widget _buildRecommendationCard(Recommendation recommendation) {
+  Widget _buildRecommendationCard(Recommendation recommendation, int index) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -417,31 +418,58 @@ class _RecommendationsListState extends State<RecommendationsList> {
                   ),
                   elevation: recommendation.isCompleted ? 0 : 2,
                 ),
-                child: OnboardingTarget(
-                  targetKey: 'set_goals_button_by_recommendation',
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        recommendation.isCompleted ? null : Icons.rocket_launch,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        recommendation.isCompleted
-                            ? 'Goals Applied ✓'
-                            : 'Set Goals',
-                        style: Shared.fontStyle(
-                          24,
-                          FontWeight.bold,
-                          recommendation.isCompleted
-                              ? Shared.gray
-                              : Colors.white,
+                child: index == 0
+                    ? OnboardingTarget(
+                        targetKey: 'set_goals_button_by_recommendation',
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              recommendation.isCompleted
+                                  ? null
+                                  : Icons.rocket_launch,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              recommendation.isCompleted
+                                  ? 'Goals Applied ✓'
+                                  : 'Set Goals',
+                              style: Shared.fontStyle(
+                                24,
+                                FontWeight.bold,
+                                recommendation.isCompleted
+                                    ? Shared.gray
+                                    : Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            recommendation.isCompleted
+                                ? null
+                                : Icons.rocket_launch,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            recommendation.isCompleted
+                                ? 'Goals Applied ✓'
+                                : 'Set Goals',
+                            style: Shared.fontStyle(
+                              24,
+                              FontWeight.bold,
+                              recommendation.isCompleted
+                                  ? Shared.gray
+                                  : Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ],

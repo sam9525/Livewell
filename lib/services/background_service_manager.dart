@@ -364,7 +364,7 @@ Future<void> _startStepCountingInService(ServiceInstance service) async {
 
     // Set up periodic updates to get fresh step count
     BackgroundServiceManager._stepIncrementTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 30),
       (timer) async {
         try {
           final currentSteps = await _getTodayStepsInBackground();

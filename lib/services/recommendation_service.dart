@@ -39,6 +39,23 @@ class RecommendationService {
     }
   }
 
+  // Fetch recommendations for today only
+  Future<List<Recommendation>> getTodayRecommendations() async {
+    try {
+      final allRecommendations = await getAllRecommendations();
+
+      // Filter recommendations to only show today's
+      final todayRecommendations = allRecommendations
+          .where((rec) => rec.isForToday())
+          .toList();
+
+      return todayRecommendations;
+    } catch (e) {
+      debugPrint('Error fetching today\'s recommendations: $e');
+      return [];
+    }
+  }
+
   // Fetch single recommendation
   Future<Recommendation?> getRecommendation(String id) async {
     try {
