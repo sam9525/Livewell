@@ -24,6 +24,11 @@ class AppConfig {
   // Local resources endpoints
   static const String localResourcesEndpoint = '/resources';
 
+  // Notification endpoints
+  static const String registerDeviceEndpoint = '/notifications/register-device';
+  static const String unregisterDeviceEndpoint =
+      '/notifications/unregister-device';
+
   // Authorization Bearer Token
   static const String authorizationBearerToken =
       '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SEgV3p4LGOCSPX';
@@ -52,4 +57,9 @@ class AppConfig {
 
   // Get local resources endpoints
   static String get localResourcesUrl => '$apiBaseUrl$localResourcesEndpoint';
+
+  // Get notification endpoints
+  static String get registerDeviceUrl => '$apiBaseUrl$registerDeviceEndpoint';
+  static String get unregisterDeviceUrl =>
+      '$apiBaseUrl$unregisterDeviceEndpoint';
 }

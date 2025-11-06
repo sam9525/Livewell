@@ -8,6 +8,7 @@ import 'package:livewell_app/shared/user_provider.dart';
 import '../views/signin.dart';
 import 'backend_auth.dart';
 import 'package:livewell_app/services/notifications_service.dart';
+import 'package:livewell_app/services/fcm_service.dart';
 
 class SignOut {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -24,6 +25,12 @@ class SignOut {
 
       // Sign out from Firebase
       await _auth.signOut();
+
+      // Unregister FCM token
+      String? fcmToken = await FCMService.getToken();
+      if (fcmToken != null) {
+        await FCMService.deleteToken(fcmToken);
+      }
 
       // Backend signout
       await BackendAuth.signOut();

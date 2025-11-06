@@ -14,16 +14,27 @@ import 'shared/location_provider.dart';
 import 'shared/medication_provider.dart';
 import 'shared/vaccination_provider.dart';
 import 'auth/backend_auth.dart';
+import 'services/fcm_service.dart';
+import 'services/notifications_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Initialize Supabase
   await Supabase.initialize(
     url: 'https://eiedyvkypizrdsrqtggc.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZWR5dmt5cGl6cmRzcnF0Z2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDAzMjQsImV4cCI6MjA3MTAxNjMyNH0.AHMZLkd98iSQ2EeIfERgA6Us-VsE9QtsLAaa9gHtK1w',
   );
+
+  // Initialize local notifications
+  await NotificationService.initialize();
+
+  // Initialize Firebase Cloud Messaging and register device token
+  await FCMService.initialize();
 
   runApp(const MyApp());
 }
