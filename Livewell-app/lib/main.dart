@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livewell_app/views/navigation.dart';
 import 'package:provider/provider.dart';
 import 'shared/shared.dart';
@@ -16,6 +17,7 @@ import 'shared/vaccination_provider.dart';
 import 'auth/backend_auth.dart';
 import 'services/fcm_service.dart';
 import 'services/notifications_service.dart';
+import 'config/env_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +25,13 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
   // Initialize Supabase
   await Supabase.initialize(
-    url: 'https://eiedyvkypizrdsrqtggc.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZWR5dmt5cGl6cmRzcnF0Z2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NDAzMjQsImV4cCI6MjA3MTAxNjMyNH0.AHMZLkd98iSQ2EeIfERgA6Us-VsE9QtsLAaa9gHtK1w',
+    url: EnvConfig.supabaseApiUrl,
+    anonKey: EnvConfig.supabasePublishableKey,
   );
 
   // Initialize local notifications
