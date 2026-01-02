@@ -1,1 +1,6 @@
 fastapi
+google-auth
+requests
+pyjwt
+uvicorn
+supabase

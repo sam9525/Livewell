@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from routers import google_auth
+
 app = FastAPI()
 
 # CORS
@@ -21,3 +23,7 @@ def read_root():
 @app.get("/health")
 def read_health():
     return {"statusCode": 200, "message": "Backend is running"}
+
+
+# Routers
+app.include_router(google_auth.router)
