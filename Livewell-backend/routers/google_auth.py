@@ -46,6 +46,7 @@ async def google_auth(token: str = Body(..., embed=True)):
             firebase_user = auth.get_user_by_email(email)
             firebase_uid = firebase_user.uid
         except Exception as e:
+            # Expected error will never happen
             print(f"Error fetching Firebase user: {e}")
 
             raise HTTPException(
@@ -68,11 +69,10 @@ async def google_auth(token: str = Body(..., embed=True)):
 
         user_id = None
 
-        # User exists - return existing user id
+        # User exists, get user id for jwt
         if result.data:
             user = result.data[0]
             user_id = user["id"]
-            print("User exist")
 
         # User doesn't exist - create new user
         else:
