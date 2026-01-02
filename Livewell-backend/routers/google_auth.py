@@ -116,7 +116,7 @@ async def google_auth(token: str = Body(..., embed=True)):
 
         jwt_response = create_jwt(user_id, email)
 
-        return {"token": jwt_response}
+        return {"statusCode": 200, "token": jwt_response}
 
     except ValueError as e:
         # Invalid token
