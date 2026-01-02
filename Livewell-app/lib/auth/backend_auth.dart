@@ -164,10 +164,7 @@ class BackendAuth {
     try {
       final response = await http.post(
         Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${AppConfig.authorizationBearerToken}',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'token': idToken}),
       );
 

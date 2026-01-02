@@ -12,4 +12,10 @@ class EnvConfig {
     if (defineValue.isNotEmpty) return defineValue;
     return dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ?? '';
   }
+
+  static String get backendUrl {
+    const defineValue = String.fromEnvironment('BACKEND_URL');
+    if (defineValue.isNotEmpty) return defineValue;
+    return dotenv.env['BACKEND_URL'] ?? '';
+  }
 }
