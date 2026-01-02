@@ -26,7 +26,10 @@ class UserProvider extends ChangeNotifier {
     // Initialize Supabase user
     _isEmailSignedIn =
         supabase.Supabase.instance.client.auth.currentUser != null;
-    if (_isEmailSignedIn) _updateCreatedAt();
+    if (_isEmailSignedIn) {
+      _updateCreatedAt();
+      _updateuserJwtToken();
+    }
 
     // Listen to Supabase auth state changes
     supabase.Supabase.instance.client.auth.onAuthStateChange.listen((data) {
@@ -34,6 +37,7 @@ class UserProvider extends ChangeNotifier {
       if (_isEmailSignedIn != isSignedIn) {
         _isEmailSignedIn = isSignedIn;
         _updateCreatedAt();
+        _updateuserJwtToken();
         notifyListeners();
       }
     });
@@ -90,8 +94,23 @@ class UserProvider extends ChangeNotifier {
   // Store user id token
   static String? userIdToken;
 
-  // Store user jwt token
-  static String? userJwtToken;
+  String? _jwtToken;
+  String? get jwtToken => _jwtToken;
+
+  // Static proxy for backward compatibility and external access
+  static String? get userJwtToken => instance?._jwtToken;
+  static set userJwtToken(String? value) {
+    if (instance != null) {
+      instance!._jwtToken = value;
+      instance!.notifyListeners();
+    }
+  }
+
+  void _updateuserJwtToken() async {
+    _jwtToken =
+        supabase.Supabase.instance.client.auth.currentSession?.accessToken;
+    notifyListeners();
+  }
 
   // Store user gender
   static String? userGender;
