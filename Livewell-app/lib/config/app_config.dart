@@ -1,7 +1,19 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'env_config.dart';
+
+void loadEnvironmentVariables() async {
+  await dotenv.load(fileName: ".env");
+}
+
 class AppConfig {
+  // Load environment variables
+  loadEnvironmentVariables() {
+    loadEnvironmentVariables();
+  }
+
   // Backend server configuration
-  static const String backendUrl = 'https://livewell-backend.onrender.com';
-  static const String healthUrl = '$backendUrl/health';
+  static String backendUrl = EnvConfig.backendUrl;
+  static String healthUrl = '$backendUrl/health';
 
   // Authentication endpoints
   static const String googleAuthEndpoint = '/auth/google';
@@ -28,10 +40,6 @@ class AppConfig {
   static const String registerDeviceEndpoint = '/notifications/register-device';
   static const String unregisterDeviceEndpoint =
       '/notifications/unregister-device';
-
-  // Authorization Bearer Token
-  static const String authorizationBearerToken =
-      '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SEgV3p4LGOCSPX';
 
   // Get the full API URL
   static String get apiBaseUrl => '$backendUrl/api';

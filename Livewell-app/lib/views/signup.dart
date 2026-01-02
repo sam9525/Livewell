@@ -36,6 +36,13 @@ class _SignUpPageState extends State<SignUpPage> {
   // Sign up user
   Future<void> signUp() async {
     try {
+      // Check if the user name is missing
+      if (usernameController.text.trim().isEmpty) {
+        Shared.showCredentialsDialog(context, "User name is missing", mounted);
+        return;
+      }
+
+      // Check if the password match
       if (passwordController.text.trim() !=
           confirmPasswordController.text.trim()) {
         Shared.showCredentialsDialog(
@@ -46,7 +53,8 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      await supabase.Supabase.instance.client.auth.signUp(
+      // Sign up in supabase
+      final authResponse = await supabase.Supabase.instance.client.auth.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -55,10 +63,17 @@ class _SignUpPageState extends State<SignUpPage> {
       if (!mounted) return;
 
       // Create a new user profile in the database
-      await supabase.Supabase.instance.client.from('profile').insert({
-        'uuid': supabase.Supabase.instance.client.auth.currentUser?.id,
-        'username': usernameController.text.trim(),
-      });
+      try {
+        await supabase.Supabase.instance.client.from('profiles').insert({
+          'id': authResponse.user!.id,
+          'user_name': usernameController.text.trim(),
+          'email': emailController.text.trim(),
+        });
+      } catch (e) {
+        debugPrint("Create user on supabase failed!");
+        debugPrint('$e');
+        return;
+      }
 
       if (!mounted) return;
       // Navigate to the survey page
