@@ -101,7 +101,8 @@ class _ProfileState extends State<Profile> {
                   ],
                 ),
               ),
-              if (userProvider.isSignedIn) _buildSignOutButton(context),
+              if (userProvider.isSignedIn || userProvider.isEmailSignedIn)
+                _buildSignOutButton(context),
             ],
           ),
         );

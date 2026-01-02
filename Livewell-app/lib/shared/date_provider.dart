@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:livewell_app/auth/tracking_auth.dart';
 import 'package:livewell_app/shared/shared.dart';
-import 'package:livewell_app/shared/user_provider.dart';
 
 class DateProvider extends ChangeNotifier {
   DateTime now = DateTime.now();
@@ -14,11 +13,6 @@ class DateProvider extends ChangeNotifier {
   List<List<double>> weeklySteps = [];
 
   bool hasPreviousWeek = false;
-
-  String createdAt = UserProvider().userCreatedAt!
-      .toIso8601String()
-      .split('T')
-      .first;
 
   // Constructor to initialize the provider
   DateProvider() {

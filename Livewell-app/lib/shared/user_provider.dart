@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class UserProvider extends ChangeNotifier {
   // Singleton-like reference to the active provider instance in the widget tree
@@ -13,11 +14,28 @@ class UserProvider extends ChangeNotifier {
     instance = this;
     // Initialize the user provider
     _user = FirebaseAuth.instance.currentUser;
+    _updateCreatedAt();
 
     // Listen to authentication state changes
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
+      _updateCreatedAt();
       notifyListeners();
+    });
+
+    // Initialize Supabase user
+    _isEmailSignedIn =
+        supabase.Supabase.instance.client.auth.currentUser != null;
+    if (_isEmailSignedIn) _updateCreatedAt();
+
+    // Listen to Supabase auth state changes
+    supabase.Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final bool isSignedIn = data.session != null;
+      if (_isEmailSignedIn != isSignedIn) {
+        _isEmailSignedIn = isSignedIn;
+        _updateCreatedAt();
+        notifyListeners();
+      }
     });
   }
 
@@ -37,7 +55,24 @@ class UserProvider extends ChangeNotifier {
   String? get userPhotoURL => _user?.photoURL;
 
   // Get user created at
-  DateTime? get userCreatedAt => _user?.metadata.creationTime;
+  String? _createdAt;
+  String? get userCreatedAt => _createdAt;
+
+  void _updateCreatedAt() {
+    if (_user != null) {
+      _createdAt = _user!.metadata.creationTime
+          ?.toIso8601String()
+          .split('T')
+          .first;
+    } else {
+      final user = supabase.Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        _createdAt = user.createdAt;
+      } else {
+        _createdAt = null;
+      }
+    }
+  }
 
   // Get user frailty score
   static double? userFrailtyScore;
@@ -47,6 +82,10 @@ class UserProvider extends ChangeNotifier {
     userFrailtyScore = score;
     notifyListeners();
   }
+
+  // Check if user is signed in with email
+  bool _isEmailSignedIn = false;
+  bool get isEmailSignedIn => _isEmailSignedIn;
 
   // Store user id token
   static String? userIdToken;
