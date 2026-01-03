@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../model/survey_model.dart';
 import 'package:flutter/foundation.dart';
+import '../shared/user_provider.dart';
 
 class LoginSurvey {
   Map<String, dynamic> get questionsJSON => {
@@ -29,7 +30,11 @@ class LoginSurvey {
     try {
       // POST to the database
       final response = await http.post(
-        Uri.parse(AppConfig.profileUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.profileEmailUrl
+              : AppConfig.profileGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: jsonEncode(questionsJSON),
       );

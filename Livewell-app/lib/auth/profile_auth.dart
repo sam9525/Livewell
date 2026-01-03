@@ -10,15 +10,21 @@ class ProfileAuth {
     try {
       // GET the profile from the database
       final response = await http.get(
-        Uri.parse(AppConfig.profileUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.profileEmailUrl
+              : AppConfig.profileGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
+      debugPrint('Profile get response: ${response.body}');
 
       if (response.statusCode == 200) {
         final profile = jsonDecode(response.body);
-        UserProvider.userGender = profile['gender'];
-        UserProvider.userAgeRange = profile['ageRange'];
-        UserProvider.userFrailtyScore = profile['frailtyScore'];
+        final data = profile is List ? profile[0] : profile['data'];
+        UserProvider.userGender = data['gender'];
+        UserProvider.userAgeRange = data['ageRange'];
+        UserProvider.userFrailtyScore = data['frailtyScore'];
 
         debugPrint('Profile get successfully');
         return profile;
@@ -35,7 +41,11 @@ class ProfileAuth {
     try {
       // PUT request to update location data
       final response = await http.put(
-        Uri.parse(AppConfig.profileUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.profileEmailUrl
+              : AppConfig.profileGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: jsonEncode({'suburb': suburb, 'postcode': postcode}),
       );
@@ -56,7 +66,11 @@ class ProfileAuth {
     try {
       // PUT request to update frailty score
       final response = await http.put(
-        Uri.parse(AppConfig.profileUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.profileEmailUrl
+              : AppConfig.profileGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: jsonEncode({'frailtyScore': score}),
       );

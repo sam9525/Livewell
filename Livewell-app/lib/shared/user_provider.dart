@@ -25,9 +25,9 @@ class UserProvider extends ChangeNotifier {
 
     // Initialize Supabase user
     final supabaseUser = supabase.Supabase.instance.client.auth.currentUser;
+
     _isEmailSignedIn =
-        supabaseUser != null &&
-        supabaseUser.appMetadata['providers'] == 'email';
+        supabaseUser != null && supabaseUser.appMetadata['provider'] == 'email';
 
     if (supabaseUser != null) {
       _updateCreatedAt();
@@ -39,6 +39,7 @@ class UserProvider extends ChangeNotifier {
       final bool isSignedIn =
           data.session != null &&
           data.session!.user.appMetadata['provider'] == 'email';
+
       bool shouldNotify = false;
 
       if (_isEmailSignedIn != isSignedIn) {
@@ -71,7 +72,7 @@ class UserProvider extends ChangeNotifier {
   // Get user display name
   String? get userDisplayName => _user?.displayName;
 
-  // Get user photo URL
+  // Get user photo url
   String? get userPhotoURL => _user?.photoURL;
 
   // Get user created at
