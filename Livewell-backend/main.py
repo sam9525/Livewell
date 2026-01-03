@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import google_auth
+from routers import google_auth, profile
 
 app = FastAPI()
 
@@ -27,3 +27,4 @@ def read_health():
 
 # Routers
 app.include_router(google_auth.router)
+app.include_router(profile.router)
