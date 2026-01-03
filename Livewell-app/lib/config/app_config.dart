@@ -19,9 +19,9 @@ class AppConfig {
   static const String googleAuthEndpoint = '/auth/google';
   static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
-  static const String chatbotEndpoint = '/chat/';
-  static const String profileEndpoint = '/profile/';
-  static const String trackingEndpoint = '/tracking/';
+  static const String chatbotEndpoint = '/chat';
+  static const String profileEndpoint = '/profile';
+  static const String trackingEndpoint = '/tracking';
   static const String trackingTodayEndpoint = '/tracking/today';
   static const String trackingTodayTargetEndpoint = '/tracking/today/targets';
 

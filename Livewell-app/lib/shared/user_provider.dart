@@ -24,20 +24,36 @@ class UserProvider extends ChangeNotifier {
     });
 
     // Initialize Supabase user
+    final supabaseUser = supabase.Supabase.instance.client.auth.currentUser;
     _isEmailSignedIn =
-        supabase.Supabase.instance.client.auth.currentUser != null;
-    if (_isEmailSignedIn) {
+        supabaseUser != null &&
+        supabaseUser.appMetadata['providers'] == 'email';
+
+    if (supabaseUser != null) {
       _updateCreatedAt();
-      _updateuserJwtToken();
+      _updateUserJwtToken();
     }
 
     // Listen to Supabase auth state changes
     supabase.Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final bool isSignedIn = data.session != null;
+      final bool isSignedIn =
+          data.session != null &&
+          data.session!.user.appMetadata['provider'] == 'email';
+      bool shouldNotify = false;
+
       if (_isEmailSignedIn != isSignedIn) {
         _isEmailSignedIn = isSignedIn;
         _updateCreatedAt();
-        _updateuserJwtToken();
+        shouldNotify = true;
+      }
+
+      final String? newToken = data.session?.accessToken;
+      if (_jwtToken != newToken) {
+        _jwtToken = newToken;
+        shouldNotify = true;
+      }
+
+      if (shouldNotify) {
         notifyListeners();
       }
     });
@@ -106,7 +122,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  void _updateuserJwtToken() async {
+  void _updateUserJwtToken() {
     _jwtToken =
         supabase.Supabase.instance.client.auth.currentSession?.accessToken;
     notifyListeners();

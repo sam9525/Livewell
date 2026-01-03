@@ -1,13 +1,12 @@
 import '/config/app_config.dart';
 import 'backend_auth.dart';
-import '../shared/user_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../model/survey_model.dart';
 import 'package:flutter/foundation.dart';
 
 class LoginSurvey {
-  Map<String, dynamic> questionsJSON = {
+  Map<String, dynamic> get questionsJSON => {
     'ageRange': questions[0].userAnswer,
     'gender': questions[1].userAnswer,
     'exerciseFrequency': questions[2].userAnswer,
