@@ -45,6 +45,7 @@ async def google_auth(token: str = Body(..., embed=True)):
             # Look up the user in Firebase by email to get their Firebase UID
             firebase_user = auth.get_user_by_email(email)
             firebase_uid = firebase_user.uid
+            login_provider = firebase_user.provider_id
         except Exception as e:
             # Expected error will never happen
             print(f"Error fetching Firebase user: {e}")
@@ -87,6 +88,22 @@ async def google_auth(token: str = Body(..., embed=True)):
 
                 auth_user = supabase_admin.auth.admin.create_user(attributes)
                 user_id = auth_user.user.id
+
+                # Link identity to user
+                supabase_admin.auth.admin.update_user_by_id(
+                    user_id,
+                    {
+                        "app_metadata": {
+                            "provider": login_provider,
+                            "providers": [login_provider],
+                        }
+                    },
+                )
+
+                # Delete email identity
+                supabase_admin.rpc(
+                    "delete_email_identity", {"user_id_param": user_id}
+                ).execute()
             except Exception as e:
                 print(f"Supabase Auth User creation note: {e}")
 
