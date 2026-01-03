@@ -35,7 +35,7 @@ class BackendAuth {
   static Future<String?> getStoredJwtToken() async {
     try {
       final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-      return prefs?.getString('jwt_token');
+      return prefs?.getString('jwt_token') ?? UserProvider.userJwtToken;
     } catch (e) {
       debugPrint('Error retrieving JWT token: $e');
       return null;

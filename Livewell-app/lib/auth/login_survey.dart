@@ -27,13 +27,7 @@ class LoginSurvey {
   };
 
   Future<bool> postSurvey() async {
-    // Authenticate with your backend server
-    final backendAuthResult = await BackendAuth().authenticateWithBackend(
-      UserProvider.userIdToken ?? '',
-      AppConfig.googleAuthUrl,
-    );
-
-    if (backendAuthResult) {
+    try {
       // POST to the database
       final response = await http.post(
         Uri.parse(AppConfig.profileUrl),
@@ -49,8 +43,8 @@ class LoginSurvey {
         debugPrint("Error: ${response.body}");
         return false;
       }
-    } else {
-      debugPrint("Backend authentication failed");
+    } catch (e) {
+      debugPrint("$e");
       return false;
     }
   }

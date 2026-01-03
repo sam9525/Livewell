@@ -3,34 +3,11 @@ import '/config/app_config.dart';
 import 'dart:convert';
 import '../shared/user_provider.dart';
 import 'backend_auth.dart';
-import '../shared/shared_preferences_provider.dart';
 import 'package:flutter/foundation.dart';
 
 class ProfileAuth {
   static Future<void> getProfile() async {
     try {
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-
-      // First, try to authenticate with stored token if not already authenticated
-      if (!BackendAuth().isAuthenticated) {
-        final storedAuthSuccess =
-            await BackendAuth.authenticateWithStoredToken();
-        if (!storedAuthSuccess) {
-          // If stored token authentication fails, try with fresh token
-          final backendAuthResult = await BackendAuth().authenticateWithBackend(
-            UserProvider.userIdToken ??
-                // Get the jwt token from the shared preferences
-                prefs?.getString('jwt_token') ??
-                '',
-            AppConfig.googleAuthUrl,
-          );
-
-          if (!backendAuthResult) {
-            throw Exception("Failed to authenticate with backend");
-          }
-        }
-      }
-
       // GET the profile from the database
       final response = await http.get(
         Uri.parse(AppConfig.profileUrl),
@@ -56,25 +33,6 @@ class ProfileAuth {
 
   static Future<bool> updateLocation(String suburb, String postcode) async {
     try {
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-
-      // Authenticate if not already authenticated
-      if (!BackendAuth().isAuthenticated) {
-        final storedAuthSuccess =
-            await BackendAuth.authenticateWithStoredToken();
-        if (!storedAuthSuccess) {
-          final backendAuthResult = await BackendAuth().authenticateWithBackend(
-            UserProvider.userIdToken ?? prefs?.getString('jwt_token') ?? '',
-            AppConfig.googleAuthUrl,
-          );
-
-          if (!backendAuthResult) {
-            debugPrint("Failed to authenticate with backend");
-            return false;
-          }
-        }
-      }
-
       // PUT request to update location data
       final response = await http.put(
         Uri.parse(AppConfig.profileUrl),
@@ -96,25 +54,6 @@ class ProfileAuth {
 
   static Future<bool> updateFrailtyScore(double score) async {
     try {
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-
-      // Authenticate if not already authenticated
-      if (!BackendAuth().isAuthenticated) {
-        final storedAuthSuccess =
-            await BackendAuth.authenticateWithStoredToken();
-        if (!storedAuthSuccess) {
-          final backendAuthResult = await BackendAuth().authenticateWithBackend(
-            UserProvider.userIdToken ?? prefs?.getString('jwt_token') ?? '',
-            AppConfig.googleAuthUrl,
-          );
-
-          if (!backendAuthResult) {
-            debugPrint("Failed to authenticate with backend");
-            return false;
-          }
-        }
-      }
-
       // PUT request to update frailty score
       final response = await http.put(
         Uri.parse(AppConfig.profileUrl),
