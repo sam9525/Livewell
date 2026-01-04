@@ -13,6 +13,7 @@ import '../shared/goal_provider.dart';
 import '../auth/profile_auth.dart';
 import '../services/onboarding_service.dart';
 import 'interactive_onboarding.dart';
+import 'survey.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -128,6 +129,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkUserProfile();
     _checkOnboarding();
 
     // Get the Postcode
@@ -140,6 +142,17 @@ class _HomePageState extends State<HomePage> {
 
     // Get the Tracking Data
     _loadTrackingData();
+  }
+
+  Future<void> _checkUserProfile() async {
+    final bool isProfileGet = await ProfileAuth.getProfile();
+    if (!mounted) return;
+    if (!isProfileGet) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SurveyPage()),
+      );
+    }
   }
 
   Future<void> _checkOnboarding() async {

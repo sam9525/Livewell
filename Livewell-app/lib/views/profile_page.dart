@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:livewell_app/auth/sign_out.dart';
+import 'package:livewell_app/views/survey.dart';
 import 'package:provider/provider.dart';
 import '../shared/shared.dart';
 import '../shared/user_provider.dart';
@@ -24,10 +25,17 @@ class _ProfileState extends State<Profile> {
   }
 
   void _initProfile() async {
-    await ProfileAuth.getProfile();
-    // Trigger a rebuild after profile data is loaded
-    if (mounted) {
-      setState(() {});
+    final bool isProfileGet = await ProfileAuth.getProfile();
+    if (isProfileGet) {
+      if (mounted) {
+        setState(() {});
+      }
+    } else if (mounted) {
+      // Go the login survey
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SurveyPage()),
+      );
     }
   }
 
