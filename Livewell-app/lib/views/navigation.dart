@@ -129,8 +129,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _checkUserProfile();
-    _checkOnboarding();
+    _checkUserProfile().then((_) {
+      _checkOnboarding();
+    });
 
     // Get the Postcode
     WidgetsBinding.instance.addPostFrameCallback((_) {
