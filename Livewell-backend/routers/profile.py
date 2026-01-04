@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header, Body
-from utils.jwt_handler import decode_jwt
+from utils.jwt_handler import verify_es256_token, verify_hs256_token
 from dotenv import load_dotenv
 from supabase import create_client
 import os
@@ -64,50 +64,6 @@ async def create_profile(payload: dict, body: dict):
             )
     else:
         raise HTTPException(status_code=400, detail="User not found")
-
-
-async def verify_es256_token(authorization: str = Header(...), body: dict = Body(...)):
-    """
-    Verify es256 token
-
-    Args:
-        authorization (str): Authorization header (contains jwt token)
-        body (dict): Body dictionary (contains user's information)
-
-    Returns:
-        payload (dict): JWT decoded information
-    """
-    JWT_ALGORITHM = "ES256"
-
-    # Verify jwt token
-    if authorization.startswith("Bearer "):
-        authorization = authorization.split(" ")[1]
-
-    payload = decode_jwt(authorization, JWT_ALGORITHM)
-
-    return payload
-
-
-async def verify_hs256_token(authorization: str = Header(...), body: dict = Body(...)):
-    """
-    Verify hs256 token
-
-    Args:
-        authorization (str): Authorization header (contains jwt token)
-        body (dict): Body dictionary (contains user's information)
-
-    Returns:
-        payload (dict): JWT decoded information
-    """
-    JWT_ALGORITHM = "HS256"
-
-    # Verify jwt token
-    if authorization.startswith("Bearer "):
-        authorization = authorization.split(" ")[1]
-
-    payload = decode_jwt(authorization, JWT_ALGORITHM)
-
-    return payload
 
 
 @router.post("/email")

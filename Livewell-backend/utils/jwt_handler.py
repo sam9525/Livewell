@@ -2,7 +2,7 @@ import time
 import datetime
 import os
 import jwt
-from fastapi import HTTPException
+from fastapi import Header, Body, HTTPException
 from dotenv import load_dotenv
 from jwt.algorithms import ECAlgorithm
 
@@ -70,3 +70,45 @@ def decode_jwt(token: str, algorithm: str) -> dict:
         )
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"JWT Decode Error (General): {e}")
+
+
+async def verify_es256_token(authorization: str = Header(...)):
+    """
+    Verify es256 token
+
+    Args:
+        authorization (str): Authorization header (contains jwt token)
+
+    Returns:
+        payload (dict): JWT decoded information
+    """
+    JWT_ALGORITHM = "ES256"
+
+    # Verify jwt token
+    if authorization.startswith("Bearer "):
+        authorization = authorization.split(" ")[1]
+
+    payload = decode_jwt(authorization, JWT_ALGORITHM)
+
+    return payload
+
+
+async def verify_hs256_token(authorization: str = Header(...)):
+    """
+    Verify hs256 token
+
+    Args:
+        authorization (str): Authorization header (contains jwt token)
+
+    Returns:
+        payload (dict): JWT decoded information
+    """
+    JWT_ALGORITHM = "HS256"
+
+    # Verify jwt token
+    if authorization.startswith("Bearer "):
+        authorization = authorization.split(" ")[1]
+
+    payload = decode_jwt(authorization, JWT_ALGORITHM)
+
+    return payload
