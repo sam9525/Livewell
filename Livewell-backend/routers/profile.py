@@ -123,7 +123,7 @@ async def create_profile_email(
     """
     payload = await verify_es256_token(authorization)
 
-    create_profile(payload, body)
+    await create_profile(payload, body)
 
 
 @router.post("/google")
@@ -139,7 +139,7 @@ async def create_profile_google(
     """
     payload = await verify_hs256_token(authorization)
 
-    create_profile(payload, body)
+    await create_profile(payload, body)
 
 
 @router.get("/email")
