@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:livewell_app/auth/tracking_auth.dart';
-import 'package:livewell_app/shared/date_provider.dart';
+import 'package:livewell_app/shared/user_provider.dart';
 import '../../shared/goal_provider.dart';
 import 'package:provider/provider.dart';
 import '../../shared/shared.dart';
@@ -614,7 +614,7 @@ class Calander extends StatefulWidget {
 class _CalanderState extends State<Calander> {
   EasyDatePickerController dateController = EasyDatePickerController();
 
-  final firstDate = DateProvider().createdAt;
+  final String firstDate = UserProvider().userCreatedAt!;
 
   List<DateTime> specialDates = [];
 

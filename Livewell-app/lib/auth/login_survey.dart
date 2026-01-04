@@ -1,13 +1,13 @@
 import '/config/app_config.dart';
 import 'backend_auth.dart';
-import '../shared/user_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../model/survey_model.dart';
 import 'package:flutter/foundation.dart';
+import '../shared/user_provider.dart';
 
 class LoginSurvey {
-  Map<String, dynamic> questionsJSON = {
+  Map<String, dynamic> get questionsJSON => {
     'ageRange': questions[0].userAnswer,
     'gender': questions[1].userAnswer,
     'exerciseFrequency': questions[2].userAnswer,
@@ -27,16 +27,14 @@ class LoginSurvey {
   };
 
   Future<bool> postSurvey() async {
-    // Authenticate with your backend server
-    final backendAuthResult = await BackendAuth().authenticateWithBackend(
-      UserProvider.userIdToken ?? '',
-      AppConfig.googleAuthUrl,
-    );
-
-    if (backendAuthResult) {
+    try {
       // POST to the database
       final response = await http.post(
-        Uri.parse(AppConfig.profileUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.profileEmailUrl
+              : AppConfig.profileGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: jsonEncode(questionsJSON),
       );
@@ -49,8 +47,8 @@ class LoginSurvey {
         debugPrint("Error: ${response.body}");
         return false;
       }
-    } else {
-      debugPrint("Backend authentication failed");
+    } catch (e) {
+      debugPrint("$e");
       return false;
     }
   }

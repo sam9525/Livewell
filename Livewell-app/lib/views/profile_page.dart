@@ -77,10 +77,15 @@ class _ProfileState extends State<Profile> {
                           : null,
                     ),
                     const SizedBox(height: 20),
-                    buildProfileField('Name', user?.displayName ?? 'User'),
+                    buildProfileField(
+                      'Name',
+                      user?.displayName ?? UserProvider.userName ?? 'User name',
+                    ),
                     buildProfileField(
                       'Email',
-                      user?.email ?? 'No email available',
+                      user?.email ??
+                          UserProvider.userEmail ??
+                          'User email address',
                     ),
                     buildProfileField(
                       'Gender',
@@ -101,7 +106,8 @@ class _ProfileState extends State<Profile> {
                   ],
                 ),
               ),
-              if (userProvider.isSignedIn) _buildSignOutButton(context),
+              if (userProvider.isSignedIn || userProvider.isEmailSignedIn)
+                _buildSignOutButton(context),
             ],
           ),
         );

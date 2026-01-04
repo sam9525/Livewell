@@ -10,6 +10,8 @@ import 'backend_auth.dart';
 import 'package:livewell_app/services/notifications_service.dart';
 import 'package:livewell_app/services/fcm_service.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class SignOut {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookAuth _facebookAuth = FacebookAuth.instance;
@@ -25,6 +27,9 @@ class SignOut {
 
       // Sign out from Firebase
       await _auth.signOut();
+
+      // Sign out from Supabase
+      await Supabase.instance.client.auth.signOut();
 
       // Unregister FCM token
       String? fcmToken = await FCMService.getToken();

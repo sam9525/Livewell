@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 import '../auth/backend_auth.dart';
 import '../model/local_resource_model.dart';
-import '../shared/user_provider.dart';
-import '../shared/shared_preferences_provider.dart';
 
 // Service for local resources from backend
 class LocalResourcesService {
@@ -14,42 +12,6 @@ class LocalResourcesService {
       LocalResourcesService._internal();
   factory LocalResourcesService() => _instance;
   LocalResourcesService._internal();
-
-  // Ensure backend authentication
-  Future<bool> _ensureAuthentication() async {
-    try {
-      // Check if already authenticated
-      if (BackendAuth().isAuthenticated) {
-        return true;
-      }
-
-      // Try to authenticate with stored token
-      final storedAuthSuccess = await BackendAuth.authenticateWithStoredToken();
-      if (storedAuthSuccess) {
-        return true;
-      }
-
-      // Try to authenticate with fresh token
-      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-      final backendAuthResult = await BackendAuth().authenticateWithBackend(
-        UserProvider.userIdToken ?? prefs?.getString('jwt_token') ?? '',
-        AppConfig.googleAuthUrl,
-      );
-
-      if (backendAuthResult) {
-        debugPrint(
-          'Local resources service: Backend authentication successful',
-        );
-        return true;
-      } else {
-        debugPrint('Local resources service: Backend authentication failed');
-        return false;
-      }
-    } catch (e) {
-      debugPrint('Local resources service: Authentication error: $e');
-      return false;
-    }
-  }
 
   // Fetch local resources by postcode
   Future<List<LocalResource>> getResourcesByPostcode(String postcode) async {
@@ -60,13 +22,6 @@ class LocalResourcesService {
           cleanPostcode == 'Unknown' ||
           cleanPostcode.contains('available')) {
         debugPrint('Invalid postcode: $postcode');
-        return [];
-      }
-
-      // Ensure authentication before making request
-      final authenticated = await _ensureAuthentication();
-      if (!authenticated) {
-        debugPrint('Cannot fetch local resources: Authentication failed');
         return [];
       }
 

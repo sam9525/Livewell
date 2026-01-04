@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import 'package:livewell_app/views/navigation.dart';
 import 'survey.dart';
 import '../shared/shared.dart';
+import '../shared/user_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../auth/signin_with_google.dart';
 import '../auth/signin_with_facebook.dart';
@@ -58,6 +60,18 @@ class _SignUpPageState extends State<SignUpPage> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+
+      // Explicitly update UserProvider token to avoid race conditions
+      if (authResponse.session != null) {
+        UserProvider.userJwtToken = authResponse.session!.accessToken;
+
+        final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+        await prefs?.setString('jwt_token', authResponse.session!.accessToken);
+        await prefs?.setString(
+          'jwt_token_timestamp',
+          DateTime.now().toIso8601String(),
+        );
+      }
 
       // Check if the user is signed up
       if (!mounted) return;

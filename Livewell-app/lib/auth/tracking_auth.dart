@@ -3,66 +3,14 @@ import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import '../config/app_config.dart';
 import 'dart:convert';
 import 'backend_auth.dart';
-import '../shared/user_provider.dart';
 import 'package:flutter/foundation.dart';
-import 'signin_with_google.dart';
 
 class TrackingAuth {
-  static Future<bool> checkAuthentication() async {
-    if (!BackendAuth().isAuthenticated) {
-      // First, try to use stored JWT token (fastest option)
-      bool storedAuthSuccess = await BackendAuth.authenticateWithStoredToken();
-      if (storedAuthSuccess) {
-        debugPrint("Authentication successful using stored JWT token");
-        return true;
-      }
-
-      // If stored token fails, try to refresh Google ID token
-      String? idToken = UserProvider.userIdToken;
-
-      // If no token or empty token, try to refresh it
-      if (idToken == null || idToken.isEmpty) {
-        try {
-          final googleAuthService = GoogleAuthService();
-          idToken = await googleAuthService.refreshIdToken();
-        } catch (e) {
-          debugPrint("Failed to refresh ID token: $e");
-          return false;
-        }
-      }
-
-      // If still no token, authentication fails
-      if (idToken == null || idToken.isEmpty) {
-        debugPrint("No valid ID token available for authentication");
-        return false;
-      }
-
-      // Authenticate with the backend server using Google ID token
-      final backendAuthResult = await BackendAuth().authenticateWithBackend(
-        idToken,
-        AppConfig.googleAuthUrl,
-      );
-
-      if (!backendAuthResult) {
-        throw Exception(
-          'Failed to authenticate with backend: $backendAuthResult',
-        );
-      }
-      return backendAuthResult;
-    }
-    return true;
-  }
-
   // Fetch the tracking data for a given week
   static Future<Map<String, dynamic>?> getTracking(
     String startOfWeek,
     String endOfWeek,
   ) async {
-    bool authenticated = await checkAuthentication();
-    if (!authenticated) {
-      throw Exception('Failed to authenticate with backend');
-    }
-
     String url =
         '${AppConfig.trackingUrl}?start_date=$startOfWeek&end_date=$endOfWeek';
 
@@ -81,11 +29,6 @@ class TrackingAuth {
 
   // Fetch the tracking data for today
   static Future<Map<String, dynamic>?> getTrackingToday() async {
-    bool authenticated = await checkAuthentication();
-    if (!authenticated) {
-      throw Exception('Failed to authenticate with backend');
-    }
-
     final response = await http.get(
       Uri.parse(AppConfig.trackingTodayUrl),
       headers: BackendAuth().getAuthHeaders(),
@@ -106,11 +49,6 @@ class TrackingAuth {
 
   // Update the tracking data for today
   static Future<bool> putTodayTracking(int steps, int waterIntakeMl) async {
-    bool authenticated = await checkAuthentication();
-    if (!authenticated) {
-      throw Exception('Failed to authenticate with backend');
-    }
-
     final response = await http.put(
       Uri.parse(AppConfig.trackingTodayUrl),
       headers: BackendAuth().getAuthHeaders(),
@@ -152,7 +90,7 @@ class TrackingAuth {
         body: jsonEncode({'steps': steps, 'waterIntakeMl': waterIntakeMl}),
       );
 
-      getTrackingToday();
+      await getTrackingToday();
 
       if (response.statusCode == 200) {
         debugPrint('Background tracking updated successfully');
@@ -172,11 +110,6 @@ class TrackingAuth {
     int targetWaterIntakeMl,
   ) async {
     try {
-      bool authenticated = await checkAuthentication();
-      if (!authenticated) {
-        throw Exception('Failed to authenticate with backend');
-      }
-
       final response = await http.put(
         Uri.parse(AppConfig.trackingTodayTargetUrl),
         headers: BackendAuth().getAuthHeaders(),

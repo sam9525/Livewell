@@ -19,9 +19,10 @@ class AppConfig {
   static const String googleAuthEndpoint = '/auth/google';
   static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
-  static const String chatbotEndpoint = '/chat/';
-  static const String profileEndpoint = '/profile/';
-  static const String trackingEndpoint = '/tracking/';
+  static const String chatbotEndpoint = '/chat';
+  static const String profileEmailEndpoint = '/profile/email';
+  static const String profileGoogleEndpoint = '/profile/google';
+  static const String trackingEndpoint = '/tracking';
   static const String trackingTodayEndpoint = '/tracking/today';
   static const String trackingTodayTargetEndpoint = '/tracking/today/targets';
 
@@ -49,7 +50,8 @@ class AppConfig {
   static String get facebookAuthUrl => '$apiBaseUrl$facebookAuthEndpoint';
   static String get logoutUrl => '$apiBaseUrl$logoutEndpoint';
   static String get chatbotUrl => '$apiBaseUrl$chatbotEndpoint';
-  static String get profileUrl => '$apiBaseUrl$profileEndpoint';
+  static String get profileEmailUrl => '$apiBaseUrl$profileEmailEndpoint';
+  static String get profileGoogleUrl => '$apiBaseUrl$profileGoogleEndpoint';
   static String get trackingUrl => '$apiBaseUrl$trackingEndpoint';
   static String get trackingTodayUrl => '$apiBaseUrl$trackingTodayEndpoint';
   static String get trackingTodayTargetUrl =>
