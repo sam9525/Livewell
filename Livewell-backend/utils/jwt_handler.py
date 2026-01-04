@@ -8,7 +8,7 @@ from jwt.algorithms import ECAlgorithm
 
 # Use a secure secret in production (e.g. from env)
 load_dotenv()
-AUTH_BEARER_TOKEN = os.environ.get("AUTH_BEARER_TOKEN")
+AUTH_BEARER_TOKEN = os.getenv("AUTH_BEARER_TOKEN")
 # Your Supabase JWK
 SUPABASE_JWK = {
     "x": "zLHBk7mhPIsyBcpBEfrsSwsdwsVV37u04rG5mlvKJDM",
