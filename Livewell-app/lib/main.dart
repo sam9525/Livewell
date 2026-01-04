@@ -50,7 +50,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(),
+          lazy: false,
+        ),
         ChangeNotifierProvider(create: (context) => DateProvider()),
         ChangeNotifierProvider(create: (context) => WaterIntakeNotifier()),
         ChangeNotifierProvider(
