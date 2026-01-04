@@ -67,10 +67,10 @@ class UserProvider extends ChangeNotifier {
   bool get isSignedIn => _user != null;
 
   // Get user email
-  String? get userEmail => _user?.email;
+  static String? userEmail;
 
   // Get user display name
-  String? get userDisplayName => _user?.displayName;
+  static String? userName;
 
   // Get user photo url
   String? get userPhotoURL => _user?.photoURL;

@@ -17,17 +17,19 @@ class ProfileAuth {
         ),
         headers: BackendAuth().getAuthHeaders(),
       );
-      debugPrint('Profile get response: ${response.body}');
 
       if (response.statusCode == 200) {
         final profile = jsonDecode(response.body);
-        final data = profile is List ? profile[0] : profile['data'];
-        UserProvider.userGender = data['gender'];
-        UserProvider.userAgeRange = data['ageRange'];
-        UserProvider.userFrailtyScore = data['frailtyScore'];
+        debugPrint('Profile get response: $profile');
+        UserProvider.userGender = profile['gender'];
+        UserProvider.userAgeRange = profile['age_range'];
+        UserProvider.userFrailtyScore = profile['frailty_score'];
+
+        // Get user name and email from supabase
+        UserProvider.userName = profile['user_name'];
+        UserProvider.userEmail = profile['email'];
 
         debugPrint('Profile get successfully');
-        return profile;
       } else {
         debugPrint('Failed to get profile: ${response.statusCode}');
         throw Exception("Failed to get profile: ${response.statusCode}");
