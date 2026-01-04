@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from routers import google_auth, profile
 
@@ -17,12 +20,12 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"Welcome to Livewell Backend": "Livewell Backend is running"}
+    return {"Welcome to Livewell Backend"}
 
 
 @app.get("/health")
 def read_health():
-    return {"statusCode": 200, "message": "Backend is running"}
+    return {"Backend is running"}
 
 
 # Routers
