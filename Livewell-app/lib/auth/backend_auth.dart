@@ -172,8 +172,8 @@ class BackendAuth {
         final responseBody = jsonDecode(response.body);
 
         // Store the JWT token in UserProvider and persistently
-        UserProvider.userJwtToken = responseBody['token'];
-        await storeJwtToken(responseBody['token']);
+        UserProvider.userJwtToken = responseBody;
+        await storeJwtToken(responseBody);
 
         isAuthenticated = true;
         return true;

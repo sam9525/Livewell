@@ -6,7 +6,7 @@ import 'backend_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class ProfileAuth {
-  static Future<void> getProfile() async {
+  static Future<bool> getProfile() async {
     try {
       // GET the profile from the database
       final response = await http.get(
@@ -21,15 +21,21 @@ class ProfileAuth {
       if (response.statusCode == 200) {
         final profile = jsonDecode(response.body);
         debugPrint('Profile get response: $profile');
-        UserProvider.userGender = profile['gender'];
-        UserProvider.userAgeRange = profile['age_range'];
-        UserProvider.userFrailtyScore = profile['frailty_score'];
 
-        // Get user name and email from supabase
-        UserProvider.userName = profile['user_name'];
-        UserProvider.userEmail = profile['email'];
+        if (profile['gender'] != null) {
+          UserProvider.userGender = profile['gender'];
+          UserProvider.userAgeRange = profile['age_range'];
+          UserProvider.userFrailtyScore = profile['frailty_score'];
 
-        debugPrint('Profile get successfully');
+          // Get user name and email from supabase
+          UserProvider.userName = profile['user_name'];
+          UserProvider.userEmail = profile['email'];
+
+          debugPrint('Profile get successfully');
+          return true;
+        } else {
+          return false;
+        }
       } else {
         debugPrint('Failed to get profile: ${response.statusCode}');
         throw Exception("Failed to get profile: ${response.statusCode}");
