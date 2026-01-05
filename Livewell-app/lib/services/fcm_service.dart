@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:livewell_app/shared/user_provider.dart';
 import '../config/app_config.dart';
 import '../auth/backend_auth.dart';
 import 'notifications_service.dart';
@@ -41,17 +42,8 @@ class FCMService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
-        // Get FCM token
-        String? token = await getToken();
-
-        if (token != null) {
-          debugPrint('FCM Token obtained: $token');
-
-          // Register device token with backend
-          await registerDeviceToken(token);
-        } else {
-          debugPrint('Failed to obtain FCM token');
-        }
+        // Register device token with backend
+        await registerCurrentDevice();
 
         FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
@@ -72,7 +64,7 @@ class FCMService {
         // Listen for token refresh
         _messaging.onTokenRefresh.listen((newToken) {
           debugPrint('FCM token refreshed: $newToken');
-          registerDeviceToken(newToken);
+          registerCurrentDevice();
         });
       } else {
         debugPrint('Notification permission denied');
@@ -93,6 +85,14 @@ class FCMService {
     }
   }
 
+  // Helper to get token and register it
+  static Future<void> registerCurrentDevice() async {
+    String? token = await getToken();
+    if (token != null) {
+      await registerDeviceToken(token);
+    }
+  }
+
   // Register device token with backend API
   static Future<bool> registerDeviceToken(String token) async {
     try {
@@ -106,7 +106,11 @@ class FCMService {
       }
 
       // Prepare request
-      final url = Uri.parse(AppConfig.registerDeviceUrl);
+      final url = Uri.parse(
+        UserProvider.instance?.isEmailSignedIn == true
+            ? AppConfig.registerDeviceEmailUrl
+            : AppConfig.registerDeviceGoogleUrl,
+      );
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $jwtToken',
@@ -174,9 +178,10 @@ class FCMService {
   }
 
   // Delete FCM token (useful for logout)
-  static Future<void> deleteToken(String token) async {
+  static Future<void> deleteToken() async {
     try {
-      await unregisterDeviceToken(token);
+      await unregisterDeviceToken();
+
       await _messaging.deleteToken();
     } catch (e) {
       debugPrint('Error deleting FCM token: $e');
@@ -184,7 +189,7 @@ class FCMService {
   }
 
   // Unregister device token with backend API
-  static Future<bool> unregisterDeviceToken(String token) async {
+  static Future<bool> unregisterDeviceToken() async {
     try {
       // Get JWT token for authentication
       String? jwtToken = await BackendAuth.getStoredJwtToken();
@@ -196,17 +201,21 @@ class FCMService {
       }
 
       // Prepare request
-      final url = Uri.parse(AppConfig.unregisterDeviceUrl);
+      final url = Uri.parse(
+        UserProvider.instance?.isEmailSignedIn == true
+            ? AppConfig.unregisterDeviceEmailUrl
+            : AppConfig.unregisterDeviceGoogleUrl,
+      );
+
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $jwtToken',
       };
-      final body = json.encode({'device_token': token});
 
       debugPrint('Unregistering device token with: $url');
 
       // Send POST request
-      final response = await http.post(url, headers: headers, body: body);
+      final response = await http.post(url, headers: headers);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;

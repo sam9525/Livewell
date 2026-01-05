@@ -38,9 +38,14 @@ class AppConfig {
   static const String localResourcesEndpoint = '/resources';
 
   // Notification endpoints
-  static const String registerDeviceEndpoint = '/notifications/register-device';
-  static const String unregisterDeviceEndpoint =
-      '/notifications/unregister-device';
+  static const String registerDeviceEmailEndpoint =
+      '/fcm-noti/register-device/email';
+  static const String registerDeviceGoogleEndpoint =
+      '/fcm-noti/register-device/google';
+  static const String unregisterDeviceEmailEndpoint =
+      '/fcm-noti/unregister-device/email';
+  static const String unregisterDeviceGoogleEndpoint =
+      '/fcm-noti/unregister-device/google';
 
   // Get the full API URL
   static String get apiBaseUrl => '$backendUrl/api';
@@ -69,7 +74,12 @@ class AppConfig {
   static String get localResourcesUrl => '$apiBaseUrl$localResourcesEndpoint';
 
   // Get notification endpoints
-  static String get registerDeviceUrl => '$apiBaseUrl$registerDeviceEndpoint';
-  static String get unregisterDeviceUrl =>
-      '$apiBaseUrl$unregisterDeviceEndpoint';
+  static String get registerDeviceEmailUrl =>
+      '$apiBaseUrl$registerDeviceEmailEndpoint';
+  static String get registerDeviceGoogleUrl =>
+      '$apiBaseUrl$registerDeviceGoogleEndpoint';
+  static String get unregisterDeviceEmailUrl =>
+      '$apiBaseUrl$unregisterDeviceEmailEndpoint';
+  static String get unregisterDeviceGoogleUrl =>
+      '$apiBaseUrl$unregisterDeviceGoogleEndpoint';
 }

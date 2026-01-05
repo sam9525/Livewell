@@ -19,22 +19,21 @@ class SignOut {
 
   Future<void> signOut() async {
     try {
-      // Sign out from Google
-      await _googleSignIn.signOut();
-
-      // Sign out from Facebook
-      await _facebookAuth.logOut();
-
-      // Sign out from Firebase
-      await _auth.signOut();
-
-      // Sign out from Supabase
-      await Supabase.instance.client.auth.signOut();
-
       // Unregister FCM token
-      String? fcmToken = await FCMService.getToken();
-      if (fcmToken != null) {
-        await FCMService.deleteToken(fcmToken);
+      await FCMService.deleteToken();
+
+      if (UserProvider.instance?.isEmailSignedIn == true) {
+        // Sign out from Supabase
+        await Supabase.instance.client.auth.signOut();
+      } else {
+        // Sign out from Google
+        await _googleSignIn.signOut();
+
+        // Sign out from Facebook
+        await _facebookAuth.logOut();
+
+        // Sign out from Firebase
+        await _auth.signOut();
       }
 
       // Backend signout

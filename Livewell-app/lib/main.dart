@@ -38,7 +38,7 @@ void main() async {
   await NotificationService.initialize();
 
   // Initialize Firebase Cloud Messaging and register device token
-  await FCMService.initialize();
+  FCMService.initialize();
 
   runApp(const MyApp());
 }

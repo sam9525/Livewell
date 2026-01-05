@@ -5,6 +5,9 @@ import '../shared/shared.dart';
 import '../auth/signin_with_google.dart';
 import '../auth/signin_with_facebook.dart';
 import '../shared/sign_in_out_shared.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
+import '../shared/user_provider.dart';
+import '../services/fcm_service.dart';
 import 'survey.dart';
 
 class SignInPage extends StatefulWidget {
@@ -34,10 +37,26 @@ class _SignInPageState extends State<SignInPage> {
   // Sign in user
   Future<void> signIn() async {
     try {
-      await supabase.Supabase.instance.client.auth.signInWithPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      final authResponse = await supabase.Supabase.instance.client.auth
+          .signInWithPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
+
+      // Explicitly update UserProvider token to avoid race conditions
+      if (authResponse.session != null) {
+        UserProvider.userJwtToken = authResponse.session!.accessToken;
+
+        final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+        await prefs?.setString('jwt_token', authResponse.session!.accessToken);
+        await prefs?.setString(
+          'jwt_token_timestamp',
+          DateTime.now().toIso8601String(),
+        );
+
+        // Register device
+        await FCMService.registerCurrentDevice();
+      }
 
       if (!mounted) return;
 
@@ -102,6 +121,10 @@ class _SignInPageState extends State<SignInPage> {
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
                   final result = await _authService.signInWithGoogle();
                   if (context.mounted && result?['user'] != null) {
+                    // Register device
+                    await FCMService.registerCurrentDevice();
+
+                    if (!context.mounted) return;
                     SignInOutShared.changePage(
                       context,
                       result?['isNewUser']
@@ -118,6 +141,10 @@ class _SignInPageState extends State<SignInPage> {
                     final result = await _facebookAuthService
                         .signInWithFacebook();
                     if (context.mounted && result?['user'] != null) {
+                      // Register device
+                      await FCMService.registerCurrentDevice();
+
+                      if (!context.mounted) return;
                       SignInOutShared.changePage(
                         context,
                         result?['isNewUser']

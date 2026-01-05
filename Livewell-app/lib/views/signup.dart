@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../auth/signin_with_google.dart';
 import '../auth/signin_with_facebook.dart';
 import '../shared/sign_in_out_shared.dart';
+import '../services/fcm_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -89,6 +90,9 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
+      // Register device
+      await FCMService.registerCurrentDevice();
+
       if (!mounted) return;
       // Navigate to the survey page
       SignInOutShared.changePage(context, const SurveyPage());
@@ -160,6 +164,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 SignInOutShared.thirdPartyButtons('google', 'Google', () async {
                   final result = await _authService.signInWithGoogle();
                   if (context.mounted && result?['user'] != null) {
+                    // Register device
+                    await FCMService.registerCurrentDevice();
+
                     SignInOutShared.changePage(
                       context,
                       result?['isNewUser']
@@ -176,6 +183,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     final result = await _facebookAuthService
                         .signInWithFacebook();
                     if (context.mounted && result?['user'] != null) {
+                      // Register device
+                      await FCMService.registerCurrentDevice();
+
                       SignInOutShared.changePage(
                         context,
                         result?['isNewUser']
