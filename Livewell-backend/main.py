@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from routers import google_auth, profile
+from routers import google_auth, profile, fcm_noti
 
 app = FastAPI()
 
@@ -31,3 +31,4 @@ def read_health():
 # Routers
 app.include_router(google_auth.router)
 app.include_router(profile.router)
+app.include_router(fcm_noti.router)
