@@ -19,7 +19,7 @@ class WaterIntakeNotifier extends ChangeNotifier {
 
     // Update the target water intake in the database
     TrackingAuth.putTodayTrackingTargets(
-      trackingData!['targetSteps'],
+      trackingData!['target_steps'],
       _waterIntake,
     );
 
@@ -75,8 +75,8 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
 
   // Add this new method
   void updateFromTrackingData(Map<String, dynamic> trackingData) {
-    _waterIntakeNotifier.setWaterIntake(trackingData['targetWaterIntakeMl']);
-    _currentWaterIntake = trackingData['currentWaterIntakeMl'];
+    _waterIntakeNotifier.setWaterIntake(trackingData['target_water_intake_ml']);
+    _currentWaterIntake = trackingData['current_water_intake_ml'];
 
     notifyListeners();
   }
@@ -118,13 +118,15 @@ class StepsNotifier extends ChangeNotifier {
   void setSteps(int value) async {
     _steps = value;
     _selected = ((value - 2000) / 100).round();
+    debugPrint('Update Steps data');
 
     final trackingData = await TrackingAuth.getTrackingToday();
 
+    debugPrint('Update Tracking data');
     // Update the target steps in the database
     TrackingAuth.putTodayTrackingTargets(
       _steps,
-      trackingData!['targetWaterIntakeMl'],
+      trackingData!['target_water_intake_ml'],
     );
 
     notifyListeners();
@@ -151,8 +153,8 @@ class CurrentStepsNotifier extends ChangeNotifier {
   }
 
   void updateFromTrackingData(Map<String, dynamic> trackingData) {
-    _stepsNotifier.setSteps(trackingData['targetSteps']);
-    _currentSteps = trackingData['currentSteps'];
+    _stepsNotifier.setSteps(trackingData['target_steps']);
+    _currentSteps = trackingData['current_steps'];
 
     notifyListeners();
   }
