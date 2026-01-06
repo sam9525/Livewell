@@ -13,10 +13,9 @@ url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 supabase_admin: Client = create_client(url, key)
 
-
-@router.get("")
-async def get_profile():
-    return {"Get profile"}
+# ============================================================================
+# Functions
+# ============================================================================
 
 
 async def create_profile(payload: dict, body: dict):
@@ -57,6 +56,87 @@ async def create_profile(payload: dict, body: dict):
             )
     else:
         raise HTTPException(status_code=400, detail="User not found")
+
+
+async def update_profile(payload: dict, body: dict = Body(...)):
+    """
+    Update user's profile
+
+    Args:
+        payload (dict): Payload dictionary (contains user's information)
+        body (dict): Body dictionary (contains user's information)
+    """
+    user_id = payload["sub"]
+    suburb = body.get("suburb")
+    postcode = body.get("postcode")
+    frailty_score = body.get("frailtyScore")
+
+    try:
+        # Check if the user exists in your database
+        result = (
+            supabase_admin.table("users_info").select("*").eq("id", user_id).execute()
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"User not found: {str(e)}")
+
+    try:
+        # Update user's info
+        supabase_admin.table("users_info").update(
+            {
+                "suburb": suburb,
+                "postcode": postcode,
+                "frailty_score": frailty_score,
+            }
+        ).eq("id", user_id).execute()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update user info: {str(e)}"
+        )
+
+
+async def get_profile(payload: dict):
+    """
+    Get user's profile from Supabase
+
+    Args:
+        payload (dict): Payload dictionary (contains user's information)
+
+    Returns:
+        User's info from Supabase
+    """
+    user_id = payload["sub"]
+
+    try:
+        # Get user's name and email from profiles table
+        profile_result = (
+            supabase_admin.table("profiles")
+            .select("user_name, email")
+            .eq("id", user_id)
+            .execute()
+        )
+
+        # Get user's info
+        info_result = (
+            supabase_admin.table("users_info").select("*").eq("id", user_id).execute()
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"User's info not found: {str(e)}")
+
+    # Combine profile and info
+    result = {
+        **profile_result.data[0],
+        **(info_result.data[0] if info_result.data else {}),
+    }
+
+    return result
+
+
+# ============================================================================
+# APIs
+# ============================================================================
 
 
 @router.post("/email")
@@ -101,44 +181,6 @@ async def create_profile_google(
     return {"User's info created successfully"}
 
 
-async def get_profile(payload: dict):
-    """
-    Get user's profile from Supabase
-
-    Args:
-        payload (dict): Payload dictionary (contains user's information)
-
-    Returns:
-        User's info from Supabase
-    """
-    user_id = payload["sub"]
-
-    try:
-        # Get user's name and email from profiles table
-        profile_result = (
-            supabase_admin.table("profiles")
-            .select("user_name, email")
-            .eq("id", user_id)
-            .execute()
-        )
-
-        # Get user's info
-        info_result = (
-            supabase_admin.table("users_info").select("*").eq("id", user_id).execute()
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=f"User's info not found: {str(e)}")
-
-    # Combine profile and info
-    result = {
-        **profile_result.data[0],
-        **(info_result.data[0] if info_result.data else {}),
-    }
-
-    return result
-
-
 @router.get("/email")
 async def get_profile_email(authorization: str = Header(...)):
     """
@@ -171,44 +213,6 @@ async def get_profile_google(authorization: str = Header(...)):
     payload = await verify_hs256_token(authorization)
 
     return await get_profile(payload)
-
-
-async def update_profile(payload: dict, body: dict = Body(...)):
-    """
-    Update user's profile
-
-    Args:
-        payload (dict): Payload dictionary (contains user's information)
-        body (dict): Body dictionary (contains user's information)
-    """
-    user_id = payload["sub"]
-    suburb = body.get("suburb")
-    postcode = body.get("postcode")
-    frailty_score = body.get("frailtyScore")
-
-    try:
-        # Check if the user exists in your database
-        result = (
-            supabase_admin.table("users_info").select("*").eq("id", user_id).execute()
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"User not found: {str(e)}")
-
-    try:
-        # Update user's info
-        supabase_admin.table("users_info").update(
-            {
-                "suburb": suburb,
-                "postcode": postcode,
-                "frailty_score": frailty_score,
-            }
-        ).eq("id", user_id).execute()
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to update user info: {str(e)}"
-        )
 
 
 @router.put("/email")
