@@ -11,6 +11,7 @@ from routers import (
     tracking_data,
     medications,
     vaccinations,
+    chatbot,
 )
 
 app = FastAPI()
@@ -42,3 +43,4 @@ app.include_router(fcm_noti.router)
 app.include_router(tracking_data.router)
 app.include_router(medications.router)
 app.include_router(vaccinations.router)
+app.include_router(chatbot.router)
