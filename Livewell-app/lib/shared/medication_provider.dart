@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:livewell_app/shared/user_provider.dart';
 import 'dart:convert';
 import '../model/medication_model.dart';
 import '../config/app_config.dart';
@@ -33,7 +34,11 @@ class MedicationProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse(AppConfig.medicationUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.medicationEmailUrl
+              : AppConfig.medicationGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
@@ -63,22 +68,22 @@ class MedicationProvider with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse(AppConfig.medicationUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.medicationEmailUrl
+              : AppConfig.medicationGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: json.encode(medication.toCreateMap()),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final newMedication = Medication.fromMap(responseData);
-        _medications.add(newMedication);
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
         _handleError(
           'Failed to add medication',
-          'HTTP ${response.statusCode}',
+          'HTTP ${response.statusCode}, url: ${response.request?.url}',
           json.encode(medication.toMap()),
         );
         return false;
@@ -96,7 +101,7 @@ class MedicationProvider with ChangeNotifier {
   // Update an existing medication
   Future<bool> updateMedication(Medication medication) async {
     // Ensure medication has an ID for update
-    if (medication.id == null) {
+    if (medication.medId == '') {
       _error = 'Cannot update medication: ID is required';
       debugPrint(_error);
       return false;
@@ -108,24 +113,20 @@ class MedicationProvider with ChangeNotifier {
 
     try {
       final response = await http.put(
-        Uri.parse('${AppConfig.medicationUrl}/${medication.id}'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.medicationEmailUrl : AppConfig.medicationGoogleUrl}/${medication.medId}',
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: json.encode(medication.toMap()),
       );
 
       if (response.statusCode == 200) {
-        final index = _medications.indexWhere((m) => m.id == medication.id);
-        if (index != -1) {
-          final Map<String, dynamic> responseData = json.decode(response.body);
-          _medications[index] = Medication.fromMap(responseData);
-        }
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
         _handleError(
           'Failed to update medication',
-          'HTTP ${response.statusCode}',
+          'HTTP ${response.statusCode}, url: ${response.request?.url}, body: ${response.body}',
         );
         return false;
       }
@@ -143,14 +144,14 @@ class MedicationProvider with ChangeNotifier {
 
     try {
       final response = await http.delete(
-        Uri.parse('${AppConfig.medicationUrl}/$medicationId'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.medicationEmailUrl : AppConfig.medicationGoogleUrl}/$medicationId',
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        _medications.removeWhere((medication) => medication.id == medicationId);
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
         _handleError(
@@ -170,14 +171,16 @@ class MedicationProvider with ChangeNotifier {
     // First check local cache
     try {
       final cachedMedication = _medications.firstWhere(
-        (medication) => medication.id == id,
+        (medication) => medication.medId == id,
       );
       return cachedMedication;
     } catch (e) {
       // Not in cache, fetch from backend
       try {
         final response = await http.get(
-          Uri.parse('${AppConfig.medicationUrl}/$id'),
+          Uri.parse(
+            '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.medicationEmailUrl : AppConfig.medicationGoogleUrl}/$id',
+          ),
           headers: BackendAuth().getAuthHeaders(),
         );
 
@@ -187,7 +190,9 @@ class MedicationProvider with ChangeNotifier {
           );
           return Medication.fromMap(medicationData);
         } else {
-          debugPrint('Failed to get medication by ID: ${response.statusCode}');
+          debugPrint(
+            'Failed to get medication by ID: HTTP ${response.statusCode}, url: ${response.request?.url}',
+          );
           return null;
         }
       } catch (e) {

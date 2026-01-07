@@ -1,21 +1,21 @@
 class Vaccination {
-  final String? id; // Optional - provided by database for existing records
+  final String vacId;
   final String name;
   final DateTime doseDate;
   final DateTime? nextDoseDate;
-  final String location;
-  final String notes;
+  final String? location;
+  final String? notes;
 
   // Backend field name constants
-  static const String _fieldId = 'id';
+  static const String _fieldId = 'vac_id';
   static const String _fieldName = 'name';
-  static const String _fieldDoseDate = 'doseDate';
-  static const String _fieldNextDoseDate = 'nextDoseDate';
+  static const String _fieldDoseDate = 'dose_date';
+  static const String _fieldNextDoseDate = 'next_dose_date';
   static const String _fieldLocation = 'location';
   static const String _fieldNotes = 'notes';
 
   const Vaccination({
-    this.id, // Optional for new vaccinations, required for updates
+    required this.vacId,
     required this.name,
     required this.doseDate,
     this.nextDoseDate,
@@ -28,7 +28,9 @@ class Vaccination {
     return {
       _fieldName: name,
       _fieldDoseDate: _formatDate(doseDate),
-      _fieldNextDoseDate: nextDoseDate != null ? _formatDate(nextDoseDate!) : null,
+      _fieldNextDoseDate: nextDoseDate != null
+          ? _formatDate(nextDoseDate!)
+          : null,
       _fieldLocation: location,
       _fieldNotes: notes,
     };
@@ -44,9 +46,7 @@ class Vaccination {
   // Convert to Map for storage (includes id for updates)
   Map<String, dynamic> toMap() {
     final map = _buildBaseMap();
-    if (id != null) {
-      map[_fieldId] = id;
-    }
+    map[_fieldId] = vacId;
     return map;
   }
 
@@ -56,7 +56,7 @@ class Vaccination {
   // Create from Map (receives id from database)
   factory Vaccination.fromMap(Map<String, dynamic> map) {
     return Vaccination(
-      id: map[_fieldId]?.toString(),
+      vacId: map[_fieldId].toString(),
       name: (map[_fieldName] ?? '').toString(),
       doseDate: DateTime.parse(
         map[_fieldDoseDate] ?? DateTime.now().toIso8601String(),
@@ -79,7 +79,7 @@ class Vaccination {
     String? notes,
   }) {
     return Vaccination(
-      id: id ?? this.id,
+      vacId: vacId,
       name: name ?? this.name,
       doseDate: doseDate ?? this.doseDate,
       nextDoseDate: nextDoseDate ?? this.nextDoseDate,

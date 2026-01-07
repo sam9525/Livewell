@@ -41,7 +41,7 @@ class MedicationDetail extends StatelessWidget {
             _buildDetailsCard(),
             const SizedBox(height: 20),
             _buildScheduleCard(),
-            if (medication.notes.isNotEmpty) ...[
+            if (medication.notes != null) ...[
               const SizedBox(height: 20),
               _buildNotesCard(),
             ],
@@ -211,7 +211,7 @@ class MedicationDetail extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  medication.notes,
+                  medication.notes ?? '',
                   style: Shared.fontStyle(28, FontWeight.w500, Shared.black),
                 ),
               ],
@@ -332,11 +332,11 @@ class MedicationDetail extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              if (medication.id != null) {
+              if (medication.medId != '') {
                 Provider.of<MedicationProvider>(
                   context,
                   listen: false,
-                ).deleteMedication(medication.id!);
+                ).deleteMedication(medication.medId);
                 Navigator.of(context).pop(); // Close dialog
                 Navigator.of(context).pop(); // Go back to list
               }

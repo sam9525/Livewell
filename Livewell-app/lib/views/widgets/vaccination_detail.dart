@@ -110,18 +110,18 @@ class VaccinationDetail extends StatelessWidget {
             ],
 
             // Location Card
-            if (vaccination.location.isNotEmpty) ...[
+            if (vaccination.location != '') ...[
               _buildInfoCard(
                 'Location',
-                vaccination.location,
+                vaccination.location ?? '',
                 Icons.location_on,
               ),
             ],
             const SizedBox(height: 15),
 
             // Notes Card (if available)
-            if (vaccination.notes.isNotEmpty) ...[
-              _buildInfoCard('Notes', vaccination.notes, Icons.notes),
+            if (vaccination.notes != '') ...[
+              _buildInfoCard('Notes', vaccination.notes ?? '', Icons.notes),
             ],
             const SizedBox(height: 30),
 
@@ -253,11 +253,11 @@ class VaccinationDetail extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              if (vaccination.id != null) {
+              if (vaccination.vacId != '') {
                 Provider.of<VaccinationProvider>(
                   context,
                   listen: false,
-                ).deleteVaccination(vaccination.id!);
+                ).deleteVaccination(vaccination.vacId);
                 Navigator.of(context).pop(); // Close dialog
                 Navigator.of(context).pop(); // Go back to list
               }

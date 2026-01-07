@@ -34,8 +34,8 @@ class _VaccinationFormState extends State<VaccinationForm> {
   void _populateForm() {
     final vaccination = widget.vaccination!;
     _nameController.text = vaccination.name;
-    _locationController.text = vaccination.location;
-    _notesController.text = vaccination.notes;
+    _locationController.text = vaccination.location ?? '';
+    _notesController.text = vaccination.notes ?? '';
     _selectedDoseDate = vaccination.doseDate;
     _selectedNextDoseDate = vaccination.nextDoseDate;
   }
@@ -87,7 +87,7 @@ class _VaccinationFormState extends State<VaccinationForm> {
   void _saveVaccination() async {
     if (_formKey.currentState!.validate()) {
       final vaccination = Vaccination(
-        id: widget.vaccination?.id, // Preserve ID for updates, null for new
+        vacId: widget.vaccination?.vacId ?? '',
         name: _nameController.text.trim(),
         doseDate: _selectedDoseDate,
         nextDoseDate: _selectedNextDoseDate,

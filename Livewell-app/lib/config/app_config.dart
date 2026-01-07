@@ -36,8 +36,10 @@ class AppConfig {
       '/tracking/today/targets/google';
 
   // Health endpoints
-  static const String medicationEndpoint = '/health/medications';
-  static const String vaccineEndpoint = '/health/vaccinations';
+  static const String medicationEmailEndpoint = '/health/medications/email';
+  static const String medicationGoogleEndpoint = '/health/medications/google';
+  static const String vaccineEmailEndpoint = '/health/vaccinations/email';
+  static const String vaccineGoogleEndpoint = '/health/vaccinations/google';
 
   // Recommendation endpoints
   static const String suggestEndpoint = '/goals/suggested';
@@ -78,8 +80,11 @@ class AppConfig {
       '$apiBaseUrl$trackingTodayTargetGoogleEndpoint';
 
   // Get health endpoints
-  static String get medicationUrl => '$apiBaseUrl$medicationEndpoint';
-  static String get vaccineUrl => '$apiBaseUrl$vaccineEndpoint';
+  static String get medicationEmailUrl => '$apiBaseUrl$medicationEmailEndpoint';
+  static String get medicationGoogleUrl =>
+      '$apiBaseUrl$medicationGoogleEndpoint';
+  static String get vaccineEmailUrl => '$apiBaseUrl$vaccineEmailEndpoint';
+  static String get vaccineGoogleUrl => '$apiBaseUrl$vaccineGoogleEndpoint';
 
   // Get recommendation endpoints
   static String get suggestUrl => '$apiBaseUrl$suggestEndpoint';

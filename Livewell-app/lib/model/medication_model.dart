@@ -1,5 +1,5 @@
 class Medication {
-  final String? id; // Optional - provided by database for existing records
+  final String medId;
   final String name;
   final int dosage;
   final String dosageUnit;
@@ -7,21 +7,21 @@ class Medication {
   final String time;
   final DateTime startDate;
   final int? durationDays;
-  final String notes;
+  final String? notes;
 
   // Backend field name constants
-  static const String _fieldId = 'id';
+  static const String _fieldMedId = 'med_id';
   static const String _fieldName = 'name';
-  static const String _fieldDosageValue = 'dosageValue';
-  static const String _fieldDosageUnit = 'dosageUnit';
-  static const String _fieldFrequencyType = 'frequencyType';
-  static const String _fieldFrequencyTime = 'frequencyTime';
-  static const String _fieldStartDate = 'startDate';
-  static const String _fieldDurationDays = 'durationDays';
+  static const String _fieldDosageValue = 'dose_value';
+  static const String _fieldDosageUnit = 'dose_unit';
+  static const String _fieldFrequencyType = 'frequency_type';
+  static const String _fieldFrequencyTime = 'frequency_time';
+  static const String _fieldStartDate = 'start_date';
+  static const String _fieldDurationDays = 'durations';
   static const String _fieldNotes = 'notes';
 
   const Medication({
-    this.id, // Optional for new medications, required for updates
+    required this.medId,
     required this.name,
     required this.dosage,
     required this.dosageUnit,
@@ -29,7 +29,7 @@ class Medication {
     required this.time,
     required this.startDate,
     this.durationDays,
-    required this.notes,
+    this.notes,
   });
 
   // Helper method to build common map fields
@@ -56,9 +56,7 @@ class Medication {
   // Convert to Map for storage (includes id for updates)
   Map<String, dynamic> toMap() {
     final map = _buildBaseMap();
-    if (id != null) {
-      map[_fieldId] = id;
-    }
+    map[_fieldMedId] = medId;
     return map;
   }
 
@@ -68,7 +66,7 @@ class Medication {
   // Create from Map (receives id from database)
   factory Medication.fromMap(Map<String, dynamic> map) {
     return Medication(
-      id: map[_fieldId]?.toString(),
+      medId: map[_fieldMedId].toString(),
       name: (map[_fieldName] ?? '').toString(),
       dosage: (map[_fieldDosageValue] ?? 0).toInt(),
       dosageUnit: (map[_fieldDosageUnit] ?? '').toString(),
@@ -77,10 +75,10 @@ class Medication {
       startDate: DateTime.parse(
         map[_fieldStartDate] ?? DateTime.now().toIso8601String(),
       ),
-      durationDays: map[_fieldDurationDays] != null
+      durationDays: map[_fieldDurationDays] != ''
           ? (map[_fieldDurationDays] is int
-              ? map[_fieldDurationDays]
-              : int.tryParse(map[_fieldDurationDays].toString()))
+                ? map[_fieldDurationDays]
+                : int.tryParse(map[_fieldDurationDays].toString()))
           : null,
       notes: (map[_fieldNotes] ?? '').toString(),
     );
@@ -88,7 +86,7 @@ class Medication {
 
   // Copy with method for updates
   Medication copyWith({
-    String? id,
+    String? medId,
     String? name,
     double? dosage,
     String? dosageUnit,
@@ -99,7 +97,7 @@ class Medication {
     String? notes,
   }) {
     return Medication(
-      id: id ?? this.id,
+      medId: medId ?? this.medId,
       name: name ?? this.name,
       dosage: dosage?.toInt() ?? this.dosage,
       dosageUnit: dosageUnit ?? this.dosageUnit,

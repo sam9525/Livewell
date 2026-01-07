@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:livewell_app/shared/user_provider.dart';
 import 'dart:convert';
 import '../model/vaccination_model.dart';
 import '../config/app_config.dart';
@@ -33,7 +34,11 @@ class VaccinationProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse(AppConfig.vaccineUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.vaccineEmailUrl
+              : AppConfig.vaccineGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
@@ -63,17 +68,17 @@ class VaccinationProvider with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse(AppConfig.vaccineUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.vaccineEmailUrl
+              : AppConfig.vaccineGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: json.encode(vaccination.toCreateMap()),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final newVaccination = Vaccination.fromMap(responseData);
-        _vaccinations.add(newVaccination);
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
         _handleError(
@@ -96,7 +101,7 @@ class VaccinationProvider with ChangeNotifier {
   // Update an existing vaccination
   Future<bool> updateVaccination(Vaccination vaccination) async {
     // Ensure vaccination has an ID for update
-    if (vaccination.id == null) {
+    if (vaccination.vacId == '') {
       _error = 'Cannot update vaccination: ID is required';
       debugPrint(_error);
       return false;
@@ -108,22 +113,21 @@ class VaccinationProvider with ChangeNotifier {
 
     try {
       final response = await http.put(
-        Uri.parse('${AppConfig.vaccineUrl}/${vaccination.id}'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.vaccineEmailUrl : AppConfig.vaccineGoogleUrl}/${vaccination.vacId}',
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: json.encode(vaccination.toMap()),
       );
 
       if (response.statusCode == 200) {
-        final index = _vaccinations.indexWhere((v) => v.id == vaccination.id);
-        if (index != -1) {
-          final Map<String, dynamic> responseData = json.decode(response.body);
-          _vaccinations[index] = Vaccination.fromMap(responseData);
-        }
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
-        _handleError('Failed to update vaccination', 'HTTP ${response.statusCode}');
+        _handleError(
+          'Failed to update vaccination',
+          'HTTP ${response.statusCode}',
+        );
         return false;
       }
     } catch (e) {
@@ -140,17 +144,20 @@ class VaccinationProvider with ChangeNotifier {
 
     try {
       final response = await http.delete(
-        Uri.parse('${AppConfig.vaccineUrl}/$vaccinationId'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.vaccineEmailUrl : AppConfig.vaccineGoogleUrl}/$vaccinationId',
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        _vaccinations.removeWhere((vaccination) => vaccination.id == vaccinationId);
-        _isLoading = false;
-        notifyListeners();
+        debugPrint("Backend Message: ${response.body}");
         return true;
       } else {
-        _handleError('Failed to delete vaccination', 'HTTP ${response.statusCode}');
+        _handleError(
+          'Failed to delete vaccination',
+          'HTTP ${response.statusCode}',
+        );
         return false;
       }
     } catch (e) {
@@ -164,14 +171,16 @@ class VaccinationProvider with ChangeNotifier {
     // First check local cache
     try {
       final cachedVaccination = _vaccinations.firstWhere(
-        (vaccination) => vaccination.id == id,
+        (vaccination) => vaccination.vacId == id,
       );
       return cachedVaccination;
     } catch (e) {
       // Not in cache, fetch from backend
       try {
         final response = await http.get(
-          Uri.parse('${AppConfig.vaccineUrl}/$id'),
+          Uri.parse(
+            '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.vaccineEmailUrl : AppConfig.vaccineGoogleUrl}/$id',
+          ),
           headers: BackendAuth().getAuthHeaders(),
         );
 
