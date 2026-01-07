@@ -4,7 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from routers import google_auth, profile, fcm_noti, tracking_data
+from routers import (
+    google_auth,
+    profile,
+    fcm_noti,
+    tracking_data,
+    medications,
+)
 
 app = FastAPI()
 
@@ -33,3 +39,4 @@ app.include_router(google_auth.router)
 app.include_router(profile.router)
 app.include_router(fcm_noti.router)
 app.include_router(tracking_data.router)
+app.include_router(medications.router)
