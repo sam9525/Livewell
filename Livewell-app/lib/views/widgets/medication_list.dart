@@ -93,7 +93,11 @@ class _MedicationListState extends State<MedicationList>
             body: Consumer<MedicationProvider>(
               builder: (context, medicationProvider, child) {
                 if (medicationProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Shared.orange),
+                    ),
+                  );
                 }
 
                 if (medicationProvider.medications.isEmpty) {
@@ -349,7 +353,7 @@ class _MedicationListState extends State<MedicationList>
                     ],
                   ),
                 ],
-                if (medication.notes.isNotEmpty) ...[
+                if (medication.notes != '') ...[
                   const SizedBox(height: 10),
                   Container(
                     width: double.infinity,
@@ -359,7 +363,7 @@ class _MedicationListState extends State<MedicationList>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      medication.notes,
+                      medication.notes ?? '',
                       style: Shared.fontStyle(14, FontWeight.w400, Shared.gray),
                     ),
                   ),
@@ -410,19 +414,19 @@ class _MedicationListState extends State<MedicationList>
   void _navigateToDetail(Medication medication) {
     Navigator.of(context)
         .push(
-      MaterialPageRoute(
-        builder: (context) => MedicationDetail(medication: medication),
-      ),
-    )
+          MaterialPageRoute(
+            builder: (context) => MedicationDetail(medication: medication),
+          ),
+        )
         .then((_) {
-      // Refresh the list when returning from detail view
-      if (mounted) {
-        Provider.of<MedicationProvider>(
-          context,
-          listen: false,
-        ).loadMedications();
-      }
-    });
+          // Refresh the list when returning from detail view
+          if (mounted) {
+            Provider.of<MedicationProvider>(
+              context,
+              listen: false,
+            ).loadMedications();
+          }
+        });
   }
 
   void _navigateToChatbot() {
@@ -465,12 +469,19 @@ class _MedicationListState extends State<MedicationList>
           ),
           TextButton(
             onPressed: () {
-              if (medication.id != null) {
+              if (medication.medId != '') {
                 Provider.of<MedicationProvider>(
                   context,
                   listen: false,
-                ).deleteMedication(medication.id!);
+                ).deleteMedication(medication.medId);
                 Navigator.of(context).pop();
+                // Reload the page
+                if (mounted) {
+                  Provider.of<MedicationProvider>(
+                    context,
+                    listen: false,
+                  ).loadMedications();
+                }
               }
             },
             child: Text(

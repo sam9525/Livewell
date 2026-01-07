@@ -40,7 +40,7 @@ class _MedicationFormState extends State<MedicationForm> {
     _dosageController.text = medication.dosage.toString();
     _selectedDosageUnit = medication.dosageUnit;
     _selectedFrequency = medication.frequency;
-    _notesController.text = medication.notes;
+    _notesController.text = medication.notes ?? '';
     _selectedStartDate = medication.startDate;
     _durationController.text = medication.durationDays?.toString() ?? '';
 
@@ -90,9 +90,7 @@ class _MedicationFormState extends State<MedicationForm> {
   void _saveMedication() async {
     if (_formKey.currentState!.validate()) {
       final medication = Medication(
-        id: widget
-            .medication
-            ?.id, // Preserve existing ID for updates, null for new
+        medId: widget.medication?.medId ?? '',
         name: _nameController.text.trim(),
         dosage: int.parse(_dosageController.text),
         dosageUnit: _selectedDosageUnit,
@@ -101,9 +99,11 @@ class _MedicationFormState extends State<MedicationForm> {
             '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
         startDate: _selectedStartDate,
         durationDays: _durationController.text.trim().isNotEmpty
-            ? int.tryParse(_durationController.text.trim())
+            ? int.parse(_durationController.text.trim())
             : null,
-        notes: _notesController.text.trim(),
+        notes: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
+            : "",
       );
 
       final medicationProvider = Provider.of<MedicationProvider>(
