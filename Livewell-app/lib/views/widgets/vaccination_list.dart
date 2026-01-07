@@ -282,7 +282,7 @@ class _VaccinationListState extends State<VaccinationList>
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            vaccination.location,
+                            vaccination.location ?? '',
                             style: Shared.fontStyle(
                               16,
                               FontWeight.w500,
@@ -348,7 +348,7 @@ class _VaccinationListState extends State<VaccinationList>
                     ],
                   ),
                 ],
-                if (vaccination.notes.isNotEmpty) ...[
+                if (vaccination.notes != '') ...[
                   const SizedBox(height: 10),
                   Container(
                     width: double.infinity,
@@ -358,7 +358,7 @@ class _VaccinationListState extends State<VaccinationList>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      vaccination.notes,
+                      vaccination.notes ?? '',
                       style: Shared.fontStyle(14, FontWeight.w400, Shared.gray),
                     ),
                   ),
@@ -409,19 +409,19 @@ class _VaccinationListState extends State<VaccinationList>
   void _navigateToDetail(Vaccination vaccination) {
     Navigator.of(context)
         .push(
-      MaterialPageRoute(
-        builder: (context) => VaccinationDetail(vaccination: vaccination),
-      ),
-    )
+          MaterialPageRoute(
+            builder: (context) => VaccinationDetail(vaccination: vaccination),
+          ),
+        )
         .then((_) {
-      // Refresh the list when returning from detail view
-      if (mounted) {
-        Provider.of<VaccinationProvider>(
-          context,
-          listen: false,
-        ).loadVaccinations();
-      }
-    });
+          // Refresh the list when returning from detail view
+          if (mounted) {
+            Provider.of<VaccinationProvider>(
+              context,
+              listen: false,
+            ).loadVaccinations();
+          }
+        });
   }
 
   void _navigateToChatbot() {
@@ -464,12 +464,18 @@ class _VaccinationListState extends State<VaccinationList>
           ),
           TextButton(
             onPressed: () {
-              if (vaccination.id != null) {
+              if (vaccination.vacId != '') {
                 Provider.of<VaccinationProvider>(
                   context,
                   listen: false,
-                ).deleteVaccination(vaccination.id!);
+                ).deleteVaccination(vaccination.vacId);
                 Navigator.of(context).pop();
+
+                // Reload page
+                Provider.of<VaccinationProvider>(
+                  context,
+                  listen: false,
+                ).loadVaccinations();
               }
             },
             child: Text(
