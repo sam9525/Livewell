@@ -16,8 +16,8 @@ def register_device(payload: dict, body: dict):
     """
     Check and insert the device token to the user's fcm_tokens table
 
-    Args: Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
-    Returns: Success message
+    Args:
+        Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
     """
     user_id = payload["sub"]
 
@@ -31,7 +31,6 @@ def register_device(payload: dict, body: dict):
             }
         ).execute()
 
-        return {"Device token registered successfully"}
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to register device token: {str(e)}"
@@ -45,14 +44,19 @@ async def register_device_email(
     """
     Register the device token to the user (email)
 
-    Args: Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
-    Returns: Success message
+    Args:
+        Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
+
+    Returns:
+        success message
     """
 
     # Verify jwt
     payload = await verify_es256_token(authorization)
 
     register_device(payload, body)
+
+    return {"Device token registered successfully"}
 
 
 @router.post("/register-device/google")
@@ -62,14 +66,18 @@ async def register_device_google(
     """
     Register the device token to the user (google)
 
-    Args: Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
-    Returns: Success message
+    Args:
+        Authorization header (contains jwt token) and body dictionary (contains user's device token and type)
+    Returns:
+        Success message
     """
 
     # Verify jwt
     payload = await verify_hs256_token(authorization)
 
     register_device(payload, body)
+
+    return {"Device token registered successfully"}
 
 
 def unregister_device(payload: dict):
@@ -85,7 +93,6 @@ def unregister_device(payload: dict):
         # Delete from fcm_tokens table
         supabase_admin.table("fcm_tokens").delete().eq("id", user_id).execute()
 
-        return {"Device token unregistered successfully"}
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to unregister device token: {str(e)}"
@@ -97,8 +104,10 @@ async def unregister_device_email(authorization: str = Header(...)):
     """
     Unregister the device token from the user (email)
 
-    Args: Authorization header (contains jwt token)
-    Returns: Success message
+    Args:
+        Authorization header (contains jwt token)
+    Returns:
+        Success message
     """
 
     # Verify jwt
@@ -106,17 +115,23 @@ async def unregister_device_email(authorization: str = Header(...)):
 
     unregister_device(payload)
 
+    return {"Device token unregistered successfully"}
+
 
 @router.post("/unregister-device/google")
 async def unregister_device_google(authorization: str = Header(...)):
     """
     Unregister the device token from the user (google)
 
-    Args: Authorization header (contains jwt token)
-    Returns: Success message
+    Args:
+        Authorization header (contains jwt token)
+    Returns:
+        Success message
     """
 
     # Verify jwt
     payload = await verify_hs256_token(authorization)
 
     unregister_device(payload)
+
+    return {"Device token unregistered successfully"}
