@@ -136,7 +136,7 @@ class _ChatbotState extends State<Chatbot> {
   }
 
   // Function to chat with the AI
-  static Future<String> chatWithAI(String url, String message) async {
+  static Future<String> chatWithAI(String message) async {
     try {
       // Get the jwt token from the shared preferences
       final jwtToken =
@@ -146,7 +146,11 @@ class _ChatbotState extends State<Chatbot> {
 
       var chatbotResponse = await http
           .post(
-            Uri.parse(url),
+            Uri.parse(
+              UserProvider.instance?.isEmailSignedIn == true
+                  ? AppConfig.chatbotEmailUrl
+                  : AppConfig.chatbotGoogleUrl,
+            ),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $jwtToken',
@@ -157,9 +161,12 @@ class _ChatbotState extends State<Chatbot> {
 
       if (chatbotResponse.statusCode == 200) {
         final responseBody = jsonDecode(chatbotResponse.body);
-        return responseBody['reply'];
+        debugPrint("Chatbot response: $responseBody");
+        return responseBody;
       } else {
-        debugPrint("Chatbot error: ${chatbotResponse.statusCode}");
+        debugPrint(
+          "Chatbot error: ${chatbotResponse.statusCode}, body: ${chatbotResponse.body}",
+        );
         return "Error: ${chatbotResponse.statusCode}";
       }
     } catch (e) {
@@ -182,7 +189,7 @@ class _ChatbotState extends State<Chatbot> {
       chatHistoryNotifier.value = List.from(chatHistory);
 
       // Get AI response
-      final response = await chatWithAI(AppConfig.chatbotUrl, message);
+      final response = await chatWithAI(message);
 
       // Remove loading message and add actual response
       chatHistory.removeLast();
