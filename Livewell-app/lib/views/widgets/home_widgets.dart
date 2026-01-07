@@ -630,12 +630,14 @@ class _CalanderState extends State<Calander> {
       DateTime.now().toIso8601String().split('T').first,
     );
 
-    final logs = stepsData?['logs'];
-
-    for (var value in logs) {
-      if (value['currentSteps'].toInt() > value['targetSteps'].toInt()) {
-        specialDates.add(DateTime.parse(value['logDate']));
-      }
+    if (stepsData != null) {
+      setState(() {
+        for (var value in stepsData) {
+          if (value['current_steps'] >= value['target_steps']) {
+            specialDates.add(DateTime.parse(value['today_date']));
+          }
+        }
+      });
     }
   }
 

@@ -20,11 +20,20 @@ class AppConfig {
   static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
   static const String chatbotEndpoint = '/chat';
+
+  // Profile endpoints
   static const String profileEmailEndpoint = '/profile/email';
   static const String profileGoogleEndpoint = '/profile/google';
-  static const String trackingEndpoint = '/tracking';
-  static const String trackingTodayEndpoint = '/tracking/today';
-  static const String trackingTodayTargetEndpoint = '/tracking/today/targets';
+
+  // Tracking endpoints
+  static const String trackingEmailEndpoint = '/tracking/email';
+  static const String trackingGoogleEndpoint = '/tracking/google';
+  static const String trackingTodayEmailEndpoint = '/tracking/today/email';
+  static const String trackingTodayGoogleEndpoint = '/tracking/today/google';
+  static const String trackingTodayTargetEmailEndpoint =
+      '/tracking/today/targets/email';
+  static const String trackingTodayTargetGoogleEndpoint =
+      '/tracking/today/targets/google';
 
   // Health endpoints
   static const String medicationEndpoint = '/health/medications';
@@ -57,10 +66,16 @@ class AppConfig {
   static String get chatbotUrl => '$apiBaseUrl$chatbotEndpoint';
   static String get profileEmailUrl => '$apiBaseUrl$profileEmailEndpoint';
   static String get profileGoogleUrl => '$apiBaseUrl$profileGoogleEndpoint';
-  static String get trackingUrl => '$apiBaseUrl$trackingEndpoint';
-  static String get trackingTodayUrl => '$apiBaseUrl$trackingTodayEndpoint';
-  static String get trackingTodayTargetUrl =>
-      '$apiBaseUrl$trackingTodayTargetEndpoint';
+  static String get trackingEmailUrl => '$apiBaseUrl$trackingEmailEndpoint';
+  static String get trackingGoogleUrl => '$apiBaseUrl$trackingGoogleEndpoint';
+  static String get trackingTodayEmailUrl =>
+      '$apiBaseUrl$trackingTodayEmailEndpoint';
+  static String get trackingTodayGoogleUrl =>
+      '$apiBaseUrl$trackingTodayGoogleEndpoint';
+  static String get trackingTodayTargetEmailUrl =>
+      '$apiBaseUrl$trackingTodayTargetEmailEndpoint';
+  static String get trackingTodayTargetGoogleUrl =>
+      '$apiBaseUrl$trackingTodayTargetGoogleEndpoint';
 
   // Get health endpoints
   static String get medicationUrl => '$apiBaseUrl$medicationEndpoint';

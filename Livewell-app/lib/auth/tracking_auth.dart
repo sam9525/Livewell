@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
+import 'package:livewell_app/shared/user_provider.dart';
 import '../config/app_config.dart';
 import 'dart:convert';
 import 'backend_auth.dart';
@@ -7,12 +8,12 @@ import 'package:flutter/foundation.dart';
 
 class TrackingAuth {
   // Fetch the tracking data for a given week
-  static Future<Map<String, dynamic>?> getTracking(
+  static Future<List<Map<String, dynamic>>?> getTracking(
     String startOfWeek,
     String endOfWeek,
   ) async {
     String url =
-        '${AppConfig.trackingUrl}?start_date=$startOfWeek&end_date=$endOfWeek';
+        '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.trackingEmailUrl : AppConfig.trackingGoogleUrl}?start_date=$startOfWeek&end_date=$endOfWeek';
 
     final response = await http.get(
       Uri.parse(url),
@@ -20,8 +21,12 @@ class TrackingAuth {
     );
 
     if (response.statusCode == 200) {
-      final tracking = jsonDecode(response.body);
-      return tracking;
+      var tracking = jsonDecode(response.body);
+      debugPrint('Tracking: $tracking');
+      if (tracking is List && tracking.isNotEmpty) {
+        return List<Map<String, dynamic>>.from(tracking);
+      }
+      return null;
     } else {
       throw Exception('Failed to get tracking: ${response.statusCode}');
     }
@@ -30,18 +35,29 @@ class TrackingAuth {
   // Fetch the tracking data for today
   static Future<Map<String, dynamic>?> getTrackingToday() async {
     final response = await http.get(
-      Uri.parse(AppConfig.trackingTodayUrl),
+      Uri.parse(
+        UserProvider.instance?.isEmailSignedIn == true
+            ? AppConfig.trackingTodayEmailUrl
+            : AppConfig.trackingTodayGoogleUrl,
+      ),
       headers: BackendAuth().getAuthHeaders(),
     );
 
     if (response.statusCode == 200) {
-      final tracking = jsonDecode(response.body);
-      debugPrint('Tracking: $tracking');
+      var tracking = jsonDecode(response.body);
+
+      if (tracking is List && tracking.isNotEmpty) {
+        tracking = tracking.first;
+      }
 
       final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
-      prefs?.setInt('current_water_intake', tracking['currentWaterIntakeMl']);
-      prefs?.setInt('target_water_intake', tracking['targetWaterIntakeMl']);
-      return tracking;
+      prefs?.setInt(
+        'current_water_intake',
+        tracking['current_water_intake_ml'],
+      );
+      prefs?.setInt('target_water_intake', tracking['target_water_intake_ml']);
+      prefs?.setInt('target_steps', tracking['target_steps']);
+      return tracking as Map<String, dynamic>;
     } else {
       throw Exception('Failed to get tracking: ${response.statusCode}');
     }
@@ -50,9 +66,16 @@ class TrackingAuth {
   // Update the tracking data for today
   static Future<bool> putTodayTracking(int steps, int waterIntakeMl) async {
     final response = await http.put(
-      Uri.parse(AppConfig.trackingTodayUrl),
+      Uri.parse(
+        UserProvider.instance?.isEmailSignedIn == true
+            ? AppConfig.trackingTodayEmailUrl
+            : AppConfig.trackingTodayGoogleUrl,
+      ),
       headers: BackendAuth().getAuthHeaders(),
-      body: jsonEncode({'steps': steps, 'waterIntakeMl': waterIntakeMl}),
+      body: jsonEncode({
+        'current_steps': steps,
+        'current_water_intake_ml': waterIntakeMl,
+      }),
     );
     getTrackingToday();
 
@@ -85,9 +108,16 @@ class TrackingAuth {
       }
 
       final response = await http.put(
-        Uri.parse(AppConfig.trackingTodayUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.trackingTodayEmailUrl
+              : AppConfig.trackingTodayGoogleUrl,
+        ),
         headers: authHeaders,
-        body: jsonEncode({'steps': steps, 'waterIntakeMl': waterIntakeMl}),
+        body: jsonEncode({
+          'current_steps': steps,
+          'current_water_intake_ml': waterIntakeMl,
+        }),
       );
 
       await getTrackingToday();
@@ -110,21 +140,29 @@ class TrackingAuth {
     int targetWaterIntakeMl,
   ) async {
     try {
+      debugPrint(
+        'Updating tracking targets: $targetSteps, $targetWaterIntakeMl',
+      );
       final response = await http.put(
-        Uri.parse(AppConfig.trackingTodayTargetUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.trackingTodayTargetEmailUrl
+              : AppConfig.trackingTodayTargetGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: jsonEncode({
-          'targetSteps': targetSteps,
-          'targetWaterIntakeMl': targetWaterIntakeMl,
+          'target_steps': targetSteps,
+          'target_water_intake_ml': targetWaterIntakeMl,
         }),
       );
-      getTrackingToday();
+      await getTrackingToday();
 
       if (response.statusCode == 200) {
         debugPrint('Tracking updated successfully');
 
         final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
         prefs?.setInt('target_water_intake', targetWaterIntakeMl);
+        prefs?.setInt('target_steps', targetSteps);
 
         return true;
       } else {

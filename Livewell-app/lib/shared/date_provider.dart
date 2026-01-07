@@ -69,6 +69,7 @@ class DateProvider extends ChangeNotifier {
         startDate,
         endDate,
       );
+      debugPrint('Weekly steps: $currentWeeklySteps');
 
       if (currentWeeklySteps.isNotEmpty) {
         weeklySteps.add(currentWeeklySteps);
@@ -82,18 +83,20 @@ class DateProvider extends ChangeNotifier {
 
   // Extract the weekly steps from the tracking data
   List<double> _extractWeeklySteps(
-    Map<String, dynamic>? trackingData,
+    List<Map<String, dynamic>>? trackingData,
     String startDate,
     String endDate,
   ) {
-    final logs = trackingData?['logs'] as List<dynamic>? ?? [];
-
     // Create lookup map for O(1) access
-    final logMap = <String, double>{
-      for (final log in logs)
-        if (log['logDate'] != null)
-          log['logDate']: (log['currentSteps'] ?? 0) / 1000,
-    };
+    final logMap = <String, double>{};
+    if (trackingData != null) {
+      for (final value in trackingData) {
+        if (value['today_date'] != null) {
+          logMap[value['today_date']] = (value['current_steps'] ?? 0) / 1000;
+        }
+      }
+    }
+    debugPrint('Log map: $logMap');
 
     // Generate steps for each day in the week
     final weeklySteps = <double>[];
@@ -123,7 +126,7 @@ class DateProvider extends ChangeNotifier {
         previousWeekBounds.end,
       );
 
-      final hasData = previousWeekData?['logs']?.isNotEmpty == true;
+      final hasData = previousWeekData != null && previousWeekData.isNotEmpty;
       hasPreviousWeek = hasData;
 
       if (hasData) {
