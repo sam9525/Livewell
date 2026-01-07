@@ -10,6 +10,7 @@ from routers import (
     fcm_noti,
     tracking_data,
     medications,
+    vaccinations,
 )
 
 app = FastAPI()
@@ -40,3 +41,4 @@ app.include_router(profile.router)
 app.include_router(fcm_noti.router)
 app.include_router(tracking_data.router)
 app.include_router(medications.router)
+app.include_router(vaccinations.router)
