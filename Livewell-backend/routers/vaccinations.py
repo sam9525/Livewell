@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 
 
-router = APIRouter(prefix="/api/health", tags=["health"])
+router = APIRouter(prefix="/api/health/vaccinations", tags=["health"])
 
 
 # ============================================================================
