@@ -1,34 +1,12 @@
 from fastapi import APIRouter, HTTPException, Header, Body
-from pydantic import BaseModel
-from utils.jwt_handler import verify_es256_token, verify_hs256_token
-from dotenv import load_dotenv
-from supabase import Client, create_client
-import os
+from utils import init_supabase, verify_es256_token, verify_hs256_token
 from datetime import datetime
-from typing import Optional
+from models import VaccinationRequest
 
-
-router = APIRouter(prefix="/api/health", tags=["health"])
-
-
-# ============================================================================
-# Request Models
-# ============================================================================
-
-
-class VaccinationRequest(BaseModel):
-    name: str
-    dose_date: str
-    next_dose_date: Optional[str] = None
-    location: Optional[str] = None
-    notes: Optional[str] = None
-
+router = APIRouter(prefix="/api/health/vaccinations", tags=["health"])
 
 # Init supabase admin
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase_admin: Client = create_client(url, key)
-
+supabase_admin = init_supabase()
 
 # ============================================================================
 # Functions for Vaccinations
