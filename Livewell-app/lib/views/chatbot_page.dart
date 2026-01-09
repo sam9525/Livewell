@@ -136,7 +136,13 @@ class _ChatbotState extends State<Chatbot> {
   }
 
   // Function to chat with the AI
-  static Future<String> chatWithAI(String message) async {
+  static Future<void> chatWithAI(
+    String message, {
+    required Function(String chunk) onChunk,
+    required Function() onDone,
+    required Function(String error) onError,
+  }) async {
+    final client = http.Client();
     try {
       // Get the jwt token from the shared preferences
       final jwtToken =
@@ -144,34 +150,47 @@ class _ChatbotState extends State<Chatbot> {
           SharedPreferencesProvider.backgroundPrefs?.getString('jwt_token') ??
           '';
 
-      var chatbotResponse = await http
-          .post(
-            Uri.parse(
-              UserProvider.instance?.isEmailSignedIn == true
-                  ? AppConfig.chatbotEmailUrl
-                  : AppConfig.chatbotGoogleUrl,
-            ),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $jwtToken',
-            },
-            body: jsonEncode({'message': message}),
-          )
-          .timeout(Duration(seconds: 30));
+      // Call api
+      final request = http.Request(
+        'POST',
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.chatbotEmailUrl
+              : AppConfig.chatbotGoogleUrl,
+        ),
+      );
 
-      if (chatbotResponse.statusCode == 200) {
-        final responseBody = jsonDecode(chatbotResponse.body);
-        debugPrint("Chatbot response: $responseBody");
-        return responseBody;
+      request.headers.addAll({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      });
+      request.body = jsonEncode({'message': message});
+
+      final streamedResponse = await client.send(request);
+
+      if (streamedResponse.statusCode == 200) {
+        streamedResponse.stream
+            .transform(utf8.decoder)
+            .listen(
+              (chunk) {
+                onChunk(chunk);
+              },
+              onDone: () {
+                onDone();
+                client.close();
+              },
+              onError: (error) {
+                onError("Error: $error");
+                client.close();
+              },
+            );
       } else {
-        debugPrint(
-          "Chatbot error: ${chatbotResponse.statusCode}, body: ${chatbotResponse.body}",
-        );
-        return "Error: ${chatbotResponse.statusCode}";
+        onError("Server Error: ${streamedResponse.statusCode}");
+        client.close();
       }
     } catch (e) {
-      debugPrint("Error: $e");
-      return "Error: $e";
+      onError("Network Error: $e");
+      client.close();
     }
   }
 
@@ -184,17 +203,53 @@ class _ChatbotState extends State<Chatbot> {
       // Clear input
       inputController.clear();
 
-      // Show loading message
-      chatHistory.add(ChatMessage(text: "Typing...", isUser: false));
+      // Placeholder for AI response
+      final aiMessage = ChatMessage(text: "typing...", isUser: false);
+      chatHistory.add(aiMessage);
       chatHistoryNotifier.value = List.from(chatHistory);
 
-      // Get AI response
-      final response = await chatWithAI(message);
+      // Temporary string to build response
+      String fullResponse = "";
+      bool isFirstChunk = true;
 
-      // Remove loading message and add actual response
-      chatHistory.removeLast();
-      chatHistory.add(ChatMessage(text: response, isUser: false));
-      chatHistoryNotifier.value = List.from(chatHistory);
+      // Get AI response with streaming
+      await chatWithAI(
+        message,
+        onChunk: (chunk) {
+          if (isFirstChunk) {
+            fullResponse = chunk;
+            isFirstChunk = false;
+          } else {
+            fullResponse += chunk;
+          }
+
+          // Update the last message (AI placeholder)
+          if (chatHistory.isNotEmpty && !chatHistory.last.isUser) {
+            chatHistory.removeLast();
+            chatHistory.add(ChatMessage(text: fullResponse, isUser: false));
+            // Trigger UI update
+            chatHistoryNotifier.value = List.from(chatHistory);
+          }
+        },
+        onDone: () {
+          // Can do final cleanup if needed
+        },
+        onError: (error) {
+          // Handle error, maybe replace partial response with error message
+          if (chatHistory.isNotEmpty && !chatHistory.last.isUser) {
+            chatHistory.removeLast();
+            chatHistory.add(
+              ChatMessage(
+                text: fullResponse.isNotEmpty
+                    ? "$fullResponse\n[Error: $error]"
+                    : error,
+                isUser: false,
+              ),
+            );
+            chatHistoryNotifier.value = List.from(chatHistory);
+          }
+        },
+      );
     }
   }
 
