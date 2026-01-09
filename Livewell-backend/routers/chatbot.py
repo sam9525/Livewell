@@ -1,50 +1,18 @@
-from fastapi import APIRouter, HTTPException, Body, Header
-from pydantic import BaseModel
-from utils.jwt_handler import verify_hs256_token
 import os
-from supabase import Client, create_client
+from fastapi import APIRouter, HTTPException, Body, Header
 from google import genai
 from google.genai import types
 from datetime import datetime
-from routers.medications import (
-    create_medication,
-    get_medication_by_id,
-    update_medication,
-    delete_medication,
-    MedicationRequest,
-)
-from routers.vaccinations import (
-    create_vaccination,
-    get_vaccination_by_id,
-    update_vaccination,
-    delete_vaccination,
-    VaccinationRequest,
-)
-from utils.function_declaration import (
-    create_new_medication_list_declaration,
-    create_update_medication_list_declaration,
-    create_delete_medication_list_declaration,
-    create_new_vaccination_list_declaration,
-    create_update_vaccination_list_declaration,
-    create_delete_vaccination_list_declaration,
-)
+from utils import init_supabase
+from models import ChatbotRequest
+from routers import *
+from utils import *
 
 router = APIRouter(prefix="/api/chatbot", tags=["chatbot"])
 
 
-# ============================================================================
-# Request Models
-# ============================================================================
-
-
-class ChatbotRequest(BaseModel):
-    message: str
-
-
 # Init supabase admin
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase_admin: Client = create_client(url, key)
+supabase_admin = init_supabase()
 
 
 # Init Gemini
@@ -65,7 +33,7 @@ tools = types.Tool(
 # ============================================================================
 
 
-async def handle_function_calls(function_call):
+async def handle_function_calls(payload, client, body, function_call):
     """
     Handle function calls from Gemini
 
@@ -222,7 +190,9 @@ async def chatbot(payload: dict, body: ChatbotRequest):
 
     # Check and handle function calls
     if function_call:
-        response_result = await handle_function_calls(function_call)
+        response_result = await handle_function_calls(
+            payload, client, body, function_call
+        )
 
     return response.text
 
@@ -230,6 +200,26 @@ async def chatbot(payload: dict, body: ChatbotRequest):
 # ============================================================================
 # API
 # ============================================================================
+
+
+@router.post("/email")
+async def chat_google(
+    authorization: str = Header(...), body: ChatbotRequest = Body(...)
+):
+    """
+    Chat with AI chatbot
+
+    Args:
+        authorization (str): Authorization header (contains jwt token)
+        body (dict): Body dictionary (contains user's information)
+
+    Returns:
+        Response message from AI chatbot
+    """
+
+    payload = await verify_es256_token(authorization)
+
+    return await chatbot(payload, body)
 
 
 @router.post("/google")

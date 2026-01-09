@@ -1,34 +1,14 @@
 from fastapi import APIRouter, HTTPException, Header, Body, Query
-from pydantic import BaseModel
-from utils.jwt_handler import verify_es256_token, verify_hs256_token
-from dotenv import load_dotenv
-from supabase import Client, create_client
-import os
+from utils import init_supabase, verify_es256_token, verify_hs256_token
 from datetime import datetime, timedelta
+from models import UpdateCurrentTrackingRequest, UpdateTargetTrackingRequest
 from typing import Optional
 
 router = APIRouter(prefix="/api/tracking", tags=["tracking"])
 
 
-# ============================================================================
-# Request Models
-# ============================================================================
-
-
-class UpdateCurrentTrackingRequest(BaseModel):
-    current_steps: int
-    current_water_intake_ml: int
-
-
-class UpdateTargetTrackingRequest(BaseModel):
-    target_steps: int
-    target_water_intake_ml: int
-
-
 # Init supabase admin
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase_admin: Client = create_client(url, key)
+supabase_admin = init_supabase()
 
 
 # ============================================================================
