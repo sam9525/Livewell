@@ -1,5 +1,6 @@
 import os
 from fastapi import APIRouter, HTTPException, Body, Header
+from fastapi.responses import StreamingResponse
 from google import genai
 from google.genai import types
 from datetime import datetime
@@ -33,15 +34,22 @@ tools = types.Tool(
 # ============================================================================
 
 
-async def handle_function_calls(payload, client, body, function_call):
+async def handle_function_calls(
+    payload: dict,
+    client: genai.Client,
+    body: ChatbotRequest,
+    function_call: types.FunctionCall,
+    history_content: types.Content,
+):
     """
     Handle function calls from Gemini
 
     Args:
         function_call (FunctionCall): Function call object, including function name and arguments
+        history_content (Content): The model's response content containing the function call
 
     Returns:
-        Response message from AI chatbot
+        AsyncGenerator: Response message chunks from AI chatbot
     """
     function_name = function_call.name
     args = dict(function_call.args)
@@ -130,17 +138,26 @@ async def handle_function_calls(payload, client, body, function_call):
             )
         )
 
-        success_response = client.models.generate_content(
+        success_response = client.models.generate_content_stream(
             model="gemini-3-flash-preview",
             contents=[
                 types.Content(role="user", parts=[types.Part(text=body.message)]),
-                response.candidates[0].content,
+                history_content,
                 types.Content(role="user", parts=[function_response_part]),
             ],
             config=config,
         )
 
-        return success_response.text
+        # Stream the response
+        for chunk in success_response:
+            if (
+                chunk.candidates
+                and chunk.candidates[0].content
+                and chunk.candidates[0].content.parts
+            ):
+                part = chunk.candidates[0].content.parts[0]
+                if part.text:
+                    yield part.text
 
 
 async def chatbot(payload: dict, body: ChatbotRequest):
@@ -178,23 +195,36 @@ async def chatbot(payload: dict, body: ChatbotRequest):
     )
 
     # Generate response, which will decide if it needs to call a function and which function to call, and return the response
-    response = client.models.generate_content(
+    response_stream = client.models.generate_content_stream(
         model="gemini-3-flash-preview",
         contents=body.message,
         config=config,
     )
 
-    # Check specifically for function calls
-    part = response.candidates[0].content.parts[0]
-    function_call = part.function_call
+    # Stream the response
+    for chunk in response_stream:
+        if (
+            chunk.candidates
+            and chunk.candidates[0].content
+            and chunk.candidates[0].content.parts
+        ):
+            part = chunk.candidates[0].content.parts[0]
 
-    # Check and handle function calls
-    if function_call:
-        response_result = await handle_function_calls(
-            payload, client, body, function_call
-        )
+            # Check for function calls
+            if part.function_call:
+                function_call = part.function_call
+                # Construct history content for the function call
+                history_content = types.Content(
+                    role="model", parts=[types.Part(function_call=function_call)]
+                )
+                async for text in handle_function_calls(
+                    payload, client, body, function_call, history_content
+                ):
+                    yield text
+                return
 
-    return response.text
+            if part.text:
+                yield part.text
 
 
 # ============================================================================
@@ -219,7 +249,7 @@ async def chat_google(
 
     payload = await verify_es256_token(authorization)
 
-    return await chatbot(payload, body)
+    return StreamingResponse(chatbot(payload, body), media_type="text/plain")
 
 
 @router.post("/google")
@@ -239,4 +269,4 @@ async def chat_google(
 
     payload = await verify_hs256_token(authorization)
 
-    return await chatbot(payload, body)
+    return StreamingResponse(chatbot(payload, body), media_type="text/plain")
