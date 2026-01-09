@@ -408,7 +408,7 @@ class _StepsWidgetState extends State<StepsWidget> {
       await _loadStepsFromBackground();
 
       // Set up periodic updates to sync with background service
-      _periodicUpdateTimer = Timer.periodic(const Duration(seconds: 5), (
+      _periodicUpdateTimer = Timer.periodic(const Duration(seconds: 600), (
         _,
       ) async {
         await _loadStepsFromBackground();

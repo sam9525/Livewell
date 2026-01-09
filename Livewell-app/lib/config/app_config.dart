@@ -19,7 +19,8 @@ class AppConfig {
   static const String googleAuthEndpoint = '/auth/google';
   static const String facebookAuthEndpoint = '/auth/facebook';
   static const String logoutEndpoint = '/auth/logout';
-  static const String chatbotEndpoint = '/chat';
+  static const String chatbotEmailEndpoint = '/chatbot/email';
+  static const String chatbotGoogleEndpoint = '/chatbot/google';
 
   // Profile endpoints
   static const String profileEmailEndpoint = '/profile/email';
@@ -65,7 +66,8 @@ class AppConfig {
   static String get googleAuthUrl => '$apiBaseUrl$googleAuthEndpoint';
   static String get facebookAuthUrl => '$apiBaseUrl$facebookAuthEndpoint';
   static String get logoutUrl => '$apiBaseUrl$logoutEndpoint';
-  static String get chatbotUrl => '$apiBaseUrl$chatbotEndpoint';
+  static String get chatbotEmailUrl => '$apiBaseUrl$chatbotEmailEndpoint';
+  static String get chatbotGoogleUrl => '$apiBaseUrl$chatbotGoogleEndpoint';
   static String get profileEmailUrl => '$apiBaseUrl$profileEmailEndpoint';
   static String get profileGoogleUrl => '$apiBaseUrl$profileGoogleEndpoint';
   static String get trackingEmailUrl => '$apiBaseUrl$trackingEmailEndpoint';
