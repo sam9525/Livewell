@@ -82,8 +82,8 @@ def generate_recommendation(user):
             f"You are a knowledgeable, empathetic, and supportive Health & Wellness Assistant. "
             f"Your goal is to recommend weekly goals for users to improve their physical and mental well-being. "
             f"You specialize in nutrition, fitness, sleep hygiene, mindfulness, and stress management. "
-            f"You need to read the user's info below and reply should be in the format of JSON with just only two number for target_water_intake_ml and target_steps, "
-            f"like {{'Weekly Goal': {{'target_water_intake_ml': '1000', 'target_steps': '7000'}}}}.\n\n "
+            f"You need to read the user's info below and reply should be in the format of JSON with just only two number for target_water_intake_ml and target_steps with just a sentence of description, "
+            f"like {{'Weekly Goal': {{'target_water_intake_ml': '1000', 'target_steps': '7000', 'description': 'Drink more water you have taken flu shot.'}}}}.\n\n "
             f"User's info: {user_info.data}"
         ),
         temperature=0.7,
@@ -134,18 +134,21 @@ async def send_fcm_noti():
     """
 
     for rec in recommendations:
+        user_id = rec.user_id
         token = rec.device_token
-        goal_details = rec.recommendation.weekly_goal
-
         title = "Your Weekly Health Goals"
+        recommend_type = "goal_recommendation"
+        target_steps = rec.recommendation.weekly_goal.target_steps
+        target_water_intake_ml = rec.recommendation.weekly_goal.target_water_intake_ml
+        description = rec.recommendation.weekly_goal.description
 
         try:
             message = messaging.Message(
                 data={
-                    "title": "Your Weekly Health Goals",
-                    "type": "goal_recommendation",
-                    "target_steps": str(goal_details.target_steps),
-                    "target_water_intake_ml": str(goal_details.target_water_intake_ml),
+                    "title": title,
+                    "type": recommend_type,
+                    "target_steps": str(target_steps),
+                    "target_water_intake_ml": str(target_water_intake_ml),
                     "click_action": "FLUTTER_NOTIFICATION_CLICK",
                 },
                 token=token,
@@ -155,4 +158,19 @@ async def send_fcm_noti():
             print(f"Successfully sent message: {response}")
 
         except Exception as e:
-            print(f"Error sending message: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+        try:
+            # Store ommendation in database
+            supabase_admin.table("goal_recommendations").insert(
+                {
+                    "title": title,
+                    "type": recommend_type,
+                    "steps_target": target_steps,
+                    "water_intake_ml_target": target_water_intake_ml,
+                    "description": description,
+                }
+            ).eq("id", user_id).execute()
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
