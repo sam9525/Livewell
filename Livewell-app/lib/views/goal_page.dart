@@ -2,9 +2,27 @@ import 'package:flutter/material.dart';
 import 'widgets/goal_widgets.dart';
 import 'widgets/recommendations_list.dart';
 import 'interactive_onboarding.dart';
+import 'package:provider/provider.dart';
+import '../shared/goal_provider.dart';
 
-class Goal extends StatelessWidget {
+class Goal extends StatefulWidget {
   const Goal({super.key});
+
+  @override
+  State<Goal> createState() => _GoalState();
+}
+
+class _GoalState extends State<Goal> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<CurrentWaterIntakeNotifier>().fetchAndSync();
+        context.read<CurrentStepsNotifier>().fetchAndSync();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

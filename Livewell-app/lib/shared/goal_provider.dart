@@ -36,7 +36,10 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
   final WaterIntakeNotifier _waterIntakeNotifier;
   bool _isInitialized = false;
 
+  static CurrentWaterIntakeNotifier? instance;
+
   CurrentWaterIntakeNotifier(this._waterIntakeNotifier) {
+    instance = this;
     _initializeFromStorage();
   }
 
@@ -79,6 +82,17 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
     _currentWaterIntake = trackingData['current_water_intake_ml'];
 
     notifyListeners();
+  }
+
+  Future<void> fetchAndSync() async {
+    try {
+      final trackingData = await TrackingAuth.getTrackingToday();
+      if (trackingData != null) {
+        updateFromTrackingData(trackingData);
+      }
+    } catch (e) {
+      debugPrint('Error fetching tracking data: $e');
+    }
   }
 
   void add250ml(int steps) {
@@ -141,7 +155,11 @@ class CurrentStepsNotifier extends ChangeNotifier {
   int _currentSteps = 0;
   final StepsNotifier _stepsNotifier;
 
-  CurrentStepsNotifier(this._stepsNotifier);
+  static CurrentStepsNotifier? instance;
+
+  CurrentStepsNotifier(this._stepsNotifier) {
+    instance = this;
+  }
 
   int get currentSteps => _currentSteps;
 
@@ -157,5 +175,16 @@ class CurrentStepsNotifier extends ChangeNotifier {
     _currentSteps = trackingData['current_steps'];
 
     notifyListeners();
+  }
+
+  Future<void> fetchAndSync() async {
+    try {
+      final trackingData = await TrackingAuth.getTrackingToday();
+      if (trackingData != null) {
+        updateFromTrackingData(trackingData);
+      }
+    } catch (e) {
+      debugPrint('Error fetching steps data: $e');
+    }
   }
 }

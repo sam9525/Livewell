@@ -7,12 +7,30 @@ import '../config/app_config.dart';
 import '../auth/backend_auth.dart';
 import 'notifications_service.dart';
 
-// Background message handler
+// Message handler
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('Handling background message: ${message.messageId}');
-  debugPrint('Message data: ${message.data}');
-  debugPrint('Message notification: ${message.notification?.title}');
+Future<void> _firebaseMessagingHandler(RemoteMessage message) async {
+  try {
+    // Initialize notifications service for background isolate
+    await NotificationService.initialize();
+
+    // Extract data
+    final data = message.data;
+    final title = data['title'] ?? 'Notification';
+    final body = data['body'];
+
+    // Show the notification using our custom service which handles the actions
+    await NotificationService.showCustomRecommendationNotification(
+      title: title,
+      body: body,
+      type: data['type'],
+      stepsTarget: int.tryParse(data['target_steps']?.toString() ?? '0') ?? 0,
+      waterIntakeTarget:
+          int.tryParse(data['target_water_intake_ml']?.toString() ?? '0') ?? 0,
+    );
+  } catch (e) {
+    debugPrint('Error in background message handler: $e');
+  }
 }
 
 // Firebase Cloud Messaging service for push notifications
@@ -45,12 +63,10 @@ class FCMService {
         // Register device token with backend
         await registerCurrentDevice();
 
-        FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+        FirebaseMessaging.onMessage.listen(_firebaseMessagingHandler);
 
         // Set up background message handler
-        FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler,
-        );
+        FirebaseMessaging.onBackgroundMessage(_firebaseMessagingHandler);
 
         // Handle notification taps when app is in background or terminated
         FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
@@ -138,43 +154,10 @@ class FCMService {
     }
   }
 
-  // Handle foreground messages (when app is open)
-  static void _handleForegroundMessage(RemoteMessage message) {
-    debugPrint('Foreground message received: ${message.messageId}');
-
-    RemoteNotification? notification = message.notification;
-
-    if (notification != null) {
-      // Show local notification for foreground messages
-      _showLocalNotification(
-        title: notification.title ?? 'Notification',
-        body: notification.body ?? '',
-        data: message.data,
-      );
-    }
-  }
-
   // Handle notification tap (when user taps notification)
   static void _handleNotificationTap(RemoteMessage message) {
     debugPrint('Notification tapped: ${message.messageId}');
     debugPrint('Notification data: ${message.data}');
-  }
-
-  // Show local notification using NotificationService
-  static Future<void> _showLocalNotification({
-    required String title,
-    required String body,
-    Map<String, dynamic>? data,
-  }) async {
-    try {
-      // Use the existing NotificationService to show local notification
-      await NotificationService.showCustomRecommendationNotification(
-        title: title,
-        message: body,
-      );
-    } catch (e) {
-      debugPrint('Error showing local notification: $e');
-    }
   }
 
   // Delete FCM token (useful for logout)

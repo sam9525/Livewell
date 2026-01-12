@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:livewell_app/auth/tracking_auth.dart';
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
+import 'package:livewell_app/shared/shared.dart';
 
 /// Consolidated notification service that handles all notification functionality
 class NotificationService {
@@ -40,7 +44,11 @@ class NotificationService {
         iOS: iosSettings,
       );
 
-      await _notificationsPlugin.initialize(initSettings);
+      await _notificationsPlugin.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: onNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse: onNotificationResponse,
+      );
 
       // Create notification channels for Android
       if (Platform.isAndroid) {
@@ -93,7 +101,9 @@ class NotificationService {
     await androidImplementation?.createNotificationChannel(stepCounterChannel);
     await androidImplementation?.createNotificationChannel(updateStepsChannel);
     await androidImplementation?.createNotificationChannel(waterIntakeChannel);
-    await androidImplementation?.createNotificationChannel(recommendationsChannel);
+    await androidImplementation?.createNotificationChannel(
+      recommendationsChannel,
+    );
   }
 
   // Show persistent notification for background step counting
@@ -232,14 +242,25 @@ class NotificationService {
     );
   }
 
-  // Show notification with custom title and message for recommendations
   static Future<void> showCustomRecommendationNotification({
     required String title,
-    required String message,
+    String? body,
+    String? type,
     int? stepsTarget,
     int? waterIntakeTarget,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    // Build notification body
+    String fullBody = '';
+
+    // Append targets to existing body if present
+    if (stepsTarget != null && stepsTarget > 0) {
+      fullBody += '🚶 Steps: $stepsTarget';
+    }
+    if (waterIntakeTarget != null && waterIntakeTarget > 0) {
+      fullBody += '\n💧 Water Intake: $waterIntakeTarget ml';
+    }
+
+    final androidDetails = AndroidNotificationDetails(
       _recommendationsChannelId,
       _recommendationsChannelName,
       channelDescription: 'AI health recommendations',
@@ -250,7 +271,15 @@ class NotificationService {
       showWhen: true,
       silent: false,
       enableVibration: true,
-      styleInformation: BigTextStyleInformation(''),
+      styleInformation: BigTextStyleInformation(fullBody),
+      actions: <AndroidNotificationAction>[
+        const AndroidNotificationAction(
+          'set_goal_action',
+          'Set Goal',
+          showsUserInterface: false,
+          titleColor: Shared.orange,
+        ),
+      ],
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -259,25 +288,23 @@ class NotificationService {
       presentSound: true,
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
-    // Build notification body
-    String body = message;
-    if (stepsTarget != null && stepsTarget > 0) {
-      body += '\n🚶 Steps: $stepsTarget';
-    }
-    if (waterIntakeTarget != null && waterIntakeTarget > 0) {
-      body += '\n💧 Water: $waterIntakeTarget ml';
-    }
+    // Create payload
+    final payload = jsonEncode({
+      'steps': stepsTarget ?? 0,
+      'water': waterIntakeTarget ?? 0,
+    });
 
     await _notificationsPlugin.show(
       _recommendationsNotificationId,
       title,
-      body,
+      fullBody,
       notificationDetails,
+      payload: payload,
     );
   }
 
@@ -306,7 +333,43 @@ class Notifications {
     String notificationChannelName,
     int notificationId,
     FlutterLocalNotificationsPlugin notificationsPlugin,
-  ) async {
-    await NotificationService.initialize();
+  ) async {}
+}
+
+// Handle notification response (action buttons) - Top level function
+@pragma('vm:entry-point')
+Future<void> onNotificationResponse(NotificationResponse response) async {
+  // Check if app is in foreground
+  final binding = WidgetsFlutterBinding.ensureInitialized();
+  final isForeground = binding.lifecycleState == AppLifecycleState.resumed;
+  debugPrint('Notification response received. Is Foreground: $isForeground');
+
+  try {
+    if (response.actionId == 'set_goal_action' && response.payload != null) {
+      // Ensure shared preferences are initialized for auth headers
+      await SharedPreferencesProvider.getBackgroundPrefs();
+
+      final data = jsonDecode(response.payload!);
+      final steps = data['steps'];
+      final water = data['water'];
+
+      // Update tracking targets
+      if (steps is int && water is int) {
+        await TrackingAuth.putTodayTrackingTargets(
+          steps,
+          water,
+          isBackground: !isForeground,
+        );
+      } else {
+        debugPrint(
+          'Invalid payload types: steps=${steps.runtimeType}, water=${water.runtimeType}',
+        );
+      }
+    } else {
+      debugPrint('Action ID did not match or payload was null');
+    }
+  } catch (e, stackTrace) {
+    debugPrint('CRITICAL ERROR in notification handler: $e');
+    debugPrint('Stack trace: $stackTrace');
   }
 }
