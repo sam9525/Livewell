@@ -26,6 +26,12 @@ class WaterIntakeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void syncWaterIntake(int value) {
+    _waterIntake = value;
+    _selected = ((_waterIntake - 500) / 50).round();
+    notifyListeners();
+  }
+
   void setSelected(int value) {
     _selected = value;
   }
@@ -78,7 +84,9 @@ class CurrentWaterIntakeNotifier extends ChangeNotifier {
 
   // Add this new method
   void updateFromTrackingData(Map<String, dynamic> trackingData) {
-    _waterIntakeNotifier.setWaterIntake(trackingData['target_water_intake_ml']);
+    _waterIntakeNotifier.syncWaterIntake(
+      trackingData['target_water_intake_ml'],
+    );
     _currentWaterIntake = trackingData['current_water_intake_ml'];
 
     notifyListeners();
@@ -146,6 +154,12 @@ class StepsNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void syncSteps(int value) {
+    _steps = value;
+    _selected = ((value - 2000) / 100).round();
+    notifyListeners();
+  }
+
   void setSelected(int value) {
     _selected = value;
   }
@@ -171,7 +185,7 @@ class CurrentStepsNotifier extends ChangeNotifier {
   }
 
   void updateFromTrackingData(Map<String, dynamic> trackingData) {
-    _stepsNotifier.setSteps(trackingData['target_steps']);
+    _stepsNotifier.syncSteps(trackingData['target_steps']);
     _currentSteps = trackingData['current_steps'];
 
     notifyListeners();
