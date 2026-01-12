@@ -13,6 +13,7 @@ from routers import (
     medications,
     vaccinations,
     chatbot,
+    recommendation,
 )
 from utils import goal_recommendation
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -65,4 +66,4 @@ app.include_router(tracking_data.router)
 app.include_router(medications.router)
 app.include_router(vaccinations.router)
 app.include_router(chatbot.router)
-app.include_router(goal_recommendation.router)
+app.include_router(recommendation.router)
