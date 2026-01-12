@@ -43,9 +43,10 @@ class AppConfig {
   static const String vaccineGoogleEndpoint = '/health/vaccinations/google';
 
   // Recommendation endpoints
-  static const String suggestEndpoint = '/goals/suggested';
-  static const String recommendationEndpoint = '/goals/suggested';
-
+  static const String recommendationEmailEndpoint =
+      '/goal/recommendation/email';
+  static const String recommendationGoogleEndpoint =
+      '/goal/recommendation/google';
   // Local resources endpoints
   static const String localResourcesEndpoint = '/resources';
 
@@ -89,8 +90,10 @@ class AppConfig {
   static String get vaccineGoogleUrl => '$apiBaseUrl$vaccineGoogleEndpoint';
 
   // Get recommendation endpoints
-  static String get suggestUrl => '$apiBaseUrl$suggestEndpoint';
-  static String get recommendationUrl => '$apiBaseUrl$recommendationEndpoint';
+  static String get recommendationEmailUrl =>
+      '$apiBaseUrl$recommendationEmailEndpoint';
+  static String get recommendationGoogleUrl =>
+      '$apiBaseUrl$recommendationGoogleEndpoint';
 
   // Get local resources endpoints
   static String get localResourcesUrl => '$apiBaseUrl$localResourcesEndpoint';

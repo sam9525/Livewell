@@ -1,40 +1,40 @@
 class Recommendation {
-  final String id;
+  final String recommendId;
   final String title;
-  final String message;
+  final String description;
   final int stepsTarget;
   final int waterIntakeTarget;
-  final bool isCompleted;
+  final bool alreadySet;
   final DateTime? createdAt;
 
   // Backend field name constants
-  static const String _fieldId = 'id';
+  static const String _fieldId = 'recommend_id';
   static const String _fieldTitle = 'title';
-  static const String _fieldMessage = 'message';
-  static const String _fieldStepsTarget = 'stepsTarget';
-  static const String _fieldWaterIntakeTarget = 'waterIntakeTarget';
-  static const String _fieldIsCompleted = 'isCompleted';
-  static const String _fieldCreatedAt = 'createdAt';
+  static const String _fieldDescription = 'description';
+  static const String _fieldStepsTarget = 'steps_target';
+  static const String _fieldWaterIntakeTarget = 'water_intake_ml_target';
+  static const String _fieldAlreadySet = 'already_set';
+  static const String _fieldCreatedAt = 'created_at';
 
   const Recommendation({
-    required this.id,
+    required this.recommendId,
     required this.title,
-    required this.message,
+    required this.description,
     required this.stepsTarget,
     required this.waterIntakeTarget,
-    required this.isCompleted,
+    required this.alreadySet,
     this.createdAt,
   });
 
   // Convert to Map for storage
   Map<String, dynamic> toMap() {
     return {
-      _fieldId: id,
+      _fieldId: recommendId,
       _fieldTitle: title,
-      _fieldMessage: message,
+      _fieldDescription: description,
       _fieldStepsTarget: stepsTarget,
       _fieldWaterIntakeTarget: waterIntakeTarget,
-      _fieldIsCompleted: isCompleted.toString(),
+      _fieldAlreadySet: alreadySet.toString(),
       _fieldCreatedAt: createdAt?.toIso8601String(),
     };
   }
@@ -42,12 +42,12 @@ class Recommendation {
   // Create from Map (receives data from backend)
   factory Recommendation.fromMap(Map<String, dynamic> map) {
     return Recommendation(
-      id: (map[_fieldId] ?? '').toString(),
+      recommendId: (map[_fieldId] ?? '').toString(),
       title: (map[_fieldTitle] ?? '').toString(),
-      message: (map[_fieldMessage] ?? '').toString(),
+      description: (map[_fieldDescription] ?? '').toString(),
       stepsTarget: (map[_fieldStepsTarget] ?? 0).toInt(),
       waterIntakeTarget: (map[_fieldWaterIntakeTarget] ?? 0).toInt(),
-      isCompleted: _parseBool(map[_fieldIsCompleted]),
+      alreadySet: _parseBool(map[_fieldAlreadySet]),
       createdAt: _parseDateTime(map[_fieldCreatedAt]),
     );
   }
@@ -78,21 +78,21 @@ class Recommendation {
 
   // Copy with method for updates
   Recommendation copyWith({
-    String? id,
+    String? recommendId,
     String? title,
-    String? message,
+    String? description,
     int? stepsTarget,
     int? waterIntakeTarget,
-    bool? isCompleted,
+    bool? alreadySet,
     DateTime? createdAt,
   }) {
     return Recommendation(
-      id: id ?? this.id,
+      recommendId: recommendId ?? this.recommendId,
       title: title ?? this.title,
-      message: message ?? this.message,
+      description: description ?? this.description,
       stepsTarget: stepsTarget ?? this.stepsTarget,
       waterIntakeTarget: waterIntakeTarget ?? this.waterIntakeTarget,
-      isCompleted: isCompleted ?? this.isCompleted,
+      alreadySet: alreadySet ?? this.alreadySet,
       createdAt: createdAt ?? this.createdAt,
     );
   }

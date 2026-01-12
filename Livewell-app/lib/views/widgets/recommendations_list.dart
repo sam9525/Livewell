@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:livewell_app/shared/goal_provider.dart';
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import '../../shared/shared.dart';
 import '../../model/recommendation_model.dart';
@@ -58,22 +60,39 @@ class _RecommendationsListState extends State<RecommendationsList> {
             ? prefs?.getInt('target_water_intake') ?? 0
             : recommendation.waterIntakeTarget,
       );
+      // Update UI
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Close loading dialog
 
       if (success) {
+        // Update global state providers
+        if (mounted) {
+          Provider.of<StepsNotifier>(
+            context,
+            listen: false,
+          ).syncSteps(recommendation.stepsTarget);
+          if (recommendation.waterIntakeTarget > 0) {
+            Provider.of<WaterIntakeNotifier>(
+              context,
+              listen: false,
+            ).syncWaterIntake(recommendation.waterIntakeTarget);
+          }
+        }
+
         // Mark recommendation as accepted in backend
-        await _recommendationService.acceptRecommendation(recommendation.id);
+        await _recommendationService.acceptRecommendation(
+          recommendation.recommendId,
+        );
 
         // Update local state
         setState(() {
           final index = _recommendations.indexWhere(
-            (r) => r.id == recommendation.id,
+            (r) => r.recommendId == recommendation.recommendId,
           );
           if (index != -1) {
             _recommendations[index] = _recommendations[index].copyWith(
-              isCompleted: true,
+              alreadySet: true,
             );
           }
         });
@@ -134,7 +153,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
 
       await NotificationService.showCustomRecommendationNotification(
         title: firstRecommendation.title,
-        body: firstRecommendation.message,
+        body: firstRecommendation.description,
         type: 'goal_recommendation',
         stepsTarget: firstRecommendation.stepsTarget,
         waterIntakeTarget: firstRecommendation.waterIntakeTarget,
@@ -281,7 +300,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
         color: Shared.bgColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: recommendation.isCompleted
+          color: recommendation.alreadySet
               ? Colors.green.withValues(alpha: 0.3)
               : Shared.orange.withValues(alpha: 0.3),
           width: 2,
@@ -304,7 +323,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
             children: [
               Expanded(
                 child: Text(
-                  recommendation.message,
+                  recommendation.description,
                   style: Shared.fontStyle(20, FontWeight.w500, Shared.black),
                 ),
               ),
@@ -403,11 +422,11 @@ class _RecommendationsListState extends State<RecommendationsList> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: recommendation.isCompleted
+                onPressed: recommendation.alreadySet
                     ? null
                     : () => _setGoals(recommendation),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: recommendation.isCompleted
+                  backgroundColor: recommendation.alreadySet
                       ? Shared.lightGray
                       : Shared.orange,
                   foregroundColor: Colors.white,
@@ -417,7 +436,7 @@ class _RecommendationsListState extends State<RecommendationsList> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  elevation: recommendation.isCompleted ? 0 : 2,
+                  elevation: recommendation.alreadySet ? 0 : 2,
                 ),
                 child: index == 0
                     ? OnboardingTarget(
@@ -426,20 +445,20 @@ class _RecommendationsListState extends State<RecommendationsList> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              recommendation.isCompleted
+                              recommendation.alreadySet
                                   ? null
                                   : Icons.rocket_launch,
                               size: 24,
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              recommendation.isCompleted
+                              recommendation.alreadySet
                                   ? 'Goals Applied ✓'
                                   : 'Set Goals',
                               style: Shared.fontStyle(
                                 24,
                                 FontWeight.bold,
-                                recommendation.isCompleted
+                                recommendation.alreadySet
                                     ? Shared.gray
                                     : Colors.white,
                               ),
@@ -451,20 +470,20 @@ class _RecommendationsListState extends State<RecommendationsList> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            recommendation.isCompleted
+                            recommendation.alreadySet
                                 ? null
                                 : Icons.rocket_launch,
                             size: 24,
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            recommendation.isCompleted
+                            recommendation.alreadySet
                                 ? 'Goals Applied ✓'
                                 : 'Set Goals',
                             style: Shared.fontStyle(
                               24,
                               FontWeight.bold,
-                              recommendation.isCompleted
+                              recommendation.alreadySet
                                   ? Shared.gray
                                   : Colors.white,
                             ),

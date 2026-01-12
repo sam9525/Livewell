@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:livewell_app/shared/user_provider.dart';
 import '../model/recommendation_model.dart';
 import '../config/app_config.dart';
 import '../auth/backend_auth.dart';
@@ -18,7 +19,11 @@ class RecommendationService {
   Future<List<Recommendation>> getAllRecommendations() async {
     try {
       final response = await http.get(
-        Uri.parse(AppConfig.suggestUrl),
+        Uri.parse(
+          UserProvider.instance?.isEmailSignedIn == true
+              ? AppConfig.recommendationEmailUrl
+              : AppConfig.recommendationGoogleUrl,
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
@@ -60,7 +65,9 @@ class RecommendationService {
   Future<Recommendation?> getRecommendation(String id) async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.suggestUrl}/$id'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.recommendationEmailUrl : AppConfig.recommendationGoogleUrl}/$id',
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
@@ -85,7 +92,9 @@ class RecommendationService {
       debugPrint('Updating recommendation $id with: $updates');
 
       final response = await http.put(
-        Uri.parse('${AppConfig.suggestUrl}/$id'),
+        Uri.parse(
+          '${UserProvider.instance?.isEmailSignedIn == true ? AppConfig.recommendationEmailUrl : AppConfig.recommendationGoogleUrl}/$id',
+        ),
         headers: BackendAuth().getAuthHeaders(),
         body: json.encode(updates),
       );
@@ -107,7 +116,7 @@ class RecommendationService {
 
   // Accept/apply recommendation
   Future<bool> acceptRecommendation(String id) async {
-    return updateRecommendation(id, {'isCompleted': true});
+    return updateRecommendation(id, {'already_set': true});
   }
 
   // Check if there are new recommendations (for notifications)
@@ -115,7 +124,7 @@ class RecommendationService {
     try {
       final recommendations = await getAllRecommendations();
       // Check if there are any recommendations that haven't been set
-      return recommendations.any((rec) => !rec.isCompleted);
+      return recommendations.any((rec) => !rec.alreadySet);
     } catch (e) {
       debugPrint('Error checking for new recommendations: $e');
       return false;
@@ -126,7 +135,7 @@ class RecommendationService {
   Future<int> getNewRecommendationsCount() async {
     try {
       final recommendations = await getAllRecommendations();
-      return recommendations.where((rec) => !rec.isCompleted).length;
+      return recommendations.where((rec) => !rec.alreadySet).length;
     } catch (e) {
       debugPrint('Error getting new recommendations count: $e');
       return 0;
