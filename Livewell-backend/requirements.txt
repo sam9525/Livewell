@@ -4,3 +4,4 @@ requests
 pyjwt
 uvicorn
 supabase
+firebase-admin
