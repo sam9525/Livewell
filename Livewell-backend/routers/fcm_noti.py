@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Header, Body, HTTPException
 from utils.jwt_handler import verify_es256_token, verify_hs256_token
-from supabase import Client, create_client
+from utils import init_supabase
 import os
 
 router = APIRouter(prefix="/api/fcm-noti", tags=["fcm-noti"])
 
 
 # Init supabase admin
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase_admin: Client = create_client(url, key)
+supabase_admin = init_supabase()
 
 
 def register_device(payload: dict, body: dict):
