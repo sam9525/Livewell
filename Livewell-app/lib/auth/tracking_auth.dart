@@ -1,4 +1,6 @@
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:livewell_app/shared/shared_preferences_provider.dart';
 import 'package:livewell_app/shared/user_provider.dart';
 import '../config/app_config.dart';
@@ -34,9 +36,12 @@ class TrackingAuth {
 
   // Fetch the tracking data for today
   static Future<Map<String, dynamic>?> getTrackingToday() async {
+    final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+    final isEmail = prefs?.getBool('is_email_signed_in') ?? false;
+
     final response = await http.get(
       Uri.parse(
-        UserProvider.instance?.isEmailSignedIn == true
+        isEmail
             ? AppConfig.trackingTodayEmailUrl
             : AppConfig.trackingTodayGoogleUrl,
       ),
@@ -137,16 +142,29 @@ class TrackingAuth {
 
   static Future<bool> putTodayTrackingTargets(
     int targetSteps,
-    int targetWaterIntakeMl,
-  ) async {
+    int targetWaterIntakeMl, {
+    bool isBackground = false,
+  }) async {
     try {
-      debugPrint(
-        'Updating tracking targets: $targetSteps, $targetWaterIntakeMl',
-      );
+      if (isBackground) {
+        try {
+          await dotenv.load(fileName: ".env");
+        } catch (e) {
+          debugPrint('dotenv load failed: $e');
+        }
+      }
+
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+      final isEmail = prefs?.getBool('is_email_signed_in') ?? false;
+
       final response = await http.put(
         Uri.parse(
-          UserProvider.instance?.isEmailSignedIn == true
-              ? AppConfig.trackingTodayTargetEmailUrl
+          isEmail
+              ? isBackground
+                    ? dotenv.get('TRACKING_TODAY_TARGET_EMAIL_URL')
+                    : AppConfig.trackingTodayTargetEmailUrl
+              : isBackground
+              ? dotenv.get('TRACKING_TODAY_TARGET_GOOGLE_URL')
               : AppConfig.trackingTodayTargetGoogleUrl,
         ),
         headers: BackendAuth().getAuthHeaders(),
@@ -155,21 +173,18 @@ class TrackingAuth {
           'target_water_intake_ml': targetWaterIntakeMl,
         }),
       );
-      await getTrackingToday();
 
       if (response.statusCode == 200) {
-        debugPrint('Tracking updated successfully');
-
-        final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
         prefs?.setInt('target_water_intake', targetWaterIntakeMl);
         prefs?.setInt('target_steps', targetSteps);
-
+        await getTrackingToday();
         return true;
       } else {
-        throw Exception('Failed to update tracking: ${response.statusCode}');
+        debugPrint('Failed to update tracking targets: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
-      debugPrint('Error in background tracking update: $e');
+      debugPrint('Error in tracking targets update: $e');
       return false;
     }
   }

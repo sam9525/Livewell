@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:livewell_app/shared/shared_preferences_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   // Singleton-like reference to the active provider instance in the widget tree
@@ -29,6 +30,11 @@ class UserProvider extends ChangeNotifier {
     _isEmailSignedIn =
         supabaseUser != null && supabaseUser.appMetadata['provider'] == 'email';
 
+    // Persist to shared prefs for background access
+    SharedPreferencesProvider.getBackgroundPrefs().then((prefs) {
+      prefs?.setBool('is_email_signed_in', _isEmailSignedIn);
+    });
+
     if (supabaseUser != null) {
       _updateCreatedAt();
       _updateUserJwtToken();
@@ -44,6 +50,10 @@ class UserProvider extends ChangeNotifier {
 
       if (_isEmailSignedIn != isSignedIn) {
         _isEmailSignedIn = isSignedIn;
+        // Persist to shared prefs
+        SharedPreferencesProvider.getBackgroundPrefs().then((prefs) {
+          prefs?.setBool('is_email_signed_in', isSignedIn);
+        });
         _updateCreatedAt();
         shouldNotify = true;
       }

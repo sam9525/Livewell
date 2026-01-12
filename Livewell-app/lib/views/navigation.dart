@@ -8,7 +8,6 @@ import 'profile_page.dart';
 import 'chatbot_page.dart';
 import 'health_page.dart';
 import '../shared/location_provider.dart';
-import '../auth/tracking_auth.dart';
 import '../shared/goal_provider.dart';
 import '../auth/profile_auth.dart';
 import '../services/onboarding_service.dart';
@@ -92,7 +91,10 @@ class _HomePageState extends State<HomePage> {
         setState(() {});
       }
     } else if (currentRoute == '/home') {
-      await _loadTrackingData();
+      if (mounted) {
+        context.read<CurrentWaterIntakeNotifier>().fetchAndSync();
+        context.read<CurrentStepsNotifier>().fetchAndSync();
+      }
     }
   }
 
@@ -103,27 +105,6 @@ class _HomePageState extends State<HomePage> {
         currentRoute = navigationHistory.last;
       }
     });
-  }
-
-  Future<void> _loadTrackingData() async {
-    try {
-      final trackingData = await TrackingAuth.getTrackingToday();
-      if (trackingData != null) {
-        if (!mounted) {
-          return;
-        }
-        // Update the CurrentWaterIntakeNotifier with the fetched data
-        context.read<CurrentWaterIntakeNotifier>().updateFromTrackingData(
-          trackingData,
-        );
-        // Update the StepsNotifier with the fetched data
-        context.read<CurrentStepsNotifier>().updateFromTrackingData(
-          trackingData,
-        );
-      }
-    } catch (e) {
-      debugPrint('Error loading tracking data: $e');
-    }
   }
 
   @override
@@ -140,9 +121,6 @@ class _HomePageState extends State<HomePage> {
         listen: false,
       ).startLocationUpdates();
     });
-
-    // Get the Tracking Data
-    _loadTrackingData();
   }
 
   Future<void> _checkUserProfile() async {

@@ -134,7 +134,8 @@ class _RecommendationsListState extends State<RecommendationsList> {
 
       await NotificationService.showCustomRecommendationNotification(
         title: firstRecommendation.title,
-        message: firstRecommendation.message,
+        body: firstRecommendation.message,
+        type: 'goal_recommendation',
         stepsTarget: firstRecommendation.stepsTarget,
         waterIntakeTarget: firstRecommendation.waterIntakeTarget,
       );
