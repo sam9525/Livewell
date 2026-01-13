@@ -1,5 +1,5 @@
 class LocalResource {
-  final int id;
+  final String id;
   final String name;
   final String category;
   final String description;
@@ -42,7 +42,7 @@ class LocalResource {
   }
 
   LocalResource copyWith({
-    int? id,
+    String? id,
     String? name,
     String? category,
     String? description,

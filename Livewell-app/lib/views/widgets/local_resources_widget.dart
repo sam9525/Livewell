@@ -28,7 +28,7 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
     });
   }
 
-  Future<void> _loadResources() async {
+  Future<void> _loadResources({bool forceRefresh = false}) async {
     final locationProvider = Provider.of<LocationProvider>(
       context,
       listen: false,
@@ -36,7 +36,7 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
     final postcode = locationProvider.postcode;
 
     // Only load if postcode has changed
-    if (postcode == _currentPostcode) return;
+    if (!forceRefresh && postcode == _currentPostcode) return;
 
     setState(() {
       _isLoading = true;
@@ -264,7 +264,9 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
                           ),
                           // Refresh button
                           IconButton(
-                            onPressed: _isLoading ? null : _loadResources,
+                            onPressed: _isLoading
+                                ? null
+                                : () => _loadResources(forceRefresh: true),
                             icon: Icon(
                               Icons.refresh,
                               color: _isLoading ? Shared.gray : Shared.orange,
@@ -277,7 +279,7 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
                     ),
 
                     // Resources list or empty state
-                    _resources.isEmpty
+                    _resources.isEmpty || _isLoading
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -320,8 +322,9 @@ class _LocalResourcesWidgetState extends State<LocalResourcesWidget> {
                             ),
                             child: ListView.separated(
                               shrinkWrap: true,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
                               itemCount: _resources.length,
                               separatorBuilder: (context, index) =>
                                   const SizedBox(height: 15),

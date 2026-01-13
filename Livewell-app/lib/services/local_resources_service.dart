@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:livewell_app/shared/user_provider.dart';
 import '../config/app_config.dart';
 import '../auth/backend_auth.dart';
 import '../model/local_resource_model.dart';
@@ -27,11 +28,13 @@ class LocalResourcesService {
 
       debugPrint('Fetching local resources for postcode: $cleanPostcode');
       debugPrint(
-        'API URL: ${AppConfig.localResourcesUrl}?postcode=$cleanPostcode',
+        'API URL: ${(UserProvider.instance?.isEmailSignedIn ?? false) ? AppConfig.localResourcesEmailUrl : AppConfig.localResourcesGoogleUrl}?postcode=$cleanPostcode',
       );
 
       final response = await http.get(
-        Uri.parse('${AppConfig.localResourcesUrl}?postcode=$cleanPostcode'),
+        Uri.parse(
+          '${(UserProvider.instance?.isEmailSignedIn ?? false) ? AppConfig.localResourcesEmailUrl : AppConfig.localResourcesGoogleUrl}?postcode=$cleanPostcode',
+        ),
         headers: BackendAuth().getAuthHeaders(),
       );
 
