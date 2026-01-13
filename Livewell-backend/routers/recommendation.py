@@ -48,6 +48,8 @@ async def update_goal_recommendation(recommend_id: str, body: dict):
             "recommend_id", recommend_id
         ).execute()
 
+        return {"Goal recommendation updated successfully"}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -107,7 +109,7 @@ async def update_goal_recommendation_email(
     """
     await verify_es256_token(authorization)
 
-    await update_goal_recommendation(recommend_id, body)
+    return await update_goal_recommendation(recommend_id, body)
 
 
 @router.put("/google/{recommend_id}")
@@ -124,4 +126,4 @@ async def update_goal_recommendation_google(
     """
     await verify_hs256_token(authorization)
 
-    await update_goal_recommendation(recommend_id, body)
+    return await update_goal_recommendation(recommend_id, body)
