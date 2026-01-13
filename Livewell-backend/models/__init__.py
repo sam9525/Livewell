@@ -11,6 +11,8 @@ from models.goal_recommend_model import (
     WeeklyGoal,
 )
 
+from models.local_resource_model import LocalResource
+
 __all__ = [
     "MedicationRequest",
     "VaccinationRequest",
@@ -20,4 +22,5 @@ __all__ = [
     "GoalDetails",
     "RecommendationResponse",
     "WeeklyGoal",
+    "LocalResource",
 ]
