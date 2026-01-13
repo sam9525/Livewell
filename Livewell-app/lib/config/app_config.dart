@@ -48,7 +48,8 @@ class AppConfig {
   static const String recommendationGoogleEndpoint =
       '/goal/recommendation/google';
   // Local resources endpoints
-  static const String localResourcesEndpoint = '/resources';
+  static const String localResourcesEmailEndpoint = '/local-resources/email';
+  static const String localResourcesGoogleEndpoint = '/local-resources/google';
 
   // Notification endpoints
   static const String registerDeviceEmailEndpoint =
@@ -96,7 +97,10 @@ class AppConfig {
       '$apiBaseUrl$recommendationGoogleEndpoint';
 
   // Get local resources endpoints
-  static String get localResourcesUrl => '$apiBaseUrl$localResourcesEndpoint';
+  static String get localResourcesEmailUrl =>
+      '$apiBaseUrl$localResourcesEmailEndpoint';
+  static String get localResourcesGoogleUrl =>
+      '$apiBaseUrl$localResourcesGoogleEndpoint';
 
   // Get notification endpoints
   static String get registerDeviceEmailUrl =>
