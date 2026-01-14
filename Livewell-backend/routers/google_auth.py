@@ -12,9 +12,12 @@ router = APIRouter(prefix="/api/auth/google", tags=["google"])
 
 
 # Initialize Firebase Admin
-cred = credentials.Certificate(
-    "credential/livewell-app-b23a0-firebase-adminsdk-fbsvc-37fd03a6f7.json"
-)
+if "RENDER" in os.environ:
+    cred_path = "/etc/secrets/firebase-adminsdk.json"
+else:
+    cred_path = "credential/livewell-app-b23a0-firebase-adminsdk-fbsvc-37fd03a6f7.json"
+cred = credentials.Certificate(cred_path)
+
 firebase_admin.initialize_app(cred)
 
 load_dotenv()
