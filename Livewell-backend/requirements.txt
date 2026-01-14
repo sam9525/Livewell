@@ -5,5 +5,7 @@ pyjwt
 uvicorn
 supabase
 firebase-admin
-dotenv
+python-dotenv
 google-genai
+apscheduler
+cryptography
