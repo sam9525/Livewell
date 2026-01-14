@@ -2,6 +2,10 @@
 
 Livewell is a comprehensive health management platform designed to help elderly users track their well-being, manage medications, and receive AI-driven health insights. The project consists of a cross-platform mobile application and a robust backend API.
 
+### Download
+
+[Download Livewell](https://drive.google.com/file/d/1KAMqixwfhZejck1s2U3tKJJP8qX1ikYe/view?usp=sharing)
+
 ## System Architecture
 
 The Livewell ecosystem is built on a modern tech stack:
