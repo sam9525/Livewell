@@ -6,3 +6,4 @@ uvicorn
 supabase
 firebase-admin
 dotenv
+google-genai
