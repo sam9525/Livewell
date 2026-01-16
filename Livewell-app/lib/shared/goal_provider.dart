@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:livewell_app/auth/tracking_auth.dart';
 import 'package:livewell_app/services/background_service_manager.dart';
 import 'package:livewell_app/services/notifications_service.dart';
@@ -168,11 +169,55 @@ class StepsNotifier extends ChangeNotifier {
 class CurrentStepsNotifier extends ChangeNotifier {
   int _currentSteps = 0;
   final StepsNotifier _stepsNotifier;
+  Timer? _refreshTimer;
 
   static CurrentStepsNotifier? instance;
 
   CurrentStepsNotifier(this._stepsNotifier) {
     instance = this;
+    _initializeFromStorage();
+    _startPeriodicCheck();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _initializeFromStorage() async {
+    try {
+      final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+      // Reload to ensure we have the latest data from other isolates
+      await prefs?.reload();
+      final storedSteps = prefs?.getInt('background_steps') ?? 0;
+
+      if (storedSteps > 0) {
+        _currentSteps = storedSteps;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading stored steps: $e');
+    }
+  }
+
+  void _startPeriodicCheck() {
+    // Check for updates every 5 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      try {
+        final prefs = await SharedPreferencesProvider.getBackgroundPrefs();
+        await prefs?.reload();
+        final storedSteps = prefs?.getInt('background_steps') ?? 0;
+
+        // Update if we have a new step count that is higher
+        if (storedSteps != _currentSteps && storedSteps > 0) {
+          _currentSteps = storedSteps;
+          notifyListeners();
+        }
+      } catch (e) {
+        debugPrint('Error refreshing steps: $e');
+      }
+    });
   }
 
   int get currentSteps => _currentSteps;
@@ -186,7 +231,11 @@ class CurrentStepsNotifier extends ChangeNotifier {
 
   void updateFromTrackingData(Map<String, dynamic> trackingData) {
     _stepsNotifier.syncSteps(trackingData['target_steps']);
-    _currentSteps = trackingData['current_steps'];
+
+    final backendSteps = trackingData['current_steps'];
+    if (backendSteps > _currentSteps) {
+      _currentSteps = backendSteps;
+    }
 
     notifyListeners();
   }
