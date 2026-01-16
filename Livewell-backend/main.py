@@ -54,7 +54,7 @@ def read_root():
     return {"Welcome to Livewell Backend"}
 
 
-@app.get("/health")
+@app.head("/health")
 def read_health():
     return {"Backend is running"}
 
